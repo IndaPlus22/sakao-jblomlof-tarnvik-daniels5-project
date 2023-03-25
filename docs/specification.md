@@ -20,6 +20,10 @@ This will be the specification for the project [sakao-jblomlof-tarnvik-daniels5-
 When working on issues include the issue number. Pull-requests should be always be created on a new branch with the branch named after the issue. If the issue is (#9 "Do this"), then the branch shall be named "issue/9-do-this". 
 Issues should have a short but descriptive title with a longer description describing the issue.
 
+Create a new branch with `git switch -c <branch-name>`. The `-c` flag creates a new branch.
+
+Merge's are supposed to be done by the assigne.
+
 ## Project
 
 ### Idea
