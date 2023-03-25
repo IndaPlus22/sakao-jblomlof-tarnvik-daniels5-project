@@ -15,6 +15,11 @@ This will be the specification for the project [sakao-jblomlof-tarnvik-daniels5-
 * [Issues](https://github.com/IndaPlus22/sakao-jblomlof-tarnvik-daniels5-project/issues)
 
 ## Branches
+The branch structure for this project is the following. Ordered from top to bottom, depending on importance.
+
+main - The main branch shall always be in a functional state. It's protected from pushes, only merging can be done.
+dev - The branch that merges all sub-branches. Only one branch on this layer. When in a good state this branch shall be merged to main.
+issue - For each issue a new branch is created to deal with that issue. It's then merged to dev.
 
 ## Project standards
 When working on issues include the issue number. Pull-requests should be always be created on a new branch with the branch named after the issue. If the issue is (#9 "Do this"), then the branch shall be named "issue/9-do-this". 
