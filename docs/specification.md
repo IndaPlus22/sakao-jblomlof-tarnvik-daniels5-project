@@ -40,3 +40,16 @@ The project aims to create a 2-dimensional physics engine, where you are able to
 Since we are 4 devolopers working on the project and creating a simple 2d program we deem it feasibile to accomplish this.
 
 ### Workflow
+The workflow for creating a 2-dimensional physics engine that allows for the spawning of objects can be broken down into several steps:
+
+* Requirements gathering: Define the scope and requirements of the project. This includes identifying the necessary features such as object spawning, simple and complex shapes, joints, and physics simulation.
+* Architecture design: Decide on the architecture of the physics engine, taking into account the requirements gathered in step 1. This includes selecting a programming language and any relevant libraries or frameworks that will be used.
+* Object spawning: Implement the ability to spawn objects in the physics engine. This involves creating a data structure that can hold object properties such as position, velocity, mass, and shape.
+* Simple shape support: Add support for simple shapes such as rectangles, circles, and triangles. This involves creating the appropriate collision detection algorithms for each shape and updating the object properties based on the laws of physics.
+* Complex shape support: Implement the ability to create complex shapes by combining simple shapes with joints. This requires creating a data structure for joints and developing algorithms to update the positions of objects connected by joints.
+* Physics simulation: Implement the physics simulation engine. This includes incorporating gravity, friction, and other physical forces into the simulation. It also requires implementing collision detection and resolution algorithms to handle interactions between objects.
+* Testing: Test the physics engine by creating and simulating different scenarios. This includes testing object spawning, simple and complex shapes, joints, and physics simulation.
+* Refinement: Refine the physics engine based on feedback from testing. This may involve optimizing code, improving algorithms, or adding new features.
+* Documentation: Document the physics engine, including how to use it and any limitations or constraints.
+
+Overall, the workflow involves a combination of design, coding, testing, and refinement to create a robust and functional 2-dimensional physics engine.
