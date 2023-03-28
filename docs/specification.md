@@ -34,6 +34,9 @@ Incase you want to make a sub-branch of an issue-branch name that branch "issue/
 
 Merge's are supposed to be done by the assigne.
 
+#### Milestones
+There will be milestones of both weekly-progress and milestones over system-requirements.
+
 ## Project
 
 ### Idea
