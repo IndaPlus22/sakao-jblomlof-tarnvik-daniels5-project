@@ -30,6 +30,8 @@ Issues should have a short but descriptive title with a longer description descr
 
 Create a new branch with `git switch -c <branch-name>`. The `-c` flag creates a new branch.
 
+Incase you want to make a sub-branch of an issue-branch name that branch "issue/feature/9-do-this".
+
 Merge's are supposed to be done by the assigne.
 
 ## Project
