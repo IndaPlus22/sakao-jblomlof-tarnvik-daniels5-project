@@ -25,8 +25,8 @@ dev - The branch that merges all sub-branches. Only one branch on this layer. Wh
 issue - For each issue a new branch is created to deal with that issue. It's then merged to dev.
 
 ## Project standards
-When working on issues include the issue number. Pull-requests should be always be created on a new branch with the branch named after the issue. If the issue is (#9 "Do this"), then the branch shall be named "issue/9-do-this". 
-Issues should have a short but descriptive title with a longer description describing the issue.
+When working on issues include the issue number. Pull-requests should be always be created on a new branch with the branch named after the issue. If the issue is (#9 "Do this"), then the branch shall be named "issue/9-do-this". If you want to create a new branch for an issue that already exists, add a -2 to the end. "issue/9-do-this-2", and so on.  
+Issues should have a short but descriptive title with a longer description describing the issue. Title should be in future tense.
 
 Create a new branch with `git switch -c <branch-name>`. The `-c` flag creates a new branch.
 
@@ -44,7 +44,9 @@ Since we are 4 devolopers working on the project and creating a simple 2d progra
 
 
 ### Areas of responsibility
+This will be what each person first and foremost will do. Ofcourse no one is limited to each area and we will help where help is needed.
+
 | Area | Person |
 |------|--------|
-| For example Circel object | vacant |
-| bla bla bla | vacant |
+| Front-end | Toshihide <sakao@kth.se>, Tilde <tarnvik@kth.se> |
+| Back-end | Daniel <daniels5@kth.se>, Jonathan <jblomlof@kth.se> |
