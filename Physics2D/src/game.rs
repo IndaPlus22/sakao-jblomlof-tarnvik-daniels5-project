@@ -31,6 +31,6 @@ impl Game {
     }
 
     pub fn draw(&mut self, event: &Event, window: &mut PistonWindow) {
-
+        draw::draw(&event, &window);
     }
 }
