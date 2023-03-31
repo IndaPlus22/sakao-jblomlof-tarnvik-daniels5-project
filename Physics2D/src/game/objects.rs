@@ -12,6 +12,10 @@ pub struct Rectangle{
 }
 
 impl Object for Rectangle {
+    fn collisions(&self, other: &dyn Object) -> Option<super::traits::collisionRecord> {
+        
+        None
+    }
     fn update(&self) {
         
     }
