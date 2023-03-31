@@ -1,5 +1,9 @@
 mod update;
 mod draw;
+
+pub const SCREEN_WIDTH: u32 = 640;
+pub const SCREEN_HEIGHT: u32 = 480;
+
 pub struct Game {
 
 }
@@ -11,15 +15,15 @@ impl Game {
         }
     }
 
-    pub fn init() {
+    pub fn init(&mut self) {
 
     }
 
-    pub fn update() {
+    pub fn update(&mut self) {
 
     }
 
-    pub fn draw() {
+    pub fn draw(&mut self, event: &Event, window: &mut PistonWindow) {
 
     }
 }

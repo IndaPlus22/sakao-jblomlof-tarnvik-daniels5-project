@@ -1,9 +1,11 @@
-// use opengl_graphics::OpenGL;
+extern crate piston_window;
+
+use opengl_graphics::OpenGL;
 use piston::{
     input::{RenderEvent, UpdateEvent},
     window::WindowSettings,
 };
-// use piston_window::{Event, PistonWindow};
+use piston_window::{Event, PistonWindow};
 
 mod game;
 
@@ -24,10 +26,10 @@ fn main() {
     // game loop
     while let Some(event) = window.next() {
         if let Some(_) = event.render_args() {
-            app.render(&event, &mut window);
+            game.draw(&event, &mut window);
         }
         if let Some(_) = event.update_args() {
-            app.update();
+            game.update();
         }
 
         let duration = time::Duration::from_millis(10);
