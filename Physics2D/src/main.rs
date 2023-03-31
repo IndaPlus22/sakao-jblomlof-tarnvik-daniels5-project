@@ -6,14 +6,15 @@ use piston::{
     window::WindowSettings,
 };
 use piston_window::{Event, PistonWindow};
+use game::Game;
 
 mod game;
 
 fn main() {
     use std::{thread, time};
 
-    let mut window =
-        WindowSettings::new("Chapter 2 Forces", (SCREEN_WIDTH, SCREEN_HEIGHT))
+    let mut window: PistonWindow =
+        WindowSettings::new("PHYSICS", (game::SCREEN_WIDTH, game::SCREEN_HEIGHT))
             .exit_on_esc(true)
             // .graphics_api(OpenGL::V3_2)
             .build()
