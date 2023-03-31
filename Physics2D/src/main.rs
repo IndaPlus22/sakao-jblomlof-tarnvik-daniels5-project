@@ -16,7 +16,7 @@ fn main() {
     let mut window: PistonWindow =
         WindowSettings::new("PHYSICS", (game::SCREEN_WIDTH, game::SCREEN_HEIGHT))
             .exit_on_esc(true)
-            // .graphics_api(OpenGL::V3_2)
+            .graphics_api(OpenGL::V3_2)
             .build()
             .unwrap();
 

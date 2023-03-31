@@ -27,10 +27,10 @@ impl Game {
     }
 
     pub fn update(&mut self) {
-
+        update::update()
     }
 
     pub fn draw(&mut self, event: &Event, window: &mut PistonWindow) {
-        draw::draw(&event, &window);
+        draw::draw(&event, window);
     }
 }
