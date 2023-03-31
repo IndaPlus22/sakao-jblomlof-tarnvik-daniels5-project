@@ -1,6 +1,6 @@
 use graphics::types::Vec2d;
 
-use super::traits::Object;
+use super::traits::{Object, collisionRecord};
 
 pub struct Rectangle{
     center: Vec2d,
@@ -12,9 +12,9 @@ pub struct Rectangle{
 }
 
 impl Object for Rectangle {
-    fn collisions(&self, other: &dyn Object) -> Option<super::traits::collisionRecord> {
+    fn collisions(&self, other: &Box<dyn Object>, record: Option<collisionRecord>) -> Option<super::traits::collisionRecord> {
         
-        None
+        return record;
     }
     fn update(&self) {
         

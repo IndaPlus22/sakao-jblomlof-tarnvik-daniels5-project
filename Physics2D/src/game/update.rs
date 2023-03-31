@@ -16,6 +16,8 @@ pub fn update(update_args: UpdateArgs, variables: &mut Variables) {
             if outerI == innerI {
                 continue;
             }
+
+            collisionRec = obj.collisions(other, collisionRec);
             //TODO
             // * Add
             // PsuedO: collisionRec = obj.collision(other, collisionRec)
