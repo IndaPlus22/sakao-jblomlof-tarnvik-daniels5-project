@@ -29,8 +29,8 @@ fn main() {
         if let Some(_) = event.render_args() {
             game.draw(&event, &mut window);
         }
-        if let Some(_) = event.update_args() {
-            game.update();
+        if let Some(update_args) = event.update_args() {
+            game.update(update_args);
         }
 
         let duration = time::Duration::from_millis(10);
