@@ -1,3 +1,5 @@
+
+// TODO: make it
 use piston::UpdateArgs;
 
 use super::Variables;
@@ -26,6 +28,5 @@ pub fn update(update_args: UpdateArgs, variables: &mut Variables) {
     }
 
     variables.objects.iter().map(|x| x.update());
-
     
 }

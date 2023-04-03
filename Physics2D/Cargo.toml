@@ -6,6 +6,7 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+gfx_device_gl = "0.16.2"
 piston = "0.53.2"
 piston_window = "*"
 piston2d-gfx_graphics = "0.79"
