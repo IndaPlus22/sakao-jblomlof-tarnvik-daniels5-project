@@ -23,7 +23,7 @@ impl Game {
     }
 
     pub fn init(&mut self) {
-
+        draw::init();
     }
 
     pub fn update(&mut self) {
