@@ -31,7 +31,7 @@ impl Object for Rectangle {
     fn update(&self) {
         
     }
-    fn draw(&self/* Merge conflict */) { // Make merge conflict!!!!!
+    fn draw(&self) {
         // TODO: Draw the rectangle. writing to demonstrate that I'm working on it.
     }
     fn getcenter(&self) -> Vec2d {
