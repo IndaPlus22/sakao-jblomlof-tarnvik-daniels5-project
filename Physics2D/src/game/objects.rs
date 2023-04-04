@@ -32,7 +32,7 @@ impl Object for Rectangle {
         
     }
     fn draw(&self) {
-        
+        // TODO: Draw the rectangle. writing to demonstrate that I'm working on it.
     }
     fn getcenter(&self) -> Vec2d {
         return self.center;
