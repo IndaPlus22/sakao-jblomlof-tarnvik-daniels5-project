@@ -25,7 +25,10 @@ pub fn draw(event: &Event, window: &mut PistonWindow) {
         for i in 0..buttons.len() {
             buttons[i].draw(graphics, context.transform);
         }
+
+        // text funcs
         draw_rect([100.0, 100.0], [50.0, 50.0], context.transform, graphics);
+        draw_circle([200.0, 200.0], 70.0, context.transform, graphics);
     });
 }
 
@@ -41,8 +44,8 @@ fn play_bar(pos: Vec2d) -> [Button; 2] {
     let play_pos: Vec2d = Vec2d::from([pos[0] + 40.0, pos[1]]);
     let restart_pos: Vec2d = Vec2d::from([pos[0] + size[0] + 60.0, pos[1]]);
 
-    let mut play_button = Button::new(play_pos, size, color::hex(LIGHT_CERISE));
-    let mut restart_button = Button::new(restart_pos, size, color::hex(LIGHT_CERISE));
+    let mut play_button = Button::new(play_pos, size, [0.0,0.0,0.0,1.0]);
+    let mut restart_button = Button::new(restart_pos, size, [0.0,0.0,0.0,1.0]);
 
     [play_button, restart_button]
 }
@@ -50,7 +53,7 @@ fn play_bar(pos: Vec2d) -> [Button; 2] {
 // TODO:
 fn tool_box() {}
 
-// FIX: 
+// Draws a rectangle by polygon.
 pub fn draw_rect(
     pos: [f64; 2],
     size: [f64; 2],
@@ -65,6 +68,17 @@ pub fn draw_rect(
     );
 }
 
+pub fn draw_circle(
+    pos: [f64; 2],
+    radius: f64,
+    transform: Matrix2d,
+    g: &mut GfxGraphics<Resources, CommandBuffer>,
+) {
+    let circle = graphics::ellipse::circle(pos[0], pos[1], radius);
+    Ellipse::new(color::hex(LIGHT_CERISE)).draw(circle, &piston_window::DrawState::default(), transform, g);
+}
+
+// Converts two vec2d one for position and one for size to a 4x2 array of corners. ONLY works for rectangles.
 fn conv_pos_size_to_corners_rect(pos: [f64; 2], size: [f64; 2]) -> [[f64; 2]; 4]{
     let corners: [[f64; 2]; 4] = [
         [pos[0], pos[1]],
