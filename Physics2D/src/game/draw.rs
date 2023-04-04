@@ -1,18 +1,18 @@
 mod button;
 
-use graphics::{types::Vec2d, color};
-use opengl_graphics::OpenGL;
+use gfx_device_gl::{CommandBuffer, Resources, *};
+use gfx_graphics::GfxGraphics;
+use graphics::{color, polygon, types::Vec2d, Rectangle, Graphics};
 use piston::{
     input::{RenderEvent, UpdateEvent},
     window::WindowSettings,
 };
-use piston_window::{Event, PistonWindow};
+use piston_window::{*, types::Matrix2d};
 
 use button::Button;
 
-const CERISE_COLOR: [f32; 4] = [232.0/255.0, 61.0/255.0, 132.0/255.0, 1.0];
+const CERISE_COLOR: [f32; 4] = [232.0 / 255.0, 61.0 / 255.0, 132.0 / 255.0, 1.0];
 const LIGHT_CERISE: &str = "ec5f99";
-
 
 pub fn draw(event: &Event, window: &mut PistonWindow) {
     // Update application window.
@@ -21,20 +21,22 @@ pub fn draw(event: &Event, window: &mut PistonWindow) {
         piston_window::clear(CERISE_COLOR, graphics);
 
         // TODO: put all graphics shit here
-        let mut buttons = play_bar(Vec2d::from([0.0, 0.0]));
+        let buttons = play_bar(Vec2d::from([10.0, 10.0]));
         for i in 0..buttons.len() {
             buttons[i].draw(graphics, context.transform);
         }
+        draw_rect([100.0, 100.0], [50.0, 50.0], context.transform, graphics);
     });
 }
 
-// TODO: 
+// TODO:
 pub fn init() {
     let mut buttons = play_bar(Vec2d::from([0.0, 0.0]));
 }
 
 // TODO:
-fn play_bar(pos: Vec2d) -> [Button; 2] { // pos is upper-left corner
+fn play_bar(pos: Vec2d) -> [Button; 2] {
+    // pos is upper-left corner
     let size: Vec2d = Vec2d::from([40.0, 40.0]);
     let play_pos: Vec2d = Vec2d::from([pos[0] + 40.0, pos[1]]);
     let restart_pos: Vec2d = Vec2d::from([pos[0] + size[0] + 60.0, pos[1]]);
@@ -46,6 +48,29 @@ fn play_bar(pos: Vec2d) -> [Button; 2] { // pos is upper-left corner
 }
 
 // TODO:
-fn tool_box() {
+fn tool_box() {}
 
+// FIX: 
+pub fn draw_rect(
+    pos: [f64; 2],
+    size: [f64; 2],
+    transform: Matrix2d,
+    g: &mut GfxGraphics<Resources, CommandBuffer>,
+) {
+    Polygon::new(color::hex(LIGHT_CERISE)).draw(
+        &conv_pos_size_to_corners_rect(pos, size),
+        &piston_window::DrawState::default(),
+        transform,
+        g,
+    );
+}
+
+fn conv_pos_size_to_corners_rect(pos: [f64; 2], size: [f64; 2]) -> [[f64; 2]; 4]{
+    let corners: [[f64; 2]; 4] = [
+        [pos[0], pos[1]],
+        [pos[0] + size[0], pos[1]],
+        [pos[0] + size[0], pos[1] + size[1]],
+        [pos[0], pos[1] + size[1]]
+    ];
+    corners
 }

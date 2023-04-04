@@ -24,7 +24,7 @@ pub struct Button {
 impl Button {
     // constructor for Button
     pub fn new(pos: Vec2d, size: Vec2d, color: Color) -> Button {
-        let dims = square(pos[0], pos[1], size[0]);
+        let dims = square(pos[0] - size[0], pos[1], size[0]);
         let shape = Rectangle::new(color);
         Button {
             dims, color, shape
