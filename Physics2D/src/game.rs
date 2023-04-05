@@ -6,11 +6,14 @@ use piston::{
 };
 use piston_window::{Event, PistonWindow};
 
+use self::input::Input;
+
 mod update;
 mod draw;
 mod input;
 mod objects;
 mod traits;
+mod button;
 
 pub const SCREEN_WIDTH: u32 = 640;
 pub const SCREEN_HEIGHT: u32 = 480;
@@ -18,14 +21,17 @@ pub const GRAVITY: Vec2d = [0.0,-1.0];
 
 pub struct Game {
     variables: Variables,
+    inputs: Input,
 }
 
 impl Game {
     pub fn new() -> Game{
+        let inputs = input::Input::new();
         Game {
             variables: Variables {
                 objects: vec![],
-            }
+            },
+            inputs
         }
     }
 
@@ -43,7 +49,7 @@ impl Game {
     }
 
     pub fn input(&mut self, event: &Event) {
-        input::input(&event);
+        self.inputs.input(&event);
     }
 }
 

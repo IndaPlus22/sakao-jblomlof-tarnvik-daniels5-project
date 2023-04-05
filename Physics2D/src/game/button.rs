@@ -13,6 +13,8 @@ use piston_window::{
     Event, PistonWindow, Rectangle,
 };
 
+use super::input::{Input, self};
+
 const RECT_SHAPE: [f64; 4] = [0.0, 0.0, 100.0, 100.0];
 // struct for button in UI.
 // TODO: put in parameters such as:
@@ -28,8 +30,8 @@ pub struct Button {
 
 impl Button {
     // constructor for Button
-    pub fn new(pos: Vec2d, size: Vec2d, color: Color) -> Button {
-        let dims = square(pos[0] - size[0], pos[1], size[0]);
+    pub fn new(pos: Vec2d, width: f64, height: f64, color: Color) -> Button {
+        let dims = [pos[0], pos[1], width, height];
         let shape = Rectangle::new(color);
         Button {
             dims,
