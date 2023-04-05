@@ -1,8 +1,9 @@
+use gfx_graphics::GfxGraphics;
 use graphics::types::Vec2d;
 
-use super::traits::{Object, collisionRecord};
+use super::traits::{collisionRecord, Object};
 
-pub struct Rectangle{
+pub struct Rectangle {
     center: Vec2d,
     height: isize,
     width: isize,
@@ -11,7 +12,7 @@ pub struct Rectangle{
     potnrg: f64,
 }
 
-pub struct Circle{
+pub struct Circle {
     center: Vec2d,
     radius: isize,
     mass: usize,
@@ -20,7 +21,11 @@ pub struct Circle{
 }
 
 impl Object for Rectangle {
-    fn collisions(&self, other: &Box<dyn Object>, record: Option<collisionRecord>) -> Option<super::traits::collisionRecord> {
+    fn collisions(
+        &self,
+        other: &Box<dyn Object>,
+        record: Option<collisionRecord>,
+    ) -> Option<super::traits::collisionRecord> {
         //Vi kommer behöva göra en if statement eller en case switch som kollar följande
         //Om other är en circel
         //Om other är en rectanglel
@@ -29,9 +34,9 @@ impl Object for Rectangle {
         return record;
     }
     fn update(&self) {
-        
+
     }
-    fn draw(&self) {
+    fn draw(&self, graphics: &mut GfxGraphics<Resources, CommandBuffer>, transform: Matrix2d) {
         
     }
     fn getcenter(&self) -> Vec2d {
@@ -40,16 +45,18 @@ impl Object for Rectangle {
 }
 
 impl Object for Circle {
-    fn collisions(&self, other: &Box<dyn Object>, record: Option<collisionRecord>) -> Option<collisionRecord> {
+    fn collisions(
+        &self,
+        other: &Box<dyn Object>,
+        record: Option<collisionRecord>,
+    ) -> Option<collisionRecord> {
         return record;
     }
-    fn update(&self) {
-        
-    }
-    fn draw(&self) {
+    fn update(&self) {}
+    fn draw(&self, graphics: &mut GfxGraphics<Resources, CommandBuffer>, transform: Matrix2d) {
         
     }
     fn getcenter(&self) -> Vec2d {
-        return self.center
+        return self.center;
     }
 }

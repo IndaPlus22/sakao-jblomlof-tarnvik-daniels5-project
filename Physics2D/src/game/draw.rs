@@ -28,7 +28,7 @@ pub fn draw(event: &Event, window: &mut PistonWindow) {
     });
 }
 
-// TODO: 
+// TODO:
 pub fn init() {
     let mut buttons = play_bar(Vec2d::from([0.0, 0.0]));
 }
