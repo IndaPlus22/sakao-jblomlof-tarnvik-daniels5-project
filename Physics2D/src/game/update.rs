@@ -1,6 +1,6 @@
 
 // TODO: make it
-use piston::UpdateArgs;
+use piston::{UpdateArgs, Event, *};
 
 use super::Variables;
 use super::traits::collisionRecord;
@@ -28,5 +28,4 @@ pub fn update(update_args: UpdateArgs, variables: &mut Variables) {
     }
 
     variables.objects.iter().map(|x| x.update());
-    
 }

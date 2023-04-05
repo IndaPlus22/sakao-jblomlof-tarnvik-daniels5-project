@@ -8,6 +8,7 @@ use piston_window::{Event, PistonWindow};
 
 mod update;
 mod draw;
+mod input;
 mod objects;
 mod traits;
 
@@ -39,6 +40,10 @@ impl Game {
 
     pub fn draw(&mut self, event: &Event, window: &mut PistonWindow) {
         draw::draw(&event, window);
+    }
+
+    pub fn input(&mut self, event: &Event) {
+        input::input(&event);
     }
 }
 
