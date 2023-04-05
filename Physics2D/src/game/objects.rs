@@ -1,5 +1,7 @@
+use gfx_device_gl::{Resources, CommandBuffer};
 use gfx_graphics::GfxGraphics;
 use graphics::types::Vec2d;
+use piston_window::types::Matrix2d;
 
 use super::traits::{collisionRecord, Object};
 
