@@ -8,7 +8,7 @@ use piston::{
 };
 use piston_window::{*, types::{Matrix2d, Width}};
 
-use super::button::Button;
+//use super::button::Button;
 
 const CERISE_COLOR: [f32; 4] = [232.0 / 255.0, 61.0 / 255.0, 132.0 / 255.0, 1.0];
 const LIGHT_CERISE: &str = "ec5f99";
@@ -20,10 +20,10 @@ pub fn draw(event: &Event, window: &mut PistonWindow) {
         piston_window::clear(CERISE_COLOR, graphics);
 
         // TODO: put all graphics shit here
-        let buttons = play_bar(Vec2d::from([10.0, 10.0]));
+        /*let buttons = play_bar(Vec2d::from([10.0, 10.0]));
         for i in 0..buttons.len() {
             buttons[i].draw(graphics, context.transform);
-        }
+        }*/
 
         // text funcs
         draw_rect([100.0, 100.0], [50.0, 50.0], context.transform, graphics);
@@ -37,7 +37,7 @@ pub fn init() {
 }
 
 // TODO:
-fn play_bar(pos: Vec2d) -> [Button; 2] {
+fn play_bar(pos: Vec2d) /*-> [Button; 2]*/ {
     // pos is upper-left corner
     let size: Vec2d = Vec2d::from([40.0, 40.0]);
     let width = 40.0;
@@ -45,10 +45,10 @@ fn play_bar(pos: Vec2d) -> [Button; 2] {
     let play_pos: Vec2d = Vec2d::from([pos[0] + 40.0, pos[1]]);
     let restart_pos: Vec2d = Vec2d::from([pos[0] + size[0] + 60.0, pos[1]]);
 
-    let mut play_button = Button::new(play_pos, width, height, [0.0,0.0,0.0,1.0]);
-    let mut restart_button = Button::new(restart_pos, width, height, [0.0,0.0,0.0,1.0]);
+    //let mut play_button = Button::new(play_pos, width, height, [0.0,0.0,0.0,1.0]);
+    //let mut restart_button = Button::new(restart_pos, width, height, [0.0,0.0,0.0,1.0]);
 
-    [play_button, restart_button]
+    //[play_button, restart_button]
 }
 
 // TODO:

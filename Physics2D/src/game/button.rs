@@ -1,4 +1,4 @@
-use gfx_device_gl::{CommandBuffer, Resources};
+/*use gfx_device_gl::{CommandBuffer, Resources};
 use gfx_graphics::GfxGraphics;
 use graphics::{color, draw_state, line::Shape, types::Vec2d};
 use opengl_graphics::OpenGL;
@@ -52,4 +52,4 @@ impl Button {
     }
 
     // TODO: Add features such as the functionality
-}
+}*/
