@@ -26,6 +26,8 @@ pub fn draw(event: &Event, window: &mut PistonWindow) {
             buttons[i].draw(graphics, context.transform);
         }
 
+        // TODO: For loop all objects in simulation and render them
+
         // text funcs
         draw_rect([100.0, 100.0], [50.0, 50.0], context.transform, graphics);
         draw_circle([200.0, 200.0], 70.0, context.transform, graphics);
@@ -81,10 +83,10 @@ pub fn draw_circle(
 // Converts two vec2d one for position and one for size to a 4x2 array of corners. ONLY works for rectangles.
 fn conv_pos_size_to_corners_rect(pos: [f64; 2], size: [f64; 2]) -> [[f64; 2]; 4]{
     let corners: [[f64; 2]; 4] = [
-        [pos[0], pos[1]],
-        [pos[0] + size[0], pos[1]],
-        [pos[0] + size[0], pos[1] + size[1]],
-        [pos[0], pos[1] + size[1]]
+        [pos[0] - size[0]/2.0, pos[1] - size[1]/2.0],
+        [pos[0] - size[0]/2.0, pos[1] + size[1]/2.0],
+        [pos[0] + size[0]/2.0, pos[1] + size[1]/2.0],
+        [pos[0] + size[0]/2.0, pos[1] - size[1]/2.0]
     ];
     corners
 }

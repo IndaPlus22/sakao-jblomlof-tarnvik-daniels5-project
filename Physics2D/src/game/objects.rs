@@ -3,7 +3,7 @@ use gfx_graphics::GfxGraphics;
 use graphics::types::Vec2d;
 use piston_window::types::Matrix2d;
 
-use super::traits::{collisionRecord, Object};
+use super::{traits::{collisionRecord, Object}, draw::{draw_rect, draw_circle}};
 
 pub struct Rectangle {
     center: Vec2d,
@@ -39,7 +39,7 @@ impl Object for Rectangle {
 
     }
     fn draw(&self, graphics: &mut GfxGraphics<Resources, CommandBuffer>, transform: Matrix2d) {
-        
+        draw_rect(self.center, [(self.width) as f64, self.height as f64], transform, graphics)
     }
     fn getcenter(&self) -> Vec2d {
         return self.center;
@@ -56,7 +56,7 @@ impl Object for Circle {
     }
     fn update(&self) {}
     fn draw(&self, graphics: &mut GfxGraphics<Resources, CommandBuffer>, transform: Matrix2d) {
-        
+        draw_circle(self.center, self.radius as f64, transform, graphics);
     }
     fn getcenter(&self) -> Vec2d {
         return self.center;
