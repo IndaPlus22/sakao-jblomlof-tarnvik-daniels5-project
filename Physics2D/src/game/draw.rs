@@ -39,7 +39,7 @@ pub fn draw(event: &Event, window: &mut PistonWindow, variables: &Variables) {
     });
 }
 
-// TODO: dont work
+// TODO: should be something that is in initialization of game and probably in something alike "fn init_menu"
 pub fn init() {
     let mut buttons = play_bar(Vec2d::from([0.0, 0.0]));
 }
@@ -62,7 +62,7 @@ fn play_bar(pos: Vec2d) /*-> [Button; 2]*/ {
 // TODO:
 fn tool_box() {}
 
-// Draws a rectangle by polygon.
+// Draws a rectangle by polygon. size[0] is width and size[1] is height.
 pub fn draw_rect(
     pos: [f64; 2],
     size: [f64; 2],
@@ -70,14 +70,14 @@ pub fn draw_rect(
     g: &mut GfxGraphics<Resources, CommandBuffer>,
 ) {
     Polygon::new(rgb_to_color(131, 176, 247)).draw(
-        &conv_pos_size_to_corners_rect(pos, size),
+        &conv_pos_size_to_vertices_rect(pos, size),
         &piston_window::DrawState::default(),
         transform,
         g,
     );
 }
 
-// Draws a polygon by polygon.
+// Draws a polygon by polygon with vertices as corners.
 pub fn draw_polygon(
     vertices: &[[f64; 2]],
     transform: Matrix2d,
@@ -102,13 +102,12 @@ pub fn draw_circle(
     // println!("Drawing circle at: ({}, {})", pos[0], pos[1]);
     // --------------
 
-
     let circle = graphics::ellipse::circle(pos[0], pos[1], radius);
     Ellipse::new(color::hex(LIGHT_CERISE)).draw(circle, &piston_window::DrawState::default(), transform, g);
 }
 
 // Converts two vec2d one for position and one for size to a 4x2 array of corners. ONLY works for rectangles.
-fn conv_pos_size_to_corners_rect(pos: [f64; 2], size: [f64; 2]) -> [[f64; 2]; 4]{
+fn conv_pos_size_to_vertices_rect(pos: [f64; 2], size: [f64; 2]) -> [[f64; 2]; 4]{
     let corners: [[f64; 2]; 4] = [
         [pos[0] - size[0]/2.0, pos[1] - size[1]/2.0],
         [pos[0] - size[0]/2.0, pos[1] + size[1]/2.0],
@@ -118,6 +117,7 @@ fn conv_pos_size_to_corners_rect(pos: [f64; 2], size: [f64; 2]) -> [[f64; 2]; 4]
     corners
 }
 
+// Converts rgb to color. Helper because I(Toshi) likes to copy from google color picker.
 fn rgb_to_color(r: u16, g: u16, b: u16) -> [f32; 4] {
     [r as f32 / 255.0, g as f32  / 255.0, b as f32  / 255.0, 1.0]
 }
