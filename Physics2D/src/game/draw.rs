@@ -34,6 +34,7 @@ pub fn draw(event: &Event, window: &mut PistonWindow, variables: &Variables) {
         // DEBUG funcs ------------------------------------------------
         // draw_rect([100.0, 100.0], [50.0, 50.0], context.transform, graphics);
         // draw_circle([200.0, 200.0], 70.0, context.transform, graphics);
+        // draw_polygon(&[[150.0, 190.0], [220.0, 320.0], [380.0, 400.0], [410.0, 280.0], [300.0, 150.0]], context.transform, graphics);
         // ---------------------------------------------------------
     });
 }
@@ -76,6 +77,21 @@ pub fn draw_rect(
     );
 }
 
+// Draws a polygon by polygon.
+pub fn draw_polygon(
+    vertices: &[[f64; 2]],
+    transform: Matrix2d,
+    g: &mut GfxGraphics<Resources, CommandBuffer>,
+) {
+    Polygon::new(rgb_to_color(131, 176, 247)).draw(
+        vertices,
+        &piston_window::DrawState::default(),
+        transform,
+        g,
+    );
+}
+
+// Draws a circle by ellipse.
 pub fn draw_circle(
     pos: [f64; 2],
     radius: f64,
