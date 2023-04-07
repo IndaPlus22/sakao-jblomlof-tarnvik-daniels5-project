@@ -22,6 +22,19 @@ pub struct Circle {
     potnrg: f64,
 }
 
+impl Rectangle {
+    pub fn new(center: Vec2d, height: isize, width: isize, mass: usize) -> Rectangle {
+        Rectangle {
+            center,
+            height,
+            width,
+            mass,
+            velocity: 0.0,
+            potnrg: 0.0,
+        }
+    }
+}
+
 impl Object for Rectangle {
     fn collisions(
         &self,
@@ -43,6 +56,18 @@ impl Object for Rectangle {
     }
     fn getcenter(&self) -> Vec2d {
         return self.center;
+    }
+}
+
+impl Circle {
+    pub fn new(center: Vec2d, radius: isize, mass: usize) -> Circle {
+        Circle {
+            center,
+            radius,
+            mass,
+            velocity: 0.0,
+            potnrg: 0.0,
+        }
     }
 }
 

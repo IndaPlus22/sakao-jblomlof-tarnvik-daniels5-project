@@ -37,6 +37,11 @@ impl Game {
 
     pub fn init(&mut self) {
         draw::init();
+
+        // TEMPORARY CODE TO TEST OBJECTS
+        self.variables.objects.push(Box::new(objects::Circle::new([100.0, 100.0], 20, 10)));
+        self.variables.objects.push(Box::new(objects::Circle::new([200.0, 100.0], 20, 10)));
+        self.variables.objects.push(Box::new(objects::Rectangle::new([300.0, 100.0], 20, 10, 10)));
     }
 
 
@@ -45,7 +50,7 @@ impl Game {
     }
 
     pub fn draw(&mut self, event: &Event, window: &mut PistonWindow) {
-        draw::draw(&event, window);
+        draw::draw(&event, window, &self.variables);
     }
 
     pub fn input(&mut self, event: &Event) {

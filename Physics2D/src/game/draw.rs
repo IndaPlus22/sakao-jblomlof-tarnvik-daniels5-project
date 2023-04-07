@@ -9,11 +9,12 @@ use piston::{
 use piston_window::{*, types::{Matrix2d, Width}};
 
 //use super::button::Button;
+use super::Variables;
 
 const CERISE_COLOR: [f32; 4] = [232.0 / 255.0, 61.0 / 255.0, 132.0 / 255.0, 1.0];
 const LIGHT_CERISE: &str = "ec5f99";
 
-pub fn draw(event: &Event, window: &mut PistonWindow) {
+pub fn draw(event: &Event, window: &mut PistonWindow, variables: &Variables) {
     // Update application window.
     window.draw_2d(event, |context, graphics, _| {
         // Fill the window with white colour.
@@ -25,11 +26,15 @@ pub fn draw(event: &Event, window: &mut PistonWindow) {
             buttons[i].draw(graphics, context.transform);
         }*/
 
-        // TODO: For loop all objects in simulation and render them
+        // TODO: For loop all objects in simulation and render them (I think that it needs to be assigned to a variable)
+        for item in &variables.objects {
+            item.draw(graphics, context.transform);
+        }
 
-        // text funcs
-        draw_rect([100.0, 100.0], [50.0, 50.0], context.transform, graphics);
-        draw_circle([200.0, 200.0], 70.0, context.transform, graphics);
+        // DEBUG funcs ------------------------------------------------
+        // draw_rect([100.0, 100.0], [50.0, 50.0], context.transform, graphics);
+        // draw_circle([200.0, 200.0], 70.0, context.transform, graphics);
+        // ---------------------------------------------------------
     });
 }
 
@@ -63,7 +68,7 @@ pub fn draw_rect(
     transform: Matrix2d,
     g: &mut GfxGraphics<Resources, CommandBuffer>,
 ) {
-    Polygon::new(color::hex(LIGHT_CERISE)).draw(
+    Polygon::new(rgb_to_color(131, 176, 247)).draw(
         &conv_pos_size_to_corners_rect(pos, size),
         &piston_window::DrawState::default(),
         transform,
@@ -77,6 +82,11 @@ pub fn draw_circle(
     transform: Matrix2d,
     g: &mut GfxGraphics<Resources, CommandBuffer>,
 ) {
+    // For debugging
+    // println!("Drawing circle at: ({}, {})", pos[0], pos[1]);
+    // --------------
+
+
     let circle = graphics::ellipse::circle(pos[0], pos[1], radius);
     Ellipse::new(color::hex(LIGHT_CERISE)).draw(circle, &piston_window::DrawState::default(), transform, g);
 }
@@ -90,4 +100,8 @@ fn conv_pos_size_to_corners_rect(pos: [f64; 2], size: [f64; 2]) -> [[f64; 2]; 4]
         [pos[0] + size[0]/2.0, pos[1] - size[1]/2.0]
     ];
     corners
+}
+
+fn rgb_to_color(r: u16, g: u16, b: u16) -> [f32; 4] {
+    [r as f32 / 255.0, g as f32  / 255.0, b as f32  / 255.0, 1.0]
 }
