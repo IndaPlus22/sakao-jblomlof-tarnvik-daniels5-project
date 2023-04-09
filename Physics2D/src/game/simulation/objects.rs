@@ -3,7 +3,8 @@ use gfx_graphics::GfxGraphics;
 use graphics::types::Vec2d;
 use piston_window::types::Matrix2d;
 
-use super::{traits::{collisionRecord, Object}, draw::{draw_rect, draw_circle}};
+use super::{traits::{collisionRecord, Object}};
+use crate::game::draw::{draw_rect, draw_circle};
 
 pub struct Rectangle {
     center: Vec2d,
