@@ -84,6 +84,7 @@ pub fn draw_polygon(
     vertices: &[[f64; 2]],
     transform: Matrix2d,
     g: &mut GfxGraphics<Resources, CommandBuffer>,
+    pos: Vec2
 ) {
     Polygon::new(rgb_to_color(131, 176, 247)).draw(
         vertices,

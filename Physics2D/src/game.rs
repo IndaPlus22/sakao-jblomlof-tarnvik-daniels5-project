@@ -63,8 +63,7 @@ impl Game {
             .objects
             .push(Box::new(objects::Rectangle::new(
                 Vec2::new(300., 100.),
-                20,
-                10,
+                vec![[50.0,50.0],[50.0,70.0],[70.0,70.0],[70.0,50.0]],
                 10,
             )));
     }

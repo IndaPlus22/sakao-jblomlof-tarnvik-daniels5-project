@@ -42,10 +42,5 @@ fn main() {
         if let Some(_) = event.button_args() {
             game.input(&event);
         }
-
-
-        // NOT SURE IF NEEDED
-        let duration = time::Duration::from_millis(10);
-        thread::sleep(duration);
     }
 }

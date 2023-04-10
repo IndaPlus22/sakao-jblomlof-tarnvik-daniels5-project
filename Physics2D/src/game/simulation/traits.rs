@@ -12,6 +12,7 @@ pub trait Object {
     fn getcenter(&self) -> Vec2;
     fn gettype(&self) -> String;
     fn getradius(&self) -> isize;
+    fn getvertices(&self) -> Vec<[f64;2]>;
 }
 
 pub struct collisionRecord {
