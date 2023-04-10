@@ -10,7 +10,7 @@ use piston_window::{Event, PistonWindow};
 
 // IMPORTS form our code
 use self::input::Input;
-use crate::game::simulation::{objects, traits};
+use crate::{game::simulation::{objects, traits}, vector::vector::Vec2};
 
 // MODULES
 mod draw;
@@ -55,14 +55,14 @@ impl Game {
         // TEMPORARY CODE TO TEST OBJECTS
         self.variables
             .objects
-            .push(Box::new(objects::Circle::new([100.0, 100.0], 20, 10)));
+            .push(Box::new(objects::Circle::new(Vec2::new(100., 100.0), 20, 10)));
         self.variables
             .objects
-            .push(Box::new(objects::Circle::new([200.0, 100.0], 20, 10)));
+            .push(Box::new(objects::Circle::new(Vec2::new(200.0, 100.), 20, 10)));
         self.variables
             .objects
             .push(Box::new(objects::Rectangle::new(
-                [300.0, 100.0],
+                Vec2::new(300., 100.),
                 20,
                 10,
                 10,

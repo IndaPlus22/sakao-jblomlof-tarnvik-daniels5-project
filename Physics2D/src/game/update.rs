@@ -27,7 +27,7 @@ pub fn update(update_args: UpdateArgs, variables: &mut Variables) {
         list_of_collisions.push(collisionRec)
     }
 
-    for obj in &variables.objects {
+    for obj in &mut variables.objects {
         obj.update();
     }
 }

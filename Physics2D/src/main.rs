@@ -7,8 +7,9 @@ use piston::{
 };
 use piston_window::{Event, PistonWindow};
 use game::Game;
-
 mod game;
+mod vector;
+
 
 fn main() {
     use std::{thread, time};

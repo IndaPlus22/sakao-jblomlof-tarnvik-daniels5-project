@@ -8,6 +8,8 @@ use piston::{
 };
 use piston_window::{*, types::{Matrix2d, Width}};
 
+use crate::vector::vector::Vec2;
+
 //use super::button::Button;
 use super::Variables;
 
@@ -64,7 +66,7 @@ fn tool_box() {}
 
 // Draws a rectangle by polygon. size[0] is width and size[1] is height.
 pub fn draw_rect(
-    pos: [f64; 2],
+    pos: Vec2,
     size: [f64; 2],
     transform: Matrix2d,
     g: &mut GfxGraphics<Resources, CommandBuffer>,
@@ -93,7 +95,7 @@ pub fn draw_polygon(
 
 // Draws a circle by ellipse.
 pub fn draw_circle(
-    pos: [f64; 2],
+    pos: Vec2,
     radius: f64,
     transform: Matrix2d,
     g: &mut GfxGraphics<Resources, CommandBuffer>,
@@ -102,17 +104,17 @@ pub fn draw_circle(
     // println!("Drawing circle at: ({}, {})", pos[0], pos[1]);
     // --------------
 
-    let circle = graphics::ellipse::circle(pos[0], pos[1], radius);
+    let circle = graphics::ellipse::circle(pos.x, pos.y, radius);
     Ellipse::new(color::hex(LIGHT_CERISE)).draw(circle, &piston_window::DrawState::default(), transform, g);
 }
 
 // Converts two vec2d one for position and one for size to a 4x2 array of corners. ONLY works for rectangles.
-fn conv_pos_size_to_vertices_rect(pos: [f64; 2], size: [f64; 2]) -> [[f64; 2]; 4]{
+fn conv_pos_size_to_vertices_rect(pos: Vec2, size: [f64; 2]) -> [[f64; 2]; 4]{
     let corners: [[f64; 2]; 4] = [
-        [pos[0] - size[0]/2.0, pos[1] - size[1]/2.0],
-        [pos[0] - size[0]/2.0, pos[1] + size[1]/2.0],
-        [pos[0] + size[0]/2.0, pos[1] + size[1]/2.0],
-        [pos[0] + size[0]/2.0, pos[1] - size[1]/2.0]
+        [pos.x - size[0]/2.0, pos.y - size[1]/2.0],
+        [pos.x - size[0]/2.0, pos.y + size[1]/2.0],
+        [pos.x + size[0]/2.0, pos.y + size[1]/2.0],
+        [pos.x + size[0]/2.0, pos.y - size[1]/2.0]
     ];
     corners
 }
