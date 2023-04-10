@@ -41,7 +41,7 @@ impl Rectangle {
             center,
             vertices,
             mass,
-            velocity: Vec2::new(1.0, 1.0),
+            velocity: Vec2::new(0.2, 0.2),
             potnrg: 0.0,
             form: "Rectangle".to_string(),
         }
@@ -55,9 +55,29 @@ impl Object for Rectangle {
         record: Option<collisionRecord>,
     ) -> Option<super::traits::collisionRecord> {
         if other.gettype() == "Rectangle" {
-            for ownPoint in self.vertices.iter() {
-                for otherPoint in other.getvertices().iter() {
-                    //checkCollision(*ownPoint, *otherPoint);
+            //Create lines of the vertices for both objects
+            let mut lines = Vec::new();
+            let mut otherlines = Vec::new();
+            for i in 0..self.vertices.len() {
+                if i == self.vertices.len()-1 {
+                    lines.push([self.vertices[i], self.vertices[0]]);
+                } else {
+                    lines.push([self.vertices[i], self.vertices[i+1]]);
+                }
+            }
+            for i in 0..other.getvertices().len() {
+                if i == other.getvertices().len()-1 {
+                    otherlines.push([other.getvertices()[i], other.getvertices()[0]]);
+                } else {
+                    otherlines.push([other.getvertices()[i], other.getvertices()[i+1]]);
+                }
+            }
+            for line in lines.iter() {
+                for otherline in otherlines.iter() {
+                    if checkCollision(*line, *otherline) {
+                        //println!("Collision");
+                        return Some(collisionRecord {});
+                    }
                 }
             }
         }
@@ -87,6 +107,9 @@ impl Object for Rectangle {
     fn getvertices(&self) -> Vec<[f64;2]> {
         return self.vertices.to_vec()
     }
+    fn setvel(&mut self, vel: Vec2) {
+        self.velocity = vel;
+    }
 }
 
 impl Circle {
@@ -95,7 +118,7 @@ impl Circle {
             center,
             radius,
             mass,
-            velocity: Vec2::new(1.0, 1.0),
+            velocity: Vec2::new(0.2, 0.2),
             potnrg: 0.0,
             form: "Circle".to_string(),
         }
@@ -116,7 +139,7 @@ impl Object for Circle {
                 return Some(collisionRecord {});
             }
         }
-        return None;
+        return record;
     }
     fn update(&mut self) {}
     fn draw(&self, graphics: &mut GfxGraphics<Resources, CommandBuffer>, transform: Matrix2d) {
@@ -134,22 +157,23 @@ impl Object for Circle {
     fn getvertices(&self) -> Vec<[f64;2]> {
         return vec![]
     }
+    fn setvel (&mut self, vel: Vec2) {
+        self.velocity = vel;
+    }
     
 }
 
-fn checkCollision(first: [[f64;2];2], second: [[f64;2];2]) -> bool {
-    let temp = Matrix2::new(
-        (first[0][0] - first[1][0]), (second[1][0]-second[0][0]),
-        (first[0][1] - first[1][1]), (second[1][1]-second[0][1]),
-    );
-
-    let mut b = Vector2::new((first[0][0]-second[0][0]), (first[0][1] - second[0][1]));
-
-    let decomp = temp.lu();
-
-    let x = decomp.solve(&b).expect("HELLO");
-    
-    println!("{:?}", x);
-    return true
-
+//Use linear algebra to check if two lines intersect each other
+fn checkCollision(line1: [[f64;2];2], line2: [[f64;2];2]) -> bool {
+    let mut matrix = Matrix2::new(line1[0][0] - line1[1][0], line2[0][0] - line2[1][0], line1[0][1] - line1[1][1], line2[0][1] - line2[1][1]);
+    let mut vector = Vector2::new(line2[0][0] - line1[0][0], line2[0][1] - line1[0][1]);
+    let decomp = matrix.lu();
+    let mut result = decomp.solve(&vector);
+    if result.is_some() {
+        let result = result.unwrap();
+        if result[0] >= 0.0 && result[0] <= 1.0 && result[1] >= 0.0 && result[1] <= 1.0 {
+            return true;
+        }
+    }
+    return false;
 }

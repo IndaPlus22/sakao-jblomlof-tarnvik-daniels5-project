@@ -66,6 +66,15 @@ impl Game {
                 vec![[50.0,50.0],[50.0,70.0],[70.0,70.0],[70.0,50.0]],
                 10,
             )));
+        self.variables
+            .objects
+            .push(Box::new(objects::Rectangle::new(
+                Vec2::new(300., 100.),
+                vec![[100.0,100.0],[100.0,120.0],[120.0,120.0],[120.0,100.0]],
+                10,
+            )));
+
+        self.variables.objects[3].setvel(Vec2::new(0.0, 0.0));
     }
 
     // A function that runs every update
