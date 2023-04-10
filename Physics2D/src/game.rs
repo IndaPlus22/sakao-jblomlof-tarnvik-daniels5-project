@@ -55,23 +55,23 @@ impl Game {
         // TEMPORARY CODE TO TEST OBJECTS
         self.variables
             .objects
-            .push(Box::new(objects::Circle::new(Vec2::new(100., 100.0), 20, 10)));
+            .push(Box::new(objects::Circle::new(Vec2::new(100., 100.0), 20.0, 10.0)));
         self.variables
             .objects
-            .push(Box::new(objects::Circle::new(Vec2::new(200.0, 100.), 20, 10)));
+            .push(Box::new(objects::Circle::new(Vec2::new(200.0, 100.), 20.0, 10.0)));
         self.variables
             .objects
             .push(Box::new(objects::Rectangle::new(
                 Vec2::new(300., 100.),
-                vec![[50.0,50.0],[50.0,70.0],[70.0,70.0],[70.0,50.0]],
-                10,
+                vec![[56.0,51.0],[51.0,72.0],[72.0,73.0],[78.0,54.0]],
+                10.0,
             )));
         self.variables
             .objects
             .push(Box::new(objects::Rectangle::new(
                 Vec2::new(300., 100.),
                 vec![[100.0,100.0],[100.0,120.0],[120.0,120.0],[120.0,100.0]],
-                10,
+                10.0,
             )));
 
         self.variables.objects[3].setvel(Vec2::new(0.0, 0.0));

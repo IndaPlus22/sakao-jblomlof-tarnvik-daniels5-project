@@ -20,7 +20,7 @@ pub struct Point {
 pub struct Rectangle {
     center: Vec2,
     vertices: Vec<[f64;2]>,
-    mass: usize,
+    mass: f64,
     velocity: Vec2,
     potnrg: f64,
     form: String,
@@ -28,15 +28,15 @@ pub struct Rectangle {
 
 pub struct Circle {
     center: Vec2,
-    radius: isize,
-    mass: usize,
+    radius: f64,
+    mass: f64,
     velocity: Vec2,
     potnrg: f64,
     form: String,
 }
 
 impl Rectangle {
-    pub fn new(center: Vec2, vertices: Vec<[f64;2]>, mass: usize) -> Rectangle {
+    pub fn new(center: Vec2, vertices: Vec<[f64;2]>, mass: f64) -> Rectangle {
         Rectangle {
             center,
             vertices,
@@ -72,6 +72,7 @@ impl Object for Rectangle {
                     otherlines.push([other.getvertices()[i], other.getvertices()[i+1]]);
                 }
             }
+            //Here we check for collisions
             for line in lines.iter() {
                 for otherline in otherlines.iter() {
                     if checkCollision(*line, *otherline) {
@@ -80,6 +81,22 @@ impl Object for Rectangle {
                     }
                 }
             }
+        } else if other.gettype() == "Circle" {
+            let mut lines = Vec::new();
+            for i in 0..self.vertices.len() {
+                if i == self.vertices.len()-1 {
+                    lines.push([self.vertices[i], self.vertices[0]]);
+                } else {
+                    lines.push([self.vertices[i], self.vertices[i+1]]);
+                }
+            }
+            for line in lines.iter() {
+                if checkCircleCollisionWithPolygon(other.getcenter(), other.getradius(), *line) {
+                    println!("Collision");
+                    return Some(collisionRecord {});
+                }
+            }
+            
         }
         return record;
     }
@@ -101,8 +118,8 @@ impl Object for Rectangle {
     fn gettype(&self) -> String {
         return self.form.clone();
     }
-    fn getradius(&self) -> isize {
-        return 10;
+    fn getradius(&self) -> f64 {
+        return 10.0;
     }
     fn getvertices(&self) -> Vec<[f64;2]> {
         return self.vertices.to_vec()
@@ -113,7 +130,7 @@ impl Object for Rectangle {
 }
 
 impl Circle {
-    pub fn new(center: Vec2, radius: isize, mass: usize) -> Circle {
+    pub fn new(center: Vec2, radius: f64, mass: f64) -> Circle {
         Circle {
             center,
             radius,
@@ -138,6 +155,21 @@ impl Object for Circle {
                 println!("Collision");
                 return Some(collisionRecord {});
             }
+        } else if other.gettype() == "Rectangle" {
+            let mut lines = Vec::new();
+            for i in 0..other.getvertices().len() {
+                if i == other.getvertices().len()-1 {
+                    lines.push([other.getvertices()[i], other.getvertices()[0]]);
+                } else {
+                    lines.push([other.getvertices()[i], other.getvertices()[i+1]]);
+                }
+            }
+            for line in lines.iter() {
+                if checkCircleCollisionWithPolygon(self.center, self.radius, *line) {
+                    println!("Collision");
+                    return Some(collisionRecord {});
+                }
+            }
         }
         return record;
     }
@@ -151,7 +183,7 @@ impl Object for Circle {
     fn gettype(&self) -> String {
         return self.form.clone();
     }
-    fn getradius(&self) -> isize {
+    fn getradius(&self) -> f64 {
         return self.radius;
     }
     fn getvertices(&self) -> Vec<[f64;2]> {
@@ -163,17 +195,39 @@ impl Object for Circle {
     
 }
 
-//Use linear algebra to check if two lines intersect each other
+//check if two lines intersect each other
 fn checkCollision(line1: [[f64;2];2], line2: [[f64;2];2]) -> bool {
-    let mut matrix = Matrix2::new(line1[0][0] - line1[1][0], line2[0][0] - line2[1][0], line1[0][1] - line1[1][1], line2[0][1] - line2[1][1]);
-    let mut vector = Vector2::new(line2[0][0] - line1[0][0], line2[0][1] - line1[0][1]);
+    let matrix = Matrix2::new(line1[0][0] - line1[1][0], line2[0][0] - line2[1][0], line1[0][1] - line1[1][1], line2[0][1] - line2[1][1]);
+    let vector = Vector2::new(line2[0][0] - line1[0][0], line2[0][1] - line1[0][1]);
     let decomp = matrix.lu();
-    let mut result = decomp.solve(&vector);
-    if result.is_some() {
-        let result = result.unwrap();
-        if result[0] >= 0.0 && result[0] <= 1.0 && result[1] >= 0.0 && result[1] <= 1.0 {
-            return true;
+    let result = decomp.solve(&vector);
+    match result {
+        Some(solution) => {
+            return solution[0] >= 0.0 && solution[0] <= 1.0 && solution[1] >= 0.0 && solution[1] <= 1.0;
         }
+        None => {return false}
     }
-    return false;
+}
+
+fn checkCircleCollisionWithPolygon(pos: Vec2, radius: f64, vertices: [[f64;2];2]) -> bool{
+    let v = Vector2::new(vertices[1][0] - vertices[0][0], vertices[1][1] - vertices[0][1]);
+    let k = Vector2::new(pos.x - vertices[0][0], pos.y - vertices[0][1]);
+    
+    let negative_p_half = v.dot(&k)/v.norm_squared();
+    let sqroot = ((negative_p_half*negative_p_half) - (k.norm_squared() - radius*radius)/v.norm_squared()).sqrt();
+
+    //Does not have a solution
+    if sqroot.is_nan() {
+        return false;
+    }
+
+    let t = negative_p_half - sqroot;
+
+    if t>=0. && t<=1. {
+        return true
+    }
+
+
+    return false
+
 }

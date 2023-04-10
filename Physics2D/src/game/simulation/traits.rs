@@ -11,7 +11,7 @@ pub trait Object {
     fn draw(&self, graphics: &mut GfxGraphics<Resources, CommandBuffer>, transform: Matrix2d);
     fn getcenter(&self) -> Vec2;
     fn gettype(&self) -> String;
-    fn getradius(&self) -> isize;
+    fn getradius(&self) -> f64;
     fn getvertices(&self) -> Vec<[f64;2]>;
     fn setvel (&mut self, vel: Vec2);
 }
