@@ -1,4 +1,6 @@
 
+use std::thread::sleep;
+
 // TODO: make it
 use piston::{UpdateArgs, Event, *};
 
@@ -6,7 +8,6 @@ use super::Variables;
 use super::traits::collisionRecord;
 
 pub fn update(update_args: UpdateArgs, variables: &mut Variables) {
-
     // TODO 
     // collisions
     // using collisionsREcord
@@ -18,7 +19,7 @@ pub fn update(update_args: UpdateArgs, variables: &mut Variables) {
             if outerI == innerI {
                 continue;
             }
-
+            
             collisionRec = obj.collisions(other, collisionRec);
             //TODO
             // * Add
@@ -26,8 +27,7 @@ pub fn update(update_args: UpdateArgs, variables: &mut Variables) {
         }
         list_of_collisions.push(collisionRec)
     }
-
-    for obj in &mut variables.objects {
-        obj.update();
+    for (index, obj) in variables.objects.iter_mut().enumerate() {
+        obj.update(&list_of_collisions[index], update_args.dt);
     }
 }
