@@ -6,13 +6,11 @@ use nalgebra::Matrix2;
 use nalgebra::Vector2;
 use piston_window::types::Matrix2d;
 
-
 use super::traits::{collisionRecord, Object};
 use crate::{
     game::draw::{draw_circle, draw_polygon, draw_rect},
     vector::vector::Vec2,
 };
-
 
 pub struct Rectangle {
     center_of_mass: Vec2,
@@ -48,7 +46,7 @@ impl Rectangle {
             velocity: Vec2::new(0.2, 0.2),
             potnrg: 0.0,
             form: "Rectangle".to_string(),
-            staticshape: false
+            staticshape: false,
         }
     }
 }
@@ -86,10 +84,12 @@ impl Object for Rectangle {
                 for otherline in otherlines.iter() {
                     let (collision, local_collision_offset) = checkCollision(*line, *otherline);
                     if collision {
-                        return Some(collisionRecord {desired_movement: match record {
-                            Some(value) => value.desired_movement,
-                            None => Vec2::new(0.0, 0.0)
-                        } + local_collision_offset});
+                        return Some(collisionRecord {
+                            desired_movement: match record {
+                                Some(value) => value.desired_movement,
+                                None => Vec2::new(0.0, 0.0),
+                            } + local_collision_offset,
+                        });
                     }
                 }
             }
@@ -103,18 +103,21 @@ impl Object for Rectangle {
                 }
             }
             for line in lines.iter() {
-                let (collision, local_collision_offset) = checkCircleCollisionWithPolygon(other.getcenter(), other.getradius(), *line);
+                let (collision, local_collision_offset) =
+                    checkCircleCollisionWithPolygon(other.getcenter(), other.getradius(), *line);
                 if collision {
-                    return Some(collisionRecord {desired_movement: match record {
-                        Some(value) => value.desired_movement,
-                        None => Vec2::new(0.0, 0.0)
-                    } + local_collision_offset});
+                    return Some(collisionRecord {
+                        desired_movement: match record {
+                            Some(value) => value.desired_movement,
+                            None => Vec2::new(0.0, 0.0),
+                        } + local_collision_offset,
+                    });
                 }
             }
         }
         return record;
     }
-    
+
     fn update(&mut self, record: &Option<collisionRecord>, dt: f64) {
         //self.center += self.velocity;
         if self.staticshape {
@@ -122,11 +125,10 @@ impl Object for Rectangle {
         }
         match record {
             Some(value) => {
-                self.moverelative(value.desired_movement+ self.velocity);
+                self.moverelative(value.desired_movement + self.velocity);
             }
-            None => {self.moverelative(self.velocity)}
+            None => self.moverelative(self.velocity),
         }
-        
     }
     fn draw(&self, graphics: &mut GfxGraphics<Resources, CommandBuffer>, transform: Matrix2d) {
         //draw_rect(self.center, [(self.width) as f64, self.height as f64], transform, graphics)
@@ -154,15 +156,15 @@ impl Object for Rectangle {
     fn setvel(&mut self, vel: Vec2) {
         self.velocity = vel;
     }
-    fn moverelative (&mut self, pos: Vec2) {
+    fn moverelative(&mut self, pos: Vec2) {
         self.center_of_mass += pos;
         self.circle_center += pos;
         for point in self.vertices.iter_mut() {
-            point[0]+= pos.x;
-            point[1]+= pos.y;
+            point[0] += pos.x;
+            point[1] += pos.y;
         }
     }
-    fn set_static (&mut self, set: bool) {
+    fn set_static(&mut self, set: bool) {
         self.staticshape = set;
     }
 }
@@ -191,16 +193,17 @@ impl Object for Circle {
             let othercenter = other.getcenter();
             let distance = (self.center_of_mass - othercenter).length();
             if distance < (self.radius + other.getradius()) as f64 {
-                //println!("Collision");
-                let distance = (self.center - othercenter);
+                let distance = (self.center_of_mass - othercenter);
                 let overlap = (self.radius + other.getradius()) as f64 - distance.length();
                 let axis = Vec2::unit_vector(distance);
                 let posmovment = axis * overlap;
 
-                return Some(collisionRecord {desired_movement: match record {
-                    Some(value) => value.desired_movement,
-                    None => Vec2::new(0.0, 0.0)
-                } + posmovment});
+                return Some(collisionRecord {
+                    desired_movement: match record {
+                        Some(value) => value.desired_movement,
+                        None => Vec2::new(0.0, 0.0),
+                    } + posmovment,
+                });
             }
         } else if other.gettype() == "Rectangle" {
             let mut lines = Vec::new();
@@ -212,15 +215,17 @@ impl Object for Circle {
                 }
             }
             for line in lines.iter() {
-                let (collision, local_collision_offset) = checkCircleCollisionWithPolygon(self.center_of_mass, self.radius, *line);
+                let (collision, local_collision_offset) =
+                    checkCircleCollisionWithPolygon(self.center_of_mass, self.radius, *line);
                 if collision {
-                    //return Some(collisionRecord {desired_movement: local_collision_offset*-1.0}); 
-                    return Some(collisionRecord {desired_movement: match record {
-                        Some(value) => value.desired_movement,
-                        None => Vec2::new(0.0, 0.0)
-                    } + local_collision_offset*-1.0});//The -1.0 is to make sure the circle moves away from the rectangle and not into it since the offset is based on the rectangle
+                    //return Some(collisionRecord {desired_movement: local_collision_offset*-1.0});
+                    return Some(collisionRecord {
+                        desired_movement: match record {
+                            Some(value) => value.desired_movement,
+                            None => Vec2::new(0.0, 0.0),
+                        } + local_collision_offset * -1.0,
+                    }); //The -1.0 is to make sure the circle moves away from the rectangle and not into it since the offset is based on the rectangle
                 }
-
             }
         }
         return record;
@@ -229,7 +234,7 @@ impl Object for Circle {
         if self.staticshape {
             return;
         }
-        self.center += self.velocity;
+        self.center_of_mass += self.velocity;
         match record {
             Some(value) => {
                 self.moverelative(value.desired_movement);
@@ -256,49 +261,62 @@ impl Object for Circle {
         self.velocity = vel;
     }
 
-    fn moverelative (&mut self, pos: Vec2) {
-        self.center +=pos;
+    fn moverelative(&mut self, pos: Vec2) {
+        self.center_of_mass += pos;
     }
-    fn set_static (&mut self, set: bool) {
+    fn set_static(&mut self, set: bool) {
         self.staticshape = set;
     }
 }
 
 //check if two lines intersect each other
-fn checkCollision(line1: [[f64;2];2], line2: [[f64;2];2]) -> (bool, Vec2) {
-    let matrix = Matrix2::new(line1[0][0] - line1[1][0], line2[1][0] - line2[0][0], line1[0][1] - line1[1][1], line2[1][1] - line2[0][1]);
+fn checkCollision(line1: [[f64; 2]; 2], line2: [[f64; 2]; 2]) -> (bool, Vec2) {
+    let matrix = Matrix2::new(
+        line1[0][0] - line1[1][0],
+        line2[1][0] - line2[0][0],
+        line1[0][1] - line1[1][1],
+        line2[1][1] - line2[0][1],
+    );
     let vector = Vector2::new(line1[0][0] - line2[0][0], line1[0][1] - line2[0][1]);
     let decomp = matrix.lu();
     let result = decomp.solve(&vector);
     match result {
-        Some(solution) => {        
+        Some(solution) => {
             let line = Vec2::new(line1[1][0] - line1[0][0], line1[1][1] - line1[0][1]);
             let mut offset = Vec2::new(0.0, 0.0);
             if solution[0] >= 0.5 {
-                offset = line*(solution[0]-1.0);
+                offset = line * (solution[0] - 1.0);
             } else {
-                offset = line*solution[0];
+                offset = line * solution[0];
             }
-            
 
-            println!("Solution: {}, {}", solution[0], solution[1]);
-            return (solution[0] >= 0.0 && solution[0] <= 1.0 && solution[1] >= 0.0 && solution[1] <= 1.0, offset);
-
-            
+            return (
+                solution[0] >= 0.0
+                    && solution[0] <= 1.0
+                    && solution[1] >= 0.0
+                    && solution[1] <= 1.0,
+                offset,
+            );
         }
-        None => {return (false, Vec2::new(0.0, 0.0))}
+        None => return (false, Vec2::new(0.0, 0.0)),
     }
 }
 
-fn checkCircleCollisionWithPolygon(pos: Vec2, radius: f64, vertices: [[f64;2];2]) -> (bool, Vec2){
-    let v = Vector2::new(vertices[1][0] - vertices[0][0], vertices[1][1] - vertices[0][1]);
+fn checkCircleCollisionWithPolygon(
+    pos: Vec2,
+    radius: f64,
+    vertices: [[f64; 2]; 2],
+) -> (bool, Vec2) {
+    let v = Vector2::new(
+        vertices[1][0] - vertices[0][0],
+        vertices[1][1] - vertices[0][1],
+    );
     let k = Vector2::new(pos.x - vertices[0][0], pos.y - vertices[0][1]);
 
     let negative_p_half = v.dot(&k) / v.norm_squared();
     let sqroot = ((negative_p_half * negative_p_half)
         - (k.norm_squared() - radius * radius) / v.norm_squared())
     .sqrt();
-
 
     //Does not have a solution
     if sqroot.is_nan() {
@@ -307,37 +325,36 @@ fn checkCircleCollisionWithPolygon(pos: Vec2, radius: f64, vertices: [[f64;2];2]
 
     let t = negative_p_half - sqroot;
 
-    if t>=0. && t<=1. {
-
-        let line = Vec2::new(vertices[1][0] - vertices[0][0], vertices[1][1] - vertices[0][1]);
+    if t >= 0. && t <= 1. {
+        let line = Vec2::new(
+            vertices[1][0] - vertices[0][0],
+            vertices[1][1] - vertices[0][1],
+        );
         let line_from_point_to_start = Vec2::new(vertices[0][0] - pos.x, vertices[0][1] - pos.y);
         let projection_line = vector_projection(line_from_point_to_start, line);
         let offset = line_from_point_to_start - projection_line;
 
-        let tt = (offset.x + pos.x)/line.x;
+        let tt = (offset.x + pos.x) / line.x;
         if tt >= 0.0 && tt <= 1.0 {
-            let k = radius/offset.length() - 1.0;
-            return (true, offset*k);
+            let k = radius / offset.length() - 1.0;
+            return (true, offset * k);
         } else {
             let alt_one = Vec2::new(vertices[0][0] - pos.x, vertices[0][1] - pos.y);
             let alt_two = Vec2::new(vertices[1][0] - pos.x, vertices[1][1] - pos.y);
             if alt_one.length() < alt_two.length() {
-                let k = radius/alt_one.length() - 1.0;
-                return (true, alt_one*k);
+                let k = radius / alt_one.length() - 1.0;
+                return (true, alt_one * k);
             } else {
-                let k = radius/alt_two.length() - 1.0;
-                return (true, alt_two*k);
+                let k = radius / alt_two.length() - 1.0;
+                return (true, alt_two * k);
             }
         }
 
-        return (true, offset*10.0);
-
-      }
-      
-    return (false, Vec2::new(0.0, 0.0));
-    
+        return (true, offset * 10.0);
     }
-    
+
+    return (false, Vec2::new(0.0, 0.0));
+}
 
 /// Calculate center of mass for a homogeneous polygon.
 /// Returns a Vec2 of the point where the center mass is located.
@@ -439,9 +456,7 @@ fn calc_mass_center(vert: &Vec<[f64; 2]>) -> Vec2 {
             area_sum += temp.1;
             vertices.remove(iplus1);
             break;
-           
-         }
-
+        }
     }
     let temp = calc_triangle_mass_center_and_area([vertices[0], vertices[1], vertices[2]]);
     sum_of_centre += temp.0;
@@ -513,13 +528,11 @@ fn approx_circle_hitbox(vertices: &Vec<[f64; 2]>) -> (Vec2, f64) {
         radius_sq = radius_sq.max(norm_sq);
     }
 
-
     return (point, radius_sq.sqrt());
 }
 
-
 pub fn vector_projection(a: Vec2, b: Vec2) -> Vec2 {
     let dot = Vec2::dot(a, b);
-    let length = b.length()*b.length();
-    return b*(dot/length);
+    let length = b.length() * b.length();
+    return b * (dot / length);
 }
