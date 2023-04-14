@@ -55,26 +55,30 @@ impl Game {
         // TEMPORARY CODE TO TEST OBJECTS
         self.variables
             .objects
-            .push(Box::new(objects::Circle::new(Vec2::new(100., 100.0), 20.0, 10.0)));
-        self.variables
-            .objects
-            .push(Box::new(objects::Circle::new(Vec2::new(200.0, 100.), 20.0, 10.0)));
+            .push(Box::new(objects::Circle::new(Vec2::new(100.0, 50.), 20.0, 10.0)));
         self.variables
             .objects
             .push(Box::new(objects::Rectangle::new(
                 Vec2::new(300., 100.),
-                vec![[56.0,51.0],[51.0,72.0],[72.0,73.0],[78.0,54.0]],
+                vec![[50.0,50.0],[50.0,70.0],[70.0,70.0],[70.0,50.0]],
                 10.0,
             )));
         self.variables
             .objects
             .push(Box::new(objects::Rectangle::new(
                 Vec2::new(300., 100.),
-                vec![[100.0,100.0],[100.0,120.0],[120.0,120.0],[120.0,100.0]],
+                vec![[150.0,50.0],[150.0,70.0],[170.0,70.0],[170.0,50.0]],
                 10.0,
             )));
+        self.variables.objects[0].setvel(Vec2::new(-0.5, 0.));
+        self.variables.objects[1].setvel(Vec2::new(0.0, 0.0));
+        self.variables.objects[2].setvel(Vec2::new(-0.5, 0.0));
+        self.variables.objects[1].set_static(true);
 
-        self.variables.objects[3].setvel(Vec2::new(0.0, 0.0));
+
+
+
+
     }
 
     // A function that runs every update
