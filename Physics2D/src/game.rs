@@ -33,8 +33,17 @@ pub const SCREEN_WIDTH: u32 = 640;
 pub const SCREEN_HEIGHT: u32 = 480;
 pub const GRAVITY: Vec2d = [0.0, -1.0];
 
+//Game state 
+#[derive(PartialEq)]
+pub enum GameState {
+    Running, 
+    Paused,                                             
+}
+
 // Game struct
+//TODO game_state probably shouldn't just be public, something smart should happen instead
 pub struct Game {
+    pub game_state: GameState,
     variables: Variables,
     inputs: Input,
     objects: Objects,
@@ -46,7 +55,9 @@ impl Game {
     pub fn new() -> Game {
         let inputs = input::Input::new();
         let mut objects: Objects = Objects::new();
+        let mut game_state = GameState::Running;
         Game {
+            game_state,
             variables: Variables { objects: vec![] },
             objects,
             inputs,
