@@ -12,7 +12,6 @@ impl Objects {
         Objects{
             buttons: Self::create_buttons()
         }        
-
     }
 
     pub fn create_buttons () -> [Button; 2]{

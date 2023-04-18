@@ -5,7 +5,7 @@ use piston_window::{Rectangle, types::{Matrix2d, Vec2d, Color}};
 pub struct Button {
     dims: [f64; 4],
     shape: Rectangle,
-    hover: bool,
+    pub hover: bool,
 }
 
 impl Button {
@@ -27,7 +27,6 @@ impl Button {
             transform,
             graphics,
         );
-
     }
 
     pub fn check_hover (&mut self, mouse_position: Vec2d){       

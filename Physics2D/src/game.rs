@@ -9,7 +9,8 @@ use piston::{
 use piston_window::{Event, PistonWindow};
 
 // IMPORTS form our code
-use self::input::Input;
+use self::{input::Input, ui::{ui_draw, ui_input}};
+use crate::game::ui::ui_objects::Objects;
 use crate::{game::simulation::{objects, traits}, vector::vector::Vec2};
 
 // MODULES
@@ -24,6 +25,7 @@ mod ui {
     pub mod ui_button;
     pub mod ui_draw;
     pub mod ui_input;
+    pub mod ui_objects;
 }
 
 // constants
@@ -75,6 +77,8 @@ impl Game {
         self.variables.objects[2].setvel(Vec2::new(-0.5, 0.0));
         self.variables.objects[1].set_static(true);
 
+        let mut objects = Objects::new();
+
 
 
 
@@ -89,11 +93,13 @@ impl Game {
     // A function that runs every frame
     pub fn draw(&mut self, event: &Event, window: &mut PistonWindow) {
         draw::draw(&event, window, &self.variables);
+        ui_draw::draw(event, window);
     }
 
     // A function that runs every time the user does inputs
     pub fn input(&mut self, event: &Event) {
         self.inputs.input(&event);
+        ui_input::input(event);
     }
 }
 
