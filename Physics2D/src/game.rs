@@ -77,7 +77,7 @@ impl Game {
         self.variables.objects[2].setvel(Vec2::new(-0.5, 0.0));
         self.variables.objects[1].set_static(true);
 
-        let mut objects = Objects::new();
+        let mut objects: Objects = Objects::new();
 
 
 
