@@ -13,6 +13,7 @@ pub trait Object {
     fn gettype(&self) -> String;
     fn getradius(&self) -> f64;
     fn getvertices(&self) -> Vec<[f64;2]>;
+    fn getvel(&self) -> Vec2;
     fn setvel (&mut self, vel: Vec2);
     fn moverelative (&mut self, pos: Vec2);
     fn set_static (&mut self, set: bool);

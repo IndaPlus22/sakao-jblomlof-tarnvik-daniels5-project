@@ -6,6 +6,7 @@ use nalgebra::Matrix2;
 use nalgebra::Vector2;
 use piston_window::types::Matrix2d;
 
+use super::collision::collision_between_polygons;
 use super::traits::{collisionRecord, Object};
 use crate::{
     game::draw::{draw_circle, draw_polygon, draw_rect},
@@ -58,7 +59,21 @@ impl Object for Rectangle {
         record: Option<collisionRecord>,
     ) -> Option<super::traits::collisionRecord> {
         if other.gettype() == "Rectangle" {
-            //Create lines of the vertices for both objects
+            let relative_velocity = self.velocity - other.getvel();
+            match collision_between_polygons(&self.vertices, &relative_velocity, &other.getvertices()) {
+                Some(val) => {
+                    let temp = self.velocity;
+                    return Some(collisionRecord {
+                        desired_movement: match record {
+                            Some(value) => value.desired_movement,
+                            None => Vec2::new(0.0, 0.0),
+                        } -val*temp,
+                    });
+                }
+                None => ()
+            }
+
+            /*//Create lines of the vertices for both objects
             let mut lines = Vec::new();
             let mut otherlines = Vec::new();
             for i in 0..self.vertices.len() {
@@ -92,7 +107,7 @@ impl Object for Rectangle {
                         });
                     }
                 }
-            }
+            }*/
         } else if other.gettype() == "Circle" {
             let mut lines = Vec::new();
             for i in 0..self.vertices.len() {
@@ -132,7 +147,7 @@ impl Object for Rectangle {
     }
     fn draw(&self, graphics: &mut GfxGraphics<Resources, CommandBuffer>, transform: Matrix2d) {
         //draw_rect(self.center, [(self.width) as f64, self.height as f64], transform, graphics)
-        draw_circle(self.circle_center, self.radius, transform, graphics);
+        //draw_circle(self.circle_center, self.radius, transform, graphics);
         draw_polygon(
             self.vertices.as_slice(),
             transform,
@@ -152,6 +167,9 @@ impl Object for Rectangle {
     }
     fn getvertices(&self) -> Vec<[f64; 2]> {
         return self.vertices.to_vec();
+    }
+    fn getvel(&self) -> Vec2 {
+        self.velocity
     }
     fn setvel(&mut self, vel: Vec2) {
         self.velocity = vel;
@@ -256,6 +274,9 @@ impl Object for Circle {
     }
     fn getvertices(&self) -> Vec<[f64; 2]> {
         return vec![];
+    }
+    fn getvel(&self) -> Vec2 {
+        self.velocity
     }
     fn setvel(&mut self, vel: Vec2) {
         self.velocity = vel;

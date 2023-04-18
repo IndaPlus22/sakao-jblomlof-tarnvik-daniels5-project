@@ -33,6 +33,13 @@ pub mod vector {
             Vec2::new(self.x+_rhs.x, self.y+_rhs.y)
         }
     }
+    impl ops::Neg<> for Vec2 {
+        type Output = Vec2;
+
+        fn neg(self) -> Self::Output {
+            Vec2::new(-self.x, -self.y)
+        }
+    }
     impl ops::Sub<Vec2> for Vec2 {
         type Output = Vec2;
 

@@ -20,6 +20,7 @@ mod update;
 mod simulation {
     pub mod objects;
     pub mod traits;
+    pub mod collision;
 }
 mod ui {
     pub mod ui_button;
@@ -58,27 +59,34 @@ impl Game {
         draw::init();
 
         // TEMPORARY CODE TO TEST OBJECTS
-        self.variables
-            .objects
-            .push(Box::new(objects::Circle::new(Vec2::new(100.0, 50.), 20.0, 10.0)));
+        //self.variables
+        //    .objects
+        //    .push(Box::new(objects::Circle::new(Vec2::new(100.0, 50.), 20.0, 10.0)));
         self.variables
             .objects
             .push(Box::new(objects::Rectangle::new(
                 Vec2::new(300., 100.),
-                vec![[50.0,50.0],[50.0,70.0],[70.0,70.0],[70.0,50.0]],
+                vec![[50.0,50.0],[51.0,71.0],[70.0,70.0],[71.0,51.0]],
                 10.0,
             )));
         self.variables
             .objects
             .push(Box::new(objects::Rectangle::new(
                 Vec2::new(300., 100.),
-                vec![[150.0,50.0],[150.0,70.0],[170.0,70.0],[170.0,50.0]],
+                vec![[100.0,100.0],[100.0,120.0],[120.0,120.0],[120.0,100.0]],
                 10.0,
             )));
-        self.variables.objects[0].setvel(Vec2::new(-0.5, 0.));
-        self.variables.objects[1].setvel(Vec2::new(0.0, 0.0));
-        self.variables.objects[2].setvel(Vec2::new(-0.5, 0.0));
-        self.variables.objects[1].set_static(true);
+            self.variables
+            .objects
+            .push(Box::new(objects::Rectangle::new(
+                Vec2::new(300., 100.),
+                vec![[110.0,50.0],[100.0,60.0],[120.0,70.0],[120.0,50.0]],
+                10.0,
+            )));
+        self.variables.objects[0].setvel(Vec2::new(0.15, 0.0));
+        self.variables.objects[1].setvel(Vec2::new(-0.2, -0.5));
+        self.variables.objects[2].setvel(Vec2::new(-0.1, 0.0));
+        //self.variables.objects[1].set_static(true);
 
     }
 
