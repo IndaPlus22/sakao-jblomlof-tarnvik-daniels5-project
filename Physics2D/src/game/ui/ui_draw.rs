@@ -3,11 +3,10 @@ use piston_window::PistonWindow;
 
 use super::ui_objects::Objects;
 
-pub fn draw(event: &Event, window: &mut PistonWindow) {
+pub fn draw(event: &Event, window: &mut PistonWindow, objects: &mut Objects) {
     window.draw_2d(event, |context, graphics, _| {
-    let buttons = Objects::new().buttons;
-        for i in 0..buttons.len() {
-            buttons[i].draw(graphics, context.transform);
+        for i in 0..objects.buttons.len() {
+            objects.buttons[i].draw(graphics, context.transform);
         }
     });
 }

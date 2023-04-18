@@ -1,4 +1,3 @@
-use graphics::color;
 use piston_window::types::Vec2d;
 
 use super::ui_button::Button;
@@ -21,8 +20,8 @@ impl Objects {
         let play_pos: Vec2d = Vec2d::from([pos[0] + 10.0, pos[1] + 10.0]);
         let restart_pos: Vec2d = Vec2d::from([pos[0]+ width + 20.0, pos[1] + 10.0]);
 
-        let mut play_button = Button::new(play_pos, width, height, [0.0,0.0,0.0,1.0]);
-        let mut restart_button = Button::new(restart_pos, width, height, [0.0,0.0,0.0,1.0]);
+        let play_button = Button::new(play_pos, width, height, [0.0,0.0,0.0,1.0]);
+        let restart_button = Button::new(restart_pos, width, height, [0.0,0.0,0.0,1.0]);
 
         [play_button, restart_button]
     }

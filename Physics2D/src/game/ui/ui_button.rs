@@ -20,7 +20,6 @@ impl Button {
     }
 
     pub fn draw(&self, graphics: &mut GfxGraphics<Resources, CommandBuffer>, transform: Matrix2d) {
-
         self.shape.draw(
             self.dims,
             &piston_window::DrawState::default(),
@@ -35,10 +34,8 @@ impl Button {
         && mouse_position[1] > self.dims[1] 
         && mouse_position[1] < self.dims[1] + self.dims[3]{
             self.hover = true;
-            println!("YEEEEES");
         } else{
             self.hover = false;
-            println!("NOOOOOOOOOO");
         }
     }
 }

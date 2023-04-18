@@ -1,13 +1,8 @@
 use piston::{Event, PressEvent, ReleaseEvent, MouseCursorEvent};
 
-use crate::game::objects;
-
-use super::ui_button::Button;
 use super::ui_objects::Objects;
 
-pub fn input(event: &Event, /*objects: Objects*/){
-
-    let mut objects: Objects = Objects::new();
+pub fn input(event: &Event, objects: &mut Objects){
 
     if let Some(pos) = event.mouse_cursor_args() {
         for i in 0..2 {
