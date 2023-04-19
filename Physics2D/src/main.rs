@@ -3,7 +3,7 @@ extern crate piston_window;
 use opengl_graphics::OpenGL;
 use piston::{
     input::{RenderEvent, UpdateEvent},
-    window::WindowSettings, ButtonEvent, MouseCursorEvent,
+    window::WindowSettings, ButtonEvent, MouseCursorEvent, Loop,
 };
 use piston_window::{Event, PistonWindow};
 use game::Game;
@@ -27,21 +27,33 @@ fn main() {
 
     // game loop
     while let Some(event) = window.next() {
+        match event {
+            Event::Input(_, _) => {
+                game.input(&event);
+            }
+            Event::Loop(Loop::Render(_)) => {
+                game.draw(&event, &mut window);
+            }
+            Event::Loop(Loop::Update(_)) => {
+                game.update(event.update_args().unwrap());
+            }
+            _ => {}
+        }
+
         // TODO: Handle events in match style instead of if let
-        if let Some(_) = event.render_args() {
-            game.draw(&event, &mut window);
-        }
+        // if let Some(_) = event.render_args() {
+        //     game.draw(&event, &mut window);
+        // }
+        // if let Some(update_args) = event.update_args() {
+        //     game.update(update_args);
+        // }
 
-        if let Some(update_args) = event.update_args() {
-            game.update(update_args);
-        }
-
-        // FIXME: Handle input
-        if let Some(_) = event.mouse_cursor_args() {
-            game.input(&event);
-        }
-        if let Some(_) = event.button_args() {
-            game.input(&event);
-        }
+        // // FIXME: Handle input
+        // if let Some(_) = event.mouse_cursor_args() {
+        //     game.input(&event);
+        // }
+        // if let Some(_) = event.button_args() {
+        //     game.input(&event);
+        // }
     }
 }
