@@ -2,86 +2,111 @@ use nalgebra::{Matrix2, Vector2};
 
 use crate::vector::vector::Vec2;
 
+/// Returns whatever the polygons approximate circles collide.
+pub fn approx_are_colliding(centre1: Vec2, raduis1: f64, centre2: Vec2, radius2: f64) -> bool {
+    let distance = (centre1 - centre2).squared_length();
+    return distance < (raduis1 + radius2) * (raduis1 + radius2);
+    // if distance^2 < rad_dist^2 so is dist < rad_dist
+    // since distance is >= 0, rad >= 0;
+}
+
 /// If a polygon collides with the other polygon, this returns Some((normal, t)).
 /// Such that t*self.velocity is the relative movement such that the polygons only touches.
 pub fn collision_between_polygons(
     main_pol_vert: &Vec<[f64; 2]>,
-    relative_velocity: &Vec2,
+    relative_movement: &Vec2,
     static_pol_vert: &Vec<[f64; 2]>,
-) -> Option<f64> {
-    if relative_velocity.squared_length() == 0.0 {
-        return None
+) -> Option<(Vec2, f64)> {
+    match type_of_collision(main_pol_vert, static_pol_vert) {
+        CollisionType::No => return None,
+        CollisionType::Touching(norm) => return Some((norm, 0.0)),
+        CollisionType::Interference => {
+            if relative_movement.squared_length() != 0.0 {
+                return Some(calculate_scalar_distance(
+                    main_pol_vert,
+                    static_pol_vert,
+                    relative_movement,
+                ));
+            } else {
+                return None;
+            }
+        }
     }
-    // if any line intersects a line in the other, move main back until it only touches. If the next line is on the other side of the toucing line, repeat.
-    let mut colliding = false;
-    let mut prev_main_index = main_pol_vert.len() - 1;
-    let mut main_index = 0;
+}
 
-    // The line from [furthest - 1] to [furthest] just got shifted repeat check for the next segment if the endpoints are on different sides.
-    let mut furthest_index = 0;
-    let mut furthest_dist = 0.0;
-    while main_index < main_pol_vert.len() {
+fn type_of_collision(
+    main_pol_vert: &Vec<[f64; 2]>,
+    static_pol_vert: &Vec<[f64; 2]>,
+) -> CollisionType {
+    let mut norms: Vec<Vec2> = Vec::new();
+    let mut found_side = false;
+
+    let mut prev_index_for_main = main_pol_vert.len() - 1;
+    for index_for_main in 0..main_pol_vert.len() {
+        let line1 = [
+            main_pol_vert[prev_index_for_main],
+            main_pol_vert[index_for_main],
+        ];
 
         let mut prev_static_index = static_pol_vert.len() - 1;
-        let mut static_index = 0;
-        while static_index < static_pol_vert.len() {
-            let line1 = [main_pol_vert[prev_main_index], main_pol_vert[main_index]];
-            let line2 = [static_pol_vert[prev_static_index], static_pol_vert[static_index]];
-            match line_parallel(line1, line2) {
-                Some(sol) => {println!("Implement here! collision.rs line 31-ish")}
-                None => {
-                    // they are not parallell
-                    match line_intersecting(line1, line2) {
-                        Some(sol) => {
-                            colliding = true;
-                            let mut dist: f64 = 0.0;
-                            let t = sol.0;
-                            if t > 0.0 {
-                                // check distance needed to move out the first point. (the distance to move it to the intersecting line)
-                                dist = dist.max(distance_needed_to_move(&(-(*relative_velocity)), line1, line2));
-                            }
-                            if t < 1.0 {
-                                dist = dist.max(distance_needed_to_move(&(-(*relative_velocity)), [line1[1], line1[0]], line2));
-                            }
-                            if dist > furthest_dist {
-                                furthest_dist = dist;
-                                furthest_index = main_index
-                            }
+        for static_index in 0..static_pol_vert.len() {
+            let line2 = [
+                static_pol_vert[prev_static_index],
+                static_pol_vert[static_index],
+            ];
+
+            let (t, s) = line_math(line1, line2);
+            if (t <= 1.0 && t >= 0.0 && s <= 1.0 && s >= 0.0) {
+                let t_on_end = t == 1.0 || t == 0.0;
+                let s_on_end = s == 1.0 || s == 0.0;
+                match (t_on_end, s_on_end) {
+                    (false, false) => return CollisionType::Interference,
+                    (true, false) => {
+                        if !found_side {
+                            norms.clear()
+                        };
+                        norms.push(norm_of(line2));
+                        found_side = true;
+                    }
+                    (false, true) => {
+                        if !found_side {
+                            norms.clear()
+                        };
+                        norms.push(norm_of(line1));
+                        found_side = true;
+                    }
+                    (true, true) => {
+                        if !found_side {
+                            norms.push(norm_of(line2))
                         }
-                        None => () // not intersecting
                     }
                 }
             }
 
             prev_static_index = static_index;
-            static_index += 1;
         }
-
-        prev_main_index = main_index;
-        main_index += 1;
+        prev_index_for_main = index_for_main;
     }
-    if colliding {
-        Some(furthest_dist)
+
+    if norms.len() > 0 {
+        return CollisionType::Touching(norms[0]);
     } else {
-        None
+        return CollisionType::No;
     }
 }
 
-///check if two lines intersect each other returns the t and s for the lines such that t*vec_from_point0 + point0 is the collision and same for s.
-/// # Panics
-/// Panics if the two lines are parallel or either line is actually a point
-fn line_intersecting(line1: [[f64; 2]; 2], line2: [[f64; 2]; 2]) -> Option<(f64, f64)> {
-    let (t,s) = line_math(line1, line2);
-    if s <= 1.0 && s >= 0.0 && t <= 1.0 && t >= 0.0 {
-        Some((t, s))
-    } else {
-    None
-    }
+fn norm_of(line1: [[f64; 2]; 2]) -> Vec2 {
+    // assuming all vertex is ordered counter-clockwise it is
+    return Vec2::new(line1[1][1] - line1[0][1], line1[0][0] - line1[1][0]);
+}
+enum CollisionType {
+    Interference,
+    Touching(Vec2),
+    No,
 }
 
 /// returns t, s
-/// # Panic
-/// panics if lines are parallell
+/// returns -0.01, -0.01 if line are parallell
 fn line_math(line1: [[f64; 2]; 2], line2: [[f64; 2]; 2]) -> (f64, f64) {
     let matrix = Matrix2::new(
         line1[0][0] - line1[1][0],
@@ -92,67 +117,83 @@ fn line_math(line1: [[f64; 2]; 2], line2: [[f64; 2]; 2]) -> (f64, f64) {
     let vector = Vector2::new(line1[0][0] - line2[0][0], line1[0][1] - line2[0][1]);
     let decomp = matrix.lu();
     match decomp.solve(&vector) {
-        Some(res) => {return (res[0], res[1]);}
+        Some(res) => {
+            return (res[0], res[1]);
+        }
         None => {
-            println!("{:?} ---- {:?}", matrix, vector);
-        return (0.0,0.0)}
-    }
-    /*let result = decomp.solve(&vector).unwrap();
-    
-    (result[0], result[1])*/
-}
-
-/// Returns the Some(t0, tmax) such the line from point0 in the vector from point0 to point1 t0<=t<=tmax is the intersecting
-/// First option signals if they are parallell, and the second one indicates if they are overlapping
-fn line_parallel(line1: [[f64; 2]; 2], line2: [[f64; 2]; 2]) -> Option<Option<(f64,f64)>> {
-    const ERROR_MARGIN: f64 = 0.001;
-    let vec1 = Vec2::new(line1[1][0] - line1[0][0], line1[1][1] - line1[0][1]);
-    let vec2 = Vec2::new(line2[1][0] - line2[0][0], line2[1][1] - line2[0][1]);
-    if (vec1.x == 0.0 && vec1.y == 0.0) || (vec2.x == 0.0 && vec2.y == 0.0) {
-        panic!("WEIRD");
-    }
-    if vec2.x == 0.0 {
-        if vec1.x == 0.0 {
-            return Some(None);
-        } else {
-            return None;
+            //println!("{:?} ---- {:?}", matrix, vector);
+            return (-0.01, -0.01);
         }
     }
-    let t = vec1.x /vec2.x;
-    if (t * vec2.y - vec1.y).abs() < ERROR_MARGIN {
-        return Some(None);
-    }
-    None
 }
 
+/// DO NOT SEND IN RELATIVE_VEL = 0
+fn calculate_scalar_distance(
+    main_pol_vert: &Vec<[f64; 2]>,
+    static_pol_vert: &Vec<[f64; 2]>,
+    relative_velocity: &Vec2,
+) -> (Vec2, f64) {
+    // TODO CALC NORM
+    let mut norms: Vec<Vec2>;
+    let mut temp_norm = Vec2::new(0.0, 0.0);
+    let mut found_side = false;
 
-// THIS NEEDS FIX
-fn distance_needed_to_move(negative_velocity: &Vec2, line1: [[f64;2];2], line2: [[f64; 2]; 2]) -> f64 {
-    let point = line1[0];
-    let move_line = [point, [point[0] + negative_velocity.x, point[1] + negative_velocity.y]];
-    match line_parallel(move_line, line2) {
-        Some(overlap) => {
-            return 0.0;
+    let neg_vel = -*relative_velocity;
+    let mut max_dist: f64 = 0.0;
+
+    let mut prev_index_for_main = main_pol_vert.len() - 1;
+    for index_for_main in 0..main_pol_vert.len() {
+        let line1 = [
+            main_pol_vert[prev_index_for_main],
+            main_pol_vert[index_for_main],
+        ];
+
+        let mut prev_static_index = static_pol_vert.len() - 1;
+        for static_index in 0..static_pol_vert.len() {
+            let line2 = [
+                static_pol_vert[prev_static_index],
+                static_pol_vert[static_index],
+            ];
+
+            // MIGHT NOT BE 100% correct for 2 parallell lines with relative direction in the same directon as the line
+            // look for the t >= 0 such that endpoints on line1 moves to line2
+            // but they need to move exactly onto line2
+            // so also check if the opposite.
+            let move_1 = [line1[0], [line1[0][0] + neg_vel.x, line1[0][1] + neg_vel.y]];
+            let move_2 = [line1[1], [line1[1][0] + neg_vel.x, line1[1][1] + neg_vel.y]];
+            let (t, s) = line_math(move_1, line2);
+            if (t > 0.0 && s <= 1.0 && s >= 0.0) {
+                if t > max_dist {
+                    max_dist = t;
+                    temp_norm = norm_of(line2)
+                }
+            }
+            let (t, s) = line_math(move_2, line2);
+            if (t > 0.0 && s <= 1.0 && s >= 0.0) {
+                if t > max_dist {
+                    max_dist = t;
+                    temp_norm = norm_of(line2)
+                }
+            }
+            //
+            let move_1 = [line2[0], [line2[0][0] - neg_vel.x, line2[0][1] - neg_vel.y]];
+            let move_2 = [line2[1], [line2[1][0] - neg_vel.x, line2[1][1] - neg_vel.y]];
+            let (t, s) = line_math(move_1, line1);
+            if (t > 0.0 && s <= 1.0 && s >= 0.0) {
+                if t > max_dist {
+                    max_dist = t;
+                    temp_norm = norm_of(line2)
+                }            }
+            let (t, s) = line_math(move_2, line1);
+            if (t > 0.0 && s <= 1.0 && s >= 0.0) {
+                if t > max_dist {
+                    max_dist = t;
+                    temp_norm = norm_of(line2)
+                }            }
+
+            prev_static_index = static_index;
         }
-        None => ()
+        prev_index_for_main = index_for_main;
     }
-    let (t,s) = line_math(move_line, line2);
-    if t < 0.0 {
-        // wrong direction
-        return 0.0;
-    }
-    else if s <= 1.0 && s >= 0.0 {
-        // moving in the right direction, and it will move just right
-        return t;
-    } else if s > 1.0 {
-        // we are overshooting, reverse perspective
-        let temp = distance_needed_to_move(&(-(*negative_velocity)), [line2[1], line2[0]], line1);
-        return temp
-    } else if s < 0.0 {
-        // we are overshooting, but a different side.
-        let temp = distance_needed_to_move(&(-(*negative_velocity)), line2, line1);
-        return temp
-    }
-    // we should never reach here
-    panic!();
+    return (temp_norm, -max_dist);
 }
