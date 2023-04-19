@@ -7,6 +7,8 @@ use piston::{
 };
 use piston_window::{Event, PistonWindow};
 use game::Game;
+
+use crate::game::GameState;
 mod game;
 mod vector;
 
@@ -32,6 +34,7 @@ fn main() {
             game.draw(&event, &mut window);
         }
 
+        //Only update game if the game state is running (meaning the user has not paused)
         if let Some(update_args) = event.update_args() {
             game.update(update_args);
         }
