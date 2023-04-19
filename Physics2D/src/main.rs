@@ -35,10 +35,8 @@ fn main() {
         }
 
         //Only update game if the game state is running (meaning the user has not paused)
-        if game.game_state == GameState::Running {
-            if let Some(update_args) = event.update_args() {
-                game.update(update_args);
-            }
+        if let Some(update_args) = event.update_args() {
+            game.update(update_args);
         }
 
         // FIXME: Handle input

@@ -43,7 +43,6 @@ pub enum GameState {
 // Game struct
 //TODO game_state probably shouldn't just be public, something smart should happen instead
 pub struct Game {
-    pub game_state: GameState,
     variables: Variables,
     inputs: Input,
     objects: Objects,
@@ -55,10 +54,9 @@ impl Game {
     pub fn new() -> Game {
         let inputs = input::Input::new();
         let mut objects: Objects = Objects::new();
-        let mut game_state = GameState::Running;
+        let mut game_state = GameState::Paused;
         Game {
-            game_state,
-            variables: Variables { objects: vec![] },
+            variables: Variables { objects: vec![], game_state },
             objects,
             inputs,
         }
@@ -95,7 +93,9 @@ impl Game {
 
     // A function that runs every update
     pub fn update(&mut self, update_args: UpdateArgs) {
-        update::update(update_args, &mut self.variables);
+        if self.variables.game_state == GameState::Running{
+            update::update(update_args, &mut self.variables);
+        }
     }
 
     // A function that runs every frame
@@ -107,11 +107,12 @@ impl Game {
     // A function that runs every time the user does inputs
     pub fn input(&mut self, event: &Event) {
         self.inputs.input(&event);
-        ui_input::input(event, &mut self.objects);
+        ui_input::input(event, &mut self.objects, &mut self.variables);
     }
 }
 
 // A struct that holds all the variables that the game needs
 pub struct Variables {
     objects: Vec<Box<dyn traits::Object>>,
+    game_state: GameState,
 }
