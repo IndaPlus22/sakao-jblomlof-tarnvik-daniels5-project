@@ -29,7 +29,15 @@ pub const SCREEN_WIDTH: u32 = 640;
 pub const SCREEN_HEIGHT: u32 = 480;
 pub const GRAVITY: Vec2d = [0.0, -1.0];
 
+//Game state 
+#[derive(PartialEq)]
+pub enum GameState {
+    Running, 
+    Paused,                                             
+}
+
 // Game struct
+//TODO game_state probably shouldn't just be public, something smart should happen instead
 pub struct Game {
     variables: Variables,
     objects: Objects,
@@ -77,7 +85,9 @@ impl Game {
 
     // A function that runs every update
     pub fn update(&mut self, update_args: UpdateArgs) {
-        update::update(update_args, &mut self.variables);
+        if self.variables.game_state == GameState::Running{
+            update::update(update_args, &mut self.variables);
+        }
     }
 
     // A function that runs every frame
@@ -95,4 +105,5 @@ impl Game {
 // A struct that holds all the variables that the game needs
 pub struct Variables {
     objects: Vec<Box<dyn traits::Object>>,
+    game_state: GameState,
 }
