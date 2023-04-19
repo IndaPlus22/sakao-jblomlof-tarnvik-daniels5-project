@@ -19,7 +19,7 @@ pub fn input(event: &Event, objects: &mut Objects, variables: &mut Variables){
             variables.game_state  = GameState::Paused;
         } 
     }
-    if let Some(button) = event.release_args() {
-        println!("Released {:?}", button);
-    }
+    // if let Some(button) = event.release_args() {
+    //     println!("Released {:?}", button);
+    // }
 }

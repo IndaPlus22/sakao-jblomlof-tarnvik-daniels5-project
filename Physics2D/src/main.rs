@@ -2,8 +2,8 @@ extern crate piston_window;
 
 use opengl_graphics::OpenGL;
 use piston::{
-    input::{RenderEvent, UpdateEvent},
-    window::WindowSettings, ButtonEvent, MouseCursorEvent,
+    input::UpdateEvent,
+    window::WindowSettings, Loop,
 };
 use piston_window::{Event, PistonWindow};
 use game::Game;
@@ -29,13 +29,22 @@ fn main() {
 
     // game loop
     while let Some(event) = window.next() {
-        // TODO: Handle events in match style instead of if let
-        if let Some(_) = event.render_args() {
-            game.draw(&event, &mut window);
+        match event {
+            Event::Input(_, _) => {
+                game.input(&event);
+            }
+            Event::Loop(Loop::Render(_)) => {
+                game.draw(&event, &mut window);
+            }
+            Event::Loop(Loop::Update(_)) => {
+                game.update(event.update_args().unwrap());
+            }
+            _ => {}
         }
 
+        // TODO: Delete this code (this is the old code. If match doesnt work check this bit of code)
         //Only update game if the game state is running (meaning the user has not paused)
-        if let Some(update_args) = event.update_args() {
+        /*if let Some(update_args) = event.update_args() {
             game.update(update_args);
         }
 
@@ -45,6 +54,6 @@ fn main() {
         }
         if let Some(_) = event.button_args() {
             game.input(&event);
-        }
+        }*/
     }
 }
