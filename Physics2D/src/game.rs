@@ -48,8 +48,9 @@ impl Game {
     // Constructor for the game
     pub fn new() -> Game {
         let objects: Objects = Objects::new();
+        let mut game_state = GameState::Paused;
         Game {
-            variables: Variables { objects: vec![] },
+            variables: Variables { objects: vec![], game_state},
             objects
         }
     }
@@ -98,7 +99,7 @@ impl Game {
 
     // A function that runs every time the user does inputs
     pub fn input(&mut self, event: &Event) {
-        ui_input::input(event, &mut self.objects);
+        ui_input::input(event, &mut self.objects, &mut self.variables);
     }
 }
 
