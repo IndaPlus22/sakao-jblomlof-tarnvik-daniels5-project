@@ -1,21 +1,17 @@
 // boilerplate use for the game
 use graphics::types::Vec2d;
-use opengl_graphics::OpenGL;
 use piston::{
-    input::{RenderEvent, UpdateEvent},
-    window::WindowSettings,
     UpdateArgs,
 };
 use piston_window::{Event, PistonWindow};
 
 // IMPORTS form our code
-use self::{input::Input, ui::{ui_draw, ui_input}};
+use self::ui::{ui_draw, ui_input};
 use crate::game::ui::ui_objects::Objects;
 use crate::{game::simulation::{objects, traits}, vector::vector::Vec2};
 
 // MODULES
 mod draw;
-mod input;
 mod update;
 mod simulation {
     pub mod objects;
@@ -36,7 +32,6 @@ pub const GRAVITY: Vec2d = [0.0, -1.0];
 // Game struct
 pub struct Game {
     variables: Variables,
-    inputs: Input,
     objects: Objects,
 }
 
@@ -44,12 +39,10 @@ pub struct Game {
 impl Game {
     // Constructor for the game
     pub fn new() -> Game {
-        let inputs = input::Input::new();
-        let mut objects: Objects = Objects::new();
+        let objects: Objects = Objects::new();
         Game {
             variables: Variables { objects: vec![] },
-            objects,
-            inputs,
+            objects
         }
     }
 
@@ -95,7 +88,6 @@ impl Game {
 
     // A function that runs every time the user does inputs
     pub fn input(&mut self, event: &Event) {
-        self.inputs.input(&event);
         ui_input::input(event, &mut self.objects);
     }
 }

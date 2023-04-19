@@ -1,12 +1,8 @@
 
-use gfx_device_gl::{CommandBuffer, Resources, *};
+use gfx_device_gl::{CommandBuffer, Resources};
 use gfx_graphics::GfxGraphics;
-use graphics::{color, polygon, types::Vec2d, Rectangle, Graphics};
-use piston::{
-    input::{RenderEvent, UpdateEvent},
-    window::WindowSettings,
-};
-use piston_window::{*, types::{Matrix2d, Width}};
+use graphics::{color, types::Vec2d};
+use piston_window::{*, types::{Matrix2d}};
 
 use crate::vector::vector::Vec2;
 
@@ -43,7 +39,7 @@ pub fn draw(event: &Event, window: &mut PistonWindow, variables: &Variables) {
 
 // TODO: should be something that is in initialization of game and probably in something alike "fn init_menu"
 pub fn init() {
-    let mut buttons = play_bar(Vec2d::from([0.0, 0.0]));
+    let buttons = play_bar(Vec2d::from([0.0, 0.0]));
 }
 
 // TODO:
