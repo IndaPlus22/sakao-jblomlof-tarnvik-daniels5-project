@@ -1,6 +1,9 @@
-use gfx_device_gl::{Resources, CommandBuffer};
+use gfx_device_gl::{CommandBuffer, Resources};
 use gfx_graphics::GfxGraphics;
-use piston_window::{Rectangle, types::{Matrix2d, Vec2d, Color}};
+use piston_window::{
+    types::{Color, Matrix2d, Vec2d},
+    Rectangle,
+};
 
 pub struct Button {
     dims: [f64; 4],
@@ -12,10 +15,10 @@ impl Button {
     pub fn new(pos: Vec2d, width: f64, height: f64, color: Color) -> Button {
         let dims = [pos[0], pos[1], width, height];
         let shape = Rectangle::new(color);
-        Button{
+        Button {
             dims,
             shape,
-            hover: false
+            hover: false,
         }
     }
 
@@ -28,13 +31,14 @@ impl Button {
         );
     }
 
-    pub fn check_hover (&mut self, mouse_position: Vec2d){       
-        if mouse_position[0] > self.dims[0] 
-        && mouse_position[0] < self.dims[0] + self.dims[2] 
-        && mouse_position[1] > self.dims[1] 
-        && mouse_position[1] < self.dims[1] + self.dims[3]{
+    pub fn check_hover(&mut self, mouse_position: Vec2d) {
+        if mouse_position[0] > self.dims[0]
+            && mouse_position[0] < self.dims[0] + self.dims[2]
+            && mouse_position[1] > self.dims[1]
+            && mouse_position[1] < self.dims[1] + self.dims[3]
+        {
             self.hover = true;
-        } else{
+        } else {
             self.hover = false;
         }
     }

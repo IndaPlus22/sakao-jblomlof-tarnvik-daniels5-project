@@ -18,22 +18,10 @@ pub fn draw(event: &Event, window: &mut PistonWindow, variables: &Variables) {
         // Fill the window with white colour.
         piston_window::clear(CERISE_COLOR, graphics);
 
-        // TODO: put all graphics shit here
-        /*let buttons = play_bar(Vec2d::from([10.0, 10.0]));
-        for i in 0..buttons.len() {
-            buttons[i].draw(graphics, context.transform);
-        }*/
-
         // TODO: For loop all objects in simulation and render them (I think that it needs to be assigned to a variable)
         for item in &variables.objects {
             item.draw(graphics, context.transform);
         }
-
-        // DEBUG funcs ------------------------------------------------
-        // draw_rect([100.0, 100.0], [50.0, 50.0], context.transform, graphics);
-        // draw_circle([200.0, 200.0], 70.0, context.transform, graphics);
-        // draw_polygon(&[[150.0, 190.0], [220.0, 320.0], [380.0, 400.0], [410.0, 280.0], [300.0, 150.0]], context.transform, graphics);
-        // ---------------------------------------------------------
     });
 }
 
