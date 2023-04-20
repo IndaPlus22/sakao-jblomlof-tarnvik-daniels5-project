@@ -69,7 +69,7 @@ impl Object for Rectangle {
                 ) {
                     Some((norm, scalar_of_vel)) => {
                         // scalar_of_vel should be improved, it works on the relative distance, not the distance
-                        println!("Norm: {}, {}. SCALAR: {}", norm.x, norm.y, scalar_of_vel);
+                        
                         return Some(collisionRecord {
                             desired_movement: match record {
                                 Some(value) => value.desired_movement,
@@ -112,8 +112,6 @@ impl Object for Rectangle {
         }
         match record {
             Some(value) => {
-
-                self.velocity = -self.velocity;
                 self.moverelative(value.desired_movement + self.velocity);
             }
             None => self.moverelative(self.velocity),

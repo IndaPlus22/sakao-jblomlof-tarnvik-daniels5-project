@@ -10,6 +10,7 @@ pub fn approx_are_colliding(centre1: Vec2, raduis1: f64, centre2: Vec2, radius2:
     // since distance is >= 0, rad >= 0;
 }
 
+/*POTENTIAL ISSUE: ROTATION NOT ACCOUNTED FOR. */
 /// If a polygon collides with the other polygon, this returns Some((normal, t)).
 /// Such that t*self.velocity is the relative movement such that the polygons only touches.
 pub fn collision_between_polygons(
@@ -77,6 +78,7 @@ fn type_of_collision(
                     }
                     (true, true) => {
                         if !found_side {
+                            // improve norm calculation for corner-corner-collision.
                             norms.push(norm_of(line2))
                         }
                     }
@@ -89,7 +91,12 @@ fn type_of_collision(
     }
 
     if norms.len() > 0 {
-        return CollisionType::Touching(norms[0]);
+        let mut total_norm = Vec2::new(0.0, 0.0);
+        for n in norms {
+            total_norm += n;
+        }
+        total_norm /= total_norm.length();
+        return CollisionType::Touching(total_norm);
     } else {
         return CollisionType::No;
     }
@@ -127,15 +134,14 @@ fn line_math(line1: [[f64; 2]; 2], line2: [[f64; 2]; 2]) -> (f64, f64) {
     }
 }
 
-/// DO NOT SEND IN RELATIVE_VEL = 0
+/// Returns  norm and scalar, does not compute well with relative_vel.length == 0
 fn calculate_scalar_distance(
     main_pol_vert: &Vec<[f64; 2]>,
     static_pol_vert: &Vec<[f64; 2]>,
     relative_velocity: &Vec2,
 ) -> (Vec2, f64) {
     // TODO CALC NORM
-    let mut norms: Vec<Vec2>;
-    let mut temp_norm = Vec2::new(0.0, 0.0);
+    let mut norm = Vec2::new(0.0, 0.0);
     let mut found_side = false;
 
     let neg_vel = -*relative_velocity;
@@ -165,14 +171,22 @@ fn calculate_scalar_distance(
             if (t > 0.0 && s <= 1.0 && s >= 0.0) {
                 if t > max_dist {
                     max_dist = t;
-                    temp_norm = norm_of(line2)
+                    let s_on_end = s == 1.0 || s == 0.0;
+                    if !s_on_end {
+                        found_side = true;
+                        norm = norm_of(line2)
+                    }
                 }
             }
             let (t, s) = line_math(move_2, line2);
             if (t > 0.0 && s <= 1.0 && s >= 0.0) {
                 if t > max_dist {
                     max_dist = t;
-                    temp_norm = norm_of(line2)
+                    let s_on_end = s == 1.0 || s == 0.0;
+                    if !s_on_end {
+                        found_side = true;
+                        norm = norm_of(line2)
+                    }
                 }
             }
             //
@@ -182,18 +196,35 @@ fn calculate_scalar_distance(
             if (t > 0.0 && s <= 1.0 && s >= 0.0) {
                 if t > max_dist {
                     max_dist = t;
-                    temp_norm = norm_of(line2)
-                }            }
+                    let s_on_end = s == 1.0 || s == 0.0;
+                    if !s_on_end {
+                        found_side = true;
+                        norm = norm_of(line1)
+                    }
+                }
+            }
             let (t, s) = line_math(move_2, line1);
             if (t > 0.0 && s <= 1.0 && s >= 0.0) {
                 if t > max_dist {
                     max_dist = t;
-                    temp_norm = norm_of(line2)
-                }            }
+                    let s_on_end = s == 1.0 || s == 0.0;
+                    if !s_on_end {
+                        found_side = true;
+                        norm = norm_of(line1)
+                    }
+                }
+            }
 
             prev_static_index = static_index;
         }
         prev_index_for_main = index_for_main;
     }
-    return (temp_norm, -max_dist);
+
+    if !found_side {
+        norm = relative_velocity.clone();
+    }
+
+    norm /= norm.length();
+
+    return (norm, -max_dist);
 }
