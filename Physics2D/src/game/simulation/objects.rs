@@ -6,6 +6,8 @@ use nalgebra::Matrix2;
 use nalgebra::Vector2;
 use piston_window::types::Matrix2d;
 
+use super::collision::approx_are_colliding;
+use super::collision::collision_between_polygons;
 use super::traits::{collisionRecord, Object};
 use crate::{
     game::draw::{draw_circle, draw_polygon, draw_rect},
@@ -14,7 +16,7 @@ use crate::{
 
 pub struct Rectangle {
     center_of_mass: Vec2,
-    circle_center: Vec2, // (centre, radius)
+    circle_center: Vec2,
     radius: f64,
     vertices: Vec<[f64; 2]>,
     mass: f64,
@@ -58,39 +60,24 @@ impl Object for Rectangle {
         record: Option<collisionRecord>,
     ) -> Option<super::traits::collisionRecord> {
         if other.gettype() == "Rectangle" {
-            //Create lines of the vertices for both objects
-            let mut lines = Vec::new();
-            let mut otherlines = Vec::new();
-            for i in 0..self.vertices.len() {
-                if i == self.vertices.len() - 1 {
-                    //This is to add a line between the start vertice and the end vertice
-                    lines.push([self.vertices[i], self.vertices[0]]);
-                } else {
-                    lines.push([self.vertices[i], self.vertices[i + 1]]);
-                }
-            }
-            for i in 0..other.getvertices().len() {
-                if i == other.getvertices().len() - 1 {
-                    otherlines.push([other.getvertices()[i], other.getvertices()[0]]);
-                } else {
-                    otherlines.push([other.getvertices()[i], other.getvertices()[i + 1]]);
-                }
-            }
-            //Here we check for collisions by comparing all the lines to each other
-            //NOTE: OPTIMIZATION TIPS
-            //1. over approx with a circle and see if that collides
-            //2. Calculate the closest verticie to the mass center of the polygon and ignore all other verticies
-            for line in lines.iter() {
-                for otherline in otherlines.iter() {
-                    let (collision, local_collision_offset) = checkCollision(*line, *otherline);
-                    if collision {
+            if approx_are_colliding(self.circle_center, self.radius, other.get_circle_center(), other.getradius()) {
+                let relative_velocity = self.velocity - other.getvel();
+                match collision_between_polygons(
+                    &self.vertices,
+                    &relative_velocity,
+                    &other.getvertices(),
+                ) {
+                    Some((norm, scalar_of_vel)) => {
+                        // scalar_of_vel should be improved, it works on the relative distance, not the distance
+                        
                         return Some(collisionRecord {
                             desired_movement: match record {
                                 Some(value) => value.desired_movement,
                                 None => Vec2::new(0.0, 0.0),
-                            } + local_collision_offset,
+                            } + scalar_of_vel * self.velocity,
                         });
                     }
+                    None => (),
                 }
             }
         } else if other.gettype() == "Circle" {
@@ -132,7 +119,7 @@ impl Object for Rectangle {
     }
     fn draw(&self, graphics: &mut GfxGraphics<Resources, CommandBuffer>, transform: Matrix2d) {
         //draw_rect(self.center, [(self.width) as f64, self.height as f64], transform, graphics)
-        draw_circle(self.circle_center, self.radius, transform, graphics);
+        //draw_circle(self.circle_center, self.radius, transform, graphics);
         draw_polygon(
             self.vertices.as_slice(),
             transform,
@@ -147,11 +134,17 @@ impl Object for Rectangle {
     fn gettype(&self) -> String {
         return self.form.clone();
     }
+    fn get_circle_center(&self) -> Vec2 {
+        return self.circle_center;
+    }
     fn getradius(&self) -> f64 {
-        return 10.0;
+        return self.radius;
     }
     fn getvertices(&self) -> Vec<[f64; 2]> {
         return self.vertices.to_vec();
+    }
+    fn getvel(&self) -> Vec2 {
+        self.velocity
     }
     fn setvel(&mut self, vel: Vec2) {
         self.velocity = vel;
@@ -251,11 +244,17 @@ impl Object for Circle {
     fn gettype(&self) -> String {
         return self.form.clone();
     }
+    fn get_circle_center(&self) -> Vec2 {
+        return self.center_of_mass;
+    }
     fn getradius(&self) -> f64 {
         return self.radius;
     }
     fn getvertices(&self) -> Vec<[f64; 2]> {
         return vec![];
+    }
+    fn getvel(&self) -> Vec2 {
+        self.velocity
     }
     fn setvel(&mut self, vel: Vec2) {
         self.velocity = vel;
