@@ -1,15 +1,17 @@
 use piston_window::types::Vec2d;
 
-use super::ui_button::Button;
+use super::{ui_button::Button, toolbar::Toolbar};
 
 pub struct Objects {
     pub buttons: [Button; 2],
+    pub tool_bar: Toolbar,
 }
 
 impl Objects {
     pub fn new() -> Objects {
         Objects {
             buttons: Self::create_buttons(),
+            tool_bar: Toolbar::new([30.0, 30.0], [10.0, 60.0]),
         }
     }
 
