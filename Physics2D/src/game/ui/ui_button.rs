@@ -1,40 +1,62 @@
-use gfx_device_gl::{Resources, CommandBuffer};
+use std::path::Path;
+
+use gfx_device_gl::{CommandBuffer, Resources};
 use gfx_graphics::GfxGraphics;
-use piston_window::{Rectangle, types::{Matrix2d, Vec2d, Color}};
+use opengl_graphics::{Texture, TextureSettings, GlGraphics};
+use graphics::{Image, types::{Vec2d, Color, Matrix2d}, Rectangle, DrawState};
 
 pub struct Button {
     dims: [f64; 4],
     shape: Rectangle,
     pub hover: bool,
+    // texture: Texture,
 }
 
 impl Button {
     pub fn new(pos: Vec2d, width: f64, height: f64, color: Color) -> Button {
         let dims = [pos[0], pos[1], width, height];
         let shape = Rectangle::new(color);
-        Button{
+
+        // not working
+        // let tmp_path = "sprites/ui/tool_bar/test.png";
+        // let texture = Button::load_sprite(tmp_path);
+        Button {
             dims,
             shape,
-            hover: false
+            hover: false,
+            // texture,
         }
     }
 
-    pub fn draw(&self, graphics: &mut GfxGraphics<Resources, CommandBuffer>, transform: Matrix2d) {
+    fn load_sprite(path: &str) -> Texture {
+        let texture = Texture::from_path(path, &TextureSettings::new()).unwrap();
+        texture
+    }
+
+    pub fn draw(&self, gl: &mut GlGraphics, transform: Matrix2d) {
+        // let img = Image::new().rect(self.dims);
+        // img.draw(
+        //     &self.texture,
+        //     &DrawState::default(),
+        //     transform,
+        //     gl,
+        // );
         self.shape.draw(
             self.dims,
-            &piston_window::DrawState::default(),
+            &DrawState::default(),
             transform,
-            graphics,
+            gl,
         );
     }
 
-    pub fn check_hover (&mut self, mouse_position: Vec2d){       
-        if mouse_position[0] > self.dims[0] 
-        && mouse_position[0] < self.dims[0] + self.dims[2] 
-        && mouse_position[1] > self.dims[1] 
-        && mouse_position[1] < self.dims[1] + self.dims[3]{
+    pub fn check_hover(&mut self, mouse_position: Vec2d) {
+        if mouse_position[0] > self.dims[0]
+            && mouse_position[0] < self.dims[0] + self.dims[2]
+            && mouse_position[1] > self.dims[1]
+            && mouse_position[1] < self.dims[1] + self.dims[3]
+        {
             self.hover = true;
-        } else{
+        } else {
             self.hover = false;
         }
     }

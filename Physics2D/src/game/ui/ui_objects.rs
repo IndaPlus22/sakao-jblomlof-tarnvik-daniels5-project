@@ -1,17 +1,20 @@
 use piston_window::types::Vec2d;
 
-use super::ui_button::Button;
+use super::{ui_button::Button, toolbar::Toolbar};
 
 pub struct Objects {
     pub buttons: [Button; 5]
+    pub tool_bar: Toolbar,
 }
 
 impl Objects {
-    pub fn new () -> Objects{
-        Objects{
-            buttons: Self::create_buttons()
-        }        
+    pub fn new() -> Objects {
+        Objects {
+            buttons: Self::create_buttons(),
+            tool_bar: Toolbar::new([30.0, 30.0], [10.0, 60.0]),
+        }
     }
+
 
     pub fn create_buttons () -> [Button; 5]{
         let pos = Vec2d::from([0.0, 0.0]);
