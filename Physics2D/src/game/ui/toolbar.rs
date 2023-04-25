@@ -7,7 +7,7 @@ use std::path::Path;
 
 use super::ui_button::Button;
 
-const SPRITES: [&str; 1] = ["sprites/ui/tool_bar/test.png"];
+const SPRITES: [&str; 1] = ["sprites/ui/tool_bar/bro.png"];
 
 pub struct Toolbar {
     button_size: Vec2d,
@@ -40,7 +40,7 @@ impl Toolbar {
     // let image_height = img.height();
     // let image_rgba = img.to_rgba8();
 
-    //A texture to use with the image
+    // //A texture to use with the image
     // let texture = Texture::from_image(&image_rgba, &TextureSettings::new());
     // vec![texture]
  // }
@@ -59,6 +59,7 @@ fn init_buttons(button_size: Vec2d, position: Vec2d) -> Vec<Button> {
                 0. + i as f32 / 4.,
                 1.0,
             ],
+            &SPRITES[0],
         );
         buttons.push(button);
     }
