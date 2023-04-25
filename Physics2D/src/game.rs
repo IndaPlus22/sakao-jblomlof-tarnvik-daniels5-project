@@ -1,8 +1,7 @@
 // boilerplate use for the game
 use graphics::types::Vec2d;
 use opengl_graphics::{GlGraphics, OpenGL};
-use piston::{UpdateArgs, RenderArgs};
-use piston_window::{Event, PistonWindow};
+use piston::{UpdateArgs, RenderArgs, Event};
 
 // IMPORTS form our code
 use self::ui::{ui_draw, ui_input};
@@ -83,7 +82,7 @@ impl Game {
             .objects
             .push(Box::new(objects::Rectangle::new(
                 Vec2::new(300., 100.),
-                vec![[100.0, 50.0], [100.0, 70.0], [120.0, 70.0], [120.0, 50.0]],
+                vec![[100.0, 50.0], [90.0, 90.0], [100.0, 100.0], [150.0, 100.0], [150.0, 50.0]],
                 10.0,
             )));
         // self.variables
