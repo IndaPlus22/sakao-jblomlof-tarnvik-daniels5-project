@@ -2,9 +2,10 @@ use std::f64::consts::PI;
 
 use gfx_device_gl::{CommandBuffer, Resources};
 use gfx_graphics::GfxGraphics;
+use graphics::types::Matrix2d;
 use nalgebra::Matrix2;
 use nalgebra::Vector2;
-use piston_window::types::Matrix2d;
+use opengl_graphics::GlGraphics;
 
 use super::collision::approx_are_colliding;
 use super::collision::collision_between_polygons;
@@ -128,7 +129,7 @@ impl Object for Rectangle {
             None => self.moverelative(self.velocity),
         }
     }
-    fn draw(&self, graphics: &mut GfxGraphics<Resources, CommandBuffer>, transform: Matrix2d) {
+    fn draw(&self, graphics: &mut GlGraphics, transform: Matrix2d) {
         //draw_rect(self.center, [(self.width) as f64, self.height as f64], transform, graphics)
         //draw_circle(self.circle_center, self.radius, transform, graphics);
         draw_polygon(
@@ -266,7 +267,7 @@ impl Object for Circle {
         
 
     }
-    fn draw(&self, graphics: &mut GfxGraphics<Resources, CommandBuffer>, transform: Matrix2d) {
+    fn draw(&self, graphics: &mut GlGraphics, transform: Matrix2d) {
         draw_circle(self.center_of_mass, self.radius as f64, transform, graphics);
     }
     fn getcenter(&self) -> Vec2 {

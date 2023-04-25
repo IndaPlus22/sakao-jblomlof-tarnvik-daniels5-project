@@ -1,5 +1,5 @@
 pub mod vector {
-    use std::{ops, cmp, iter::Sum};
+    use std::{ops, iter::Sum};
 
     #[derive(Copy, Clone)]
     pub struct Vec2{
