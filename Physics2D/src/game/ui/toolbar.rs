@@ -2,7 +2,7 @@
 use gfx_device_gl::{CommandBuffer, Resources};
 use gfx_graphics::GfxGraphics;
 use graphics::{Image};
-use opengl_graphics::{Texture, TextureSettings};
+use opengl_graphics::{Texture, TextureSettings, GlGraphics};
 use piston_window::types::{Matrix2d, Vec2d};
 use std::path::Path;
 
@@ -14,38 +14,37 @@ pub struct Toolbar {
     button_size: Vec2d,
     position: Vec2d,
     pub buttons: Vec<Button>,
-    textures: Vec<Texture>,
+    // textures: Vec<Texture>,
 }
 
 impl Toolbar {
     pub fn new(button_size: Vec2d, position: Vec2d) -> Toolbar {
-        let textures = load_sprites();
+        // let textures = load_sprites();
         let buttons = init_buttons(button_size, position);
         Toolbar {
             button_size,
             position,
             buttons,
-            textures,
         }
     }
 
-    pub fn draw(&self, graphics: &mut GfxGraphics<Resources, CommandBuffer>, transform: Matrix2d) {
+    pub fn draw(&self, graphics: &mut GlGraphics, transform: Matrix2d) {
         for button in &self.buttons {
             button.draw(graphics, transform);
         }
     }
 }
 
-fn load_sprites() -> Vec<Texture> {
-    let img = image::open("sprites/ui/tool_bar/test.png").unwrap();
+// fn load_sprites() -> Vec<Texture> {
+    // let img = image::open("sprites/ui/tool_bar/test.png").unwrap();
     // let image_width = img.width();
     // let image_height = img.height();
-    let image_rgba = img.to_rgba8();
+    // let image_rgba = img.to_rgba8();
 
     //A texture to use with the image
-    let texture = Texture::from_image(&image_rgba, &TextureSettings::new());
-    vec![texture]
-}
+    // let texture = Texture::from_image(&image_rgba, &TextureSettings::new());
+    // vec![texture]
+ // }
 
 fn init_buttons(button_size: Vec2d, position: Vec2d) -> Vec<Button> {
     let mut buttons = Vec::new();

@@ -1,24 +1,18 @@
 extern crate piston_window;
 // extern crate image;
 
-use glutin_window::GlutinWindow as Window;
-use opengl_graphics::{OpenGL, GlGraphics};
-use piston::{
-    input::UpdateEvent,
-    window::WindowSettings, Loop,
-};
-use piston_window::{Event, PistonWindow};
 use game::Game;
+use glutin_window::GlutinWindow as Window;
+use opengl_graphics::{GlGraphics, OpenGL};
+use piston::{input::UpdateEvent, window::WindowSettings, Event, EventSettings, Events, Loop};
 
 use crate::game::GameState;
 mod game;
 mod vector;
 
-
 fn main() {
     use std::{thread, time};
-    let opengl  = OpenGL::V3_2;
-    let mut gl  = GlGraphics::new(opengl);
+    let opengl = OpenGL::V3_2;
 
     let mut window: Window =
         WindowSettings::new("PHYSICS", (game::SCREEN_WIDTH, game::SCREEN_HEIGHT))
@@ -27,38 +21,24 @@ fn main() {
             .build()
             .unwrap();
 
-    let mut game = game::Game::new();
+    let mut game = game::Game::new(opengl);
 
     game.init();
 
+    let mut events = Events::new(EventSettings::new());
     // game loop
-    while let Some(event) = window.next() {
+    while let Some(event) = events.next(&mut window) {
         match event {
             Event::Input(_, _) => {
                 game.input(&event);
             }
             Event::Loop(Loop::Render(args)) => {
-                // game.draw(&event, &mut window);
-                game.draw(&event, &args, &mut gl);
+                game.draw(&event, &args);
             }
             Event::Loop(Loop::Update(_)) => {
                 game.update(event.update_args().unwrap());
             }
             _ => {}
         }
-
-        // TODO: Delete this code (this is the old code. If match doesnt work check this bit of code)
-        //Only update game if the game state is running (meaning the user has not paused)
-        /*if let Some(update_args) = event.update_args() {
-            game.update(update_args);
-        }
-
-        // FIXME: Handle input
-        if let Some(_) = event.mouse_cursor_args() {
-            game.input(&event);
-        }
-        if let Some(_) = event.button_args() {
-            game.input(&event);
-        }*/
     }
 }

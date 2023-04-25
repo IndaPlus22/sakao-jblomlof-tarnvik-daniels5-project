@@ -1,17 +1,15 @@
+use std::path::Path;
+
 use gfx_device_gl::{CommandBuffer, Resources};
 use gfx_graphics::GfxGraphics;
-use piston_window::{
-    types::{Color, Matrix2d, Vec2d},
-    Rectangle,
-};
-use opengl_graphics::{Texture, TextureSettings};
-use graphics::{Image};
+use opengl_graphics::{Texture, TextureSettings, GlGraphics};
+use graphics::{Image, types::{Vec2d, Color, Matrix2d}, Rectangle, DrawState};
 
 pub struct Button {
     dims: [f64; 4],
     shape: Rectangle,
     pub hover: bool,
-    texture: Texture,
+    // texture: Texture,
 }
 
 impl Button {
@@ -20,13 +18,13 @@ impl Button {
         let shape = Rectangle::new(color);
 
         // not working
-        let tmp_path = "sprites/ui/tool_bar/test.png";
-        let texture = Button::load_sprite(tmp_path);
+        // let tmp_path = "sprites/ui/tool_bar/test.png";
+        // let texture = Button::load_sprite(tmp_path);
         Button {
             dims,
             shape,
             hover: false,
-            texture,
+            // texture,
         }
     }
 
@@ -35,19 +33,20 @@ impl Button {
         texture
     }
 
-    pub fn draw(&self, graphics: &mut GfxGraphics<Resources, CommandBuffer>, transform: Matrix2d) {
-        gl.draw(
-            &self.dims,
-            &piston_window::DrawState::default(),
-            transform,
-            graphics,
-        );
-        // self.shape.draw(
-        //     self.dims,
-        //     &piston_window::DrawState::default(),
+    pub fn draw(&self, gl: &mut GlGraphics, transform: Matrix2d) {
+        // let img = Image::new().rect(self.dims);
+        // img.draw(
+        //     &self.texture,
+        //     &DrawState::default(),
         //     transform,
-        //     graphics,
+        //     gl,
         // );
+        self.shape.draw(
+            self.dims,
+            &DrawState::default(),
+            transform,
+            gl,
+        );
     }
 
     pub fn check_hover(&mut self, mouse_position: Vec2d) {

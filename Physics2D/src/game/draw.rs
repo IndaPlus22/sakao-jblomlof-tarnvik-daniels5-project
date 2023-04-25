@@ -1,9 +1,9 @@
 
 use gfx_device_gl::{CommandBuffer, Resources};
 use gfx_graphics::GfxGraphics;
-use graphics::{color, types::Vec2d};
+use graphics::{color, types::{Vec2d, Matrix2d}, clear, rectangle, Polygon, draw_state::DrawState, Ellipse};
 use opengl_graphics::GlGraphics;
-use piston_window::{*, types::{Matrix2d}};
+use piston::{Event, RenderArgs};
 
 use crate::vector::vector::Vec2;
 
@@ -26,15 +26,15 @@ const LIGHT_CERISE: &str = "ec5f99";
 //     });
 // }
 
-pub fn draw(event: &Event, args: &RenderArgs, gl: GlGraphics, variables: &Variables) {
+pub fn draw(event: &Event, args: &RenderArgs, gl: &mut GlGraphics, variables: &Variables) {
     // Update application window.
     gl.draw(args.viewport(), |context, gl| {
         // Fill the window with white colour.
-        // piston_window::clear(CERISE_COLOR, gl);
+        clear(CERISE_COLOR, gl);
 
         // TODO: For loop all objects in simulation and render them (I think that it needs to be assigned to a variable)
         for item in &variables.objects {
-            item.draw(graphics, context.transform);
+            item.draw(gl, context.transform);
         }
     });
 }
@@ -67,15 +67,15 @@ pub fn draw_rect(
     pos: Vec2,
     size: [f64; 2],
     transform: Matrix2d,
-    g: &mut GlGraphics,
+    gl: &mut GlGraphics,
 ) {
     // Polygon::new(rgb_to_color(131, 176, 247))
 
     Polygon::new(rgb_to_color(131, 176, 247)).draw(
         &conv_pos_size_to_vertices_rect(pos, size),
-        &piston_window::DrawState::default(),
+        &DrawState::default(),
         transform,
-        g,
+        gl,
     );
 }
 
@@ -83,14 +83,14 @@ pub fn draw_rect(
 pub fn draw_polygon(
     vertices: &[[f64; 2]],
     transform: Matrix2d,
-    g: &mut GfxGraphics<Resources, CommandBuffer>,
+    gl: &mut GlGraphics,
     pos: Vec2
 ) {
     Polygon::new(rgb_to_color(131, 176, 247)).draw(
         vertices,
-        &piston_window::DrawState::default(),
+        &DrawState::default(),
         transform,
-        g,
+        gl,
     );
 }
 
@@ -99,14 +99,14 @@ pub fn draw_circle(
     pos: Vec2,
     radius: f64,
     transform: Matrix2d,
-    g: &mut GfxGraphics<Resources, CommandBuffer>,
+    gl: &mut GlGraphics,
 ) {
     // For debugging
     // println!("Drawing circle at: ({}, {})", pos[0], pos[1]);
     // --------------
 
     let circle = graphics::ellipse::circle(pos.x, pos.y, radius);
-    Ellipse::new(color::hex(LIGHT_CERISE)).draw(circle, &piston_window::DrawState::default(), transform, g);
+    Ellipse::new(color::hex(LIGHT_CERISE)).draw(circle, &DrawState::default(), transform, gl);
 }
 
 // Converts two vec2d one for position and one for size to a 4x2 array of corners. ONLY works for rectangles.

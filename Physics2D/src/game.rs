@@ -1,5 +1,6 @@
 // boilerplate use for the game
 use graphics::types::Vec2d;
+use opengl_graphics::{GlGraphics, OpenGL};
 use piston::{UpdateArgs, RenderArgs};
 use piston_window::{Event, PistonWindow};
 
@@ -42,6 +43,7 @@ pub enum GameState {
 // Game struct
 //TODO game_state probably shouldn't just be public, something smart should happen instead
 pub struct Game {
+    pub gl: GlGraphics,
     variables: Variables,
     ui_objects: Objects,
 }
@@ -49,10 +51,11 @@ pub struct Game {
 // Game impl
 impl Game {
     // Constructor for the game
-    pub fn new() -> Game {
+    pub fn new(opengl: OpenGL) -> Game {
         let ui_objects: Objects = Objects::new();
         let mut game_state = GameState::Paused;
         Game {
+            gl: GlGraphics::new(opengl),
             variables: Variables {
                 objects: vec![],
                 game_state,
@@ -108,9 +111,9 @@ impl Game {
     //     draw::draw(&event, window, &self.variables);
     //     ui_draw::draw(event, window, &mut self.ui_objects);
     // }
-    pub fn draw(&mut self, event: &Event, args: &RenderArgs, gl: &mut opengl_graphics::GlGraphics) {
-        draw::draw(&event, args, gl, &self.variables);
-        // ui_draw::draw(event, args, gl, &mut self.ui_objects);
+    pub fn draw(&mut self, event: &Event, args: &RenderArgs) {
+        draw::draw(event, args, &mut self.gl, &self.variables);
+        ui_draw::draw(event, args, &mut self.gl, &mut self.ui_objects);
     }
 
     // A function that runs every time the user does inputs
