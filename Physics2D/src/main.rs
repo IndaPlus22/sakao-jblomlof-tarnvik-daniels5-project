@@ -1,50 +1,44 @@
-extern crate piston_window;
+// extern crate piston_window;
+// extern crate image;
 
-use opengl_graphics::OpenGL;
-use piston::{
-    input::{RenderEvent, UpdateEvent},
-    window::WindowSettings, ButtonEvent, MouseCursorEvent,
-};
-use piston_window::{Event, PistonWindow};
 use game::Game;
+use glutin_window::GlutinWindow as Window;
+use opengl_graphics::{GlGraphics, OpenGL};
+use piston::{input::UpdateEvent, window::WindowSettings, Event, EventSettings, Events, Loop};
 
+use crate::game::GameState;
 mod game;
+mod vector;
 
 fn main() {
     use std::{thread, time};
+    let opengl = OpenGL::V3_2;
 
-    let mut window: PistonWindow =
+    let mut window: Window =
         WindowSettings::new("PHYSICS", (game::SCREEN_WIDTH, game::SCREEN_HEIGHT))
             .exit_on_esc(true)
-            .graphics_api(OpenGL::V3_2)
+            .graphics_api(opengl)
             .build()
             .unwrap();
 
-    let mut game = game::Game::new();
+    let mut game = game::Game::new(opengl);
 
     game.init();
 
+    let mut events = Events::new(EventSettings::new());
     // game loop
-    while let Some(event) = window.next() {
-        // TODO: Handle events in match style instead of if let
-        if let Some(_) = event.render_args() {
-            game.draw(&event, &mut window);
+    while let Some(event) = events.next(&mut window) {
+        match event {
+            Event::Input(_, _) => {
+                game.input(&event);
+            }
+            Event::Loop(Loop::Render(args)) => {
+                game.draw(&event, &args);
+            }
+            Event::Loop(Loop::Update(_)) => {
+                game.update(event.update_args().unwrap());
+            }
+            _ => {}
         }
-        if let Some(update_args) = event.update_args() {
-            game.update(update_args);
-        }
-
-        // FIXME: Handle input
-        if let Some(_) = event.mouse_cursor_args() {
-            game.input(&event);
-        }
-        if let Some(_) = event.button_args() {
-            game.input(&event);
-        }
-
-
-        // NOT SURE IF NEEDED
-        let duration = time::Duration::from_millis(10);
-        thread::sleep(duration);
     }
 }

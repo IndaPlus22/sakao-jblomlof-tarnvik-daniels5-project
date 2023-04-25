@@ -1,12 +1,11 @@
 
-use gfx_device_gl::{CommandBuffer, Resources, *};
+use gfx_device_gl::{CommandBuffer, Resources};
 use gfx_graphics::GfxGraphics;
-use graphics::{color, polygon, types::Vec2d, Rectangle, Graphics};
-use piston::{
-    input::{RenderEvent, UpdateEvent},
-    window::WindowSettings,
-};
-use piston_window::{*, types::{Matrix2d, Width}};
+use graphics::{color, types::{Vec2d, Matrix2d}, clear, rectangle, Polygon, draw_state::DrawState, Ellipse};
+use opengl_graphics::GlGraphics;
+use piston::{Event, RenderArgs};
+
+use crate::vector::vector::Vec2;
 
 //use super::button::Button;
 use super::Variables;
@@ -14,34 +13,35 @@ use super::Variables;
 const CERISE_COLOR: [f32; 4] = [232.0 / 255.0, 61.0 / 255.0, 132.0 / 255.0, 1.0];
 const LIGHT_CERISE: &str = "ec5f99";
 
-pub fn draw(event: &Event, window: &mut PistonWindow, variables: &Variables) {
-    // Update application window.
-    window.draw_2d(event, |context, graphics, _| {
-        // Fill the window with white colour.
-        piston_window::clear(CERISE_COLOR, graphics);
+// pub fn draw(event: &Event, window: &mut PistonWindow, variables: &Variables) {
+//     // Update application window.
+//     window.draw_2d(event, |context, graphics, _| {
+//         // Fill the window with white colour.
+//         piston_window::clear(CERISE_COLOR, graphics);
 
-        // TODO: put all graphics shit here
-        /*let buttons = play_bar(Vec2d::from([10.0, 10.0]));
-        for i in 0..buttons.len() {
-            buttons[i].draw(graphics, context.transform);
-        }*/
+//         // TODO: For loop all objects in simulation and render them (I think that it needs to be assigned to a variable)
+//         for item in &variables.objects {
+//             item.draw(graphics, context.transform);
+//         }
+//     });
+// }
+
+pub fn draw(event: &Event, args: &RenderArgs, gl: &mut GlGraphics, variables: &Variables) {
+    // Update application window.
+    gl.draw(args.viewport(), |context, gl| {
+        // Fill the window with white colour.
+        clear(CERISE_COLOR, gl);
 
         // TODO: For loop all objects in simulation and render them (I think that it needs to be assigned to a variable)
         for item in &variables.objects {
-            item.draw(graphics, context.transform);
+            item.draw(gl, context.transform);
         }
-
-        // DEBUG funcs ------------------------------------------------
-        // draw_rect([100.0, 100.0], [50.0, 50.0], context.transform, graphics);
-        // draw_circle([200.0, 200.0], 70.0, context.transform, graphics);
-        // draw_polygon(&[[150.0, 190.0], [220.0, 320.0], [380.0, 400.0], [410.0, 280.0], [300.0, 150.0]], context.transform, graphics);
-        // ---------------------------------------------------------
     });
 }
 
-// TODO: dont work
+// TODO: should be something that is in initialization of game and probably in something alike "fn init_menu"
 pub fn init() {
-    let mut buttons = play_bar(Vec2d::from([0.0, 0.0]));
+    let buttons = play_bar(Vec2d::from([0.0, 0.0]));
 }
 
 // TODO:
@@ -62,62 +62,65 @@ fn play_bar(pos: Vec2d) /*-> [Button; 2]*/ {
 // TODO:
 fn tool_box() {}
 
-// Draws a rectangle by polygon.
+// Draws a rectangle by polygon. size[0] is width and size[1] is height.
 pub fn draw_rect(
-    pos: [f64; 2],
+    pos: Vec2,
     size: [f64; 2],
     transform: Matrix2d,
-    g: &mut GfxGraphics<Resources, CommandBuffer>,
+    gl: &mut GlGraphics,
 ) {
+    // Polygon::new(rgb_to_color(131, 176, 247))
+
     Polygon::new(rgb_to_color(131, 176, 247)).draw(
-        &conv_pos_size_to_corners_rect(pos, size),
-        &piston_window::DrawState::default(),
+        &conv_pos_size_to_vertices_rect(pos, size),
+        &DrawState::default(),
         transform,
-        g,
+        gl,
     );
 }
 
-// Draws a polygon by polygon.
+// Draws a polygon by polygon with vertices as corners.
 pub fn draw_polygon(
     vertices: &[[f64; 2]],
     transform: Matrix2d,
-    g: &mut GfxGraphics<Resources, CommandBuffer>,
+    gl: &mut GlGraphics,
+    pos: Vec2
 ) {
-    Polygon::new(rgb_to_color(131, 176, 247)).draw(
+    Polygon::new(rgb_to_color(131, 176, 247)).draw_tri(
         vertices,
-        &piston_window::DrawState::default(),
+        &DrawState::default(),
         transform,
-        g,
+        gl,
     );
 }
 
 // Draws a circle by ellipse.
 pub fn draw_circle(
-    pos: [f64; 2],
+    pos: Vec2,
     radius: f64,
     transform: Matrix2d,
-    g: &mut GfxGraphics<Resources, CommandBuffer>,
+    gl: &mut GlGraphics,
 ) {
     // For debugging
     // println!("Drawing circle at: ({}, {})", pos[0], pos[1]);
     // --------------
 
-
-    let circle = graphics::ellipse::circle(pos[0], pos[1], radius);
-    Ellipse::new(color::hex(LIGHT_CERISE)).draw(circle, &piston_window::DrawState::default(), transform, g);
+    let circle = graphics::ellipse::circle(pos.x, pos.y, radius);
+    Ellipse::new(color::hex(LIGHT_CERISE)).draw(circle, &DrawState::default(), transform, gl);
 }
 
 // Converts two vec2d one for position and one for size to a 4x2 array of corners. ONLY works for rectangles.
-fn conv_pos_size_to_corners_rect(pos: [f64; 2], size: [f64; 2]) -> [[f64; 2]; 4]{
+fn conv_pos_size_to_vertices_rect(pos: Vec2, size: [f64; 2]) -> [[f64; 2]; 4]{
     let corners: [[f64; 2]; 4] = [
-        [pos[0] - size[0]/2.0, pos[1] - size[1]/2.0],
-        [pos[0] - size[0]/2.0, pos[1] + size[1]/2.0],
-        [pos[0] + size[0]/2.0, pos[1] + size[1]/2.0],
-        [pos[0] + size[0]/2.0, pos[1] - size[1]/2.0]
+        [pos.x - size[0]/2.0, pos.y - size[1]/2.0],
+        [pos.x - size[0]/2.0, pos.y + size[1]/2.0],
+        [pos.x + size[0]/2.0, pos.y + size[1]/2.0],
+        [pos.x + size[0]/2.0, pos.y - size[1]/2.0]
     ];
     corners
 }
 
+// Converts rgb to color. Helper because I(Toshi) likes to copy from google color picker.
 fn rgb_to_color(r: u16, g: u16, b: u16) -> [f32; 4] {
     [r as f32 / 255.0, g as f32  / 255.0, b as f32  / 255.0, 1.0]
 }

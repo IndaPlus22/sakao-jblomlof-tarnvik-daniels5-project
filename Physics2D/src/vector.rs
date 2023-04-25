@@ -1,10 +1,5 @@
-use rand::Rng;
 pub mod vector {
-    use std::{ops, cmp, iter::Sum};
-
-    use rand::Rng;
-
-    use crate::random::random_double;
+    use std::{ops, iter::Sum};
 
     #[derive(Copy, Clone)]
     pub struct Vec2{
@@ -38,6 +33,13 @@ pub mod vector {
             Vec2::new(self.x+_rhs.x, self.y+_rhs.y)
         }
     }
+    impl ops::Neg<> for Vec2 {
+        type Output = Vec2;
+
+        fn neg(self) -> Self::Output {
+            Vec2::new(-self.x, -self.y)
+        }
+    }
     impl ops::Sub<Vec2> for Vec2 {
         type Output = Vec2;
 
@@ -67,7 +69,7 @@ pub mod vector {
     impl ops::Mul<f64> for Vec2 {
         type Output = Vec2;
         fn mul(self, rhs: f64) -> Self::Output {
-            Vec2::new(self.x*rhs, self.y*rhs, self.y*rhs)
+            Vec2::new(self.x*rhs, self.y*rhs)
         }
     }
     impl ops::Div<f64> for Vec2 {
@@ -117,7 +119,7 @@ pub mod vector {
         where
             I: Iterator<Item = Self>,
             {
-                iter.fold(Self {x: 0.0, y: 0.0, z: 0.0}, |a, b| Self {
+                iter.fold(Self {x: 0.0, y: 0.0}, |a, b| Self {
                     x: a.x + b.x,
                     y: a.y + b.y,
                 })
