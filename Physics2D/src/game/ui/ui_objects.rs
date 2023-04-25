@@ -1,9 +1,9 @@
-use piston_window::types::Vec2d;
+use graphics::types::Vec2d;
 
 use super::{ui_button::Button, toolbar::Toolbar};
 
 pub struct Objects {
-    pub buttons: [Button; 5]
+    pub buttons: [Button; 5],
     pub tool_bar: Toolbar,
 }
 

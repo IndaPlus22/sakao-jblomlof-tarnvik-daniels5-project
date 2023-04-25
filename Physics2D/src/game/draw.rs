@@ -86,7 +86,7 @@ pub fn draw_polygon(
     gl: &mut GlGraphics,
     pos: Vec2
 ) {
-    Polygon::new(rgb_to_color(131, 176, 247)).draw(
+    Polygon::new(rgb_to_color(131, 176, 247)).draw_tri(
         vertices,
         &DrawState::default(),
         transform,

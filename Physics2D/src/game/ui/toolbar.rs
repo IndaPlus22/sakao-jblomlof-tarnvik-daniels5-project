@@ -1,9 +1,8 @@
 
 use gfx_device_gl::{CommandBuffer, Resources};
 use gfx_graphics::GfxGraphics;
-use graphics::{Image};
+use graphics::{Image, types::{Vec2d, Matrix2d}};
 use opengl_graphics::{Texture, TextureSettings, GlGraphics};
-use piston_window::types::{Matrix2d, Vec2d};
 use std::path::Path;
 
 use super::ui_button::Button;
