@@ -1,6 +1,6 @@
 // boilerplate use for the game
 use graphics::types::Vec2d;
-use opengl_graphics::{GlGraphics, OpenGL};
+use opengl_graphics::{GlGraphics, OpenGL, Texture};
 use piston::{UpdateArgs, RenderArgs, Event};
 
 // IMPORTS form our code
@@ -59,7 +59,7 @@ impl Game {
                 objects: vec![],
                 game_state,
             },
-            ui_objects,
+            ui_objects
         }
     }
 
