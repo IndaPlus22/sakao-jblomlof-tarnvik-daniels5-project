@@ -70,7 +70,7 @@ impl Object for Rectangle {
                 ) {
                     Some((norm, scalar_of_vel)) => {
                         // scalar_of_vel should be improved, it works on the relative distance, not the distance
-                        
+                        println!("NORM: {} {}. SCALAR: {}", norm.x, norm.y, scalar_of_vel);
                         return Some(collisionRecord {
                             desired_movement: match record {
                                 Some(value) => value.desired_movement,
