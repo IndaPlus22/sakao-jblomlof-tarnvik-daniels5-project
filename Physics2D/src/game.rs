@@ -1,6 +1,6 @@
 // boilerplate use for the game
 use graphics::types::Vec2d;
-use piston::UpdateArgs;
+use piston::{UpdateArgs, RenderArgs};
 use piston_window::{Event, PistonWindow};
 
 // IMPORTS form our code
@@ -104,9 +104,13 @@ impl Game {
     }
 
     // A function that runs every frame
-    pub fn draw(&mut self, event: &Event, window: &mut PistonWindow) {
-        draw::draw(&event, window, &self.variables);
-        ui_draw::draw(event, window, &mut self.ui_objects);
+    // pub fn draw(&mut self, event: &Event, window: &mut PistonWindow, gl: &mut opengl_graphics::GlGraphics) {
+    //     draw::draw(&event, window, &self.variables);
+    //     ui_draw::draw(event, window, &mut self.ui_objects);
+    // }
+    pub fn draw(&mut self, event: &Event, args: &RenderArgs, gl: &mut opengl_graphics::GlGraphics) {
+        draw::draw(&event, args, gl, &self.variables);
+        // ui_draw::draw(event, args, gl, &mut self.ui_objects);
     }
 
     // A function that runs every time the user does inputs

@@ -1,6 +1,8 @@
 extern crate piston_window;
+// extern crate image;
 
-use opengl_graphics::OpenGL;
+use glutin_window::GlutinWindow as Window;
+use opengl_graphics::{OpenGL, GlGraphics};
 use piston::{
     input::UpdateEvent,
     window::WindowSettings, Loop,
@@ -15,11 +17,13 @@ mod vector;
 
 fn main() {
     use std::{thread, time};
+    let opengl  = OpenGL::V3_2;
+    let mut gl  = GlGraphics::new(opengl);
 
-    let mut window: PistonWindow =
+    let mut window: Window =
         WindowSettings::new("PHYSICS", (game::SCREEN_WIDTH, game::SCREEN_HEIGHT))
             .exit_on_esc(true)
-            .graphics_api(OpenGL::V3_2)
+            .graphics_api(opengl)
             .build()
             .unwrap();
 
@@ -33,8 +37,9 @@ fn main() {
             Event::Input(_, _) => {
                 game.input(&event);
             }
-            Event::Loop(Loop::Render(_)) => {
-                game.draw(&event, &mut window);
+            Event::Loop(Loop::Render(args)) => {
+                // game.draw(&event, &mut window);
+                game.draw(&event, &args, &mut gl);
             }
             Event::Loop(Loop::Update(_)) => {
                 game.update(event.update_args().unwrap());

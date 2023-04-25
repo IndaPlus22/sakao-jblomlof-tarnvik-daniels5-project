@@ -1,7 +1,8 @@
+
 use gfx_device_gl::{CommandBuffer, Resources};
-use gfx_graphics::{GfxGraphics};
-use graphics::Image;
-use opengl_graphics::Texture;
+use gfx_graphics::GfxGraphics;
+use graphics::{Image};
+use opengl_graphics::{Texture, TextureSettings};
 use piston_window::types::{Matrix2d, Vec2d};
 use std::path::Path;
 
@@ -13,17 +14,18 @@ pub struct Toolbar {
     button_size: Vec2d,
     position: Vec2d,
     pub buttons: Vec<Button>,
-    // textures: Vec<Texture>,
+    textures: Vec<Texture>,
 }
 
 impl Toolbar {
     pub fn new(button_size: Vec2d, position: Vec2d) -> Toolbar {
-        // let textures = load_sprites();
+        let textures = load_sprites();
         let buttons = init_buttons(button_size, position);
         Toolbar {
             button_size,
             position,
             buttons,
+            textures,
         }
     }
 
@@ -35,9 +37,13 @@ impl Toolbar {
 }
 
 fn load_sprites() -> Vec<Texture> {
-    let image = Image::new().rect([0.0, 0.0, 100.0, 100.0]);
+    let img = image::open("sprites/ui/tool_bar/test.png").unwrap();
+    // let image_width = img.width();
+    // let image_height = img.height();
+    let image_rgba = img.to_rgba8();
+
     //A texture to use with the image
-    let texture = Texture::from_path(Path::new(SPRITES[0]), &opengl_graphics::TextureSettings::new()).unwrap();
+    let texture = Texture::from_image(&image_rgba, &TextureSettings::new());
     vec![texture]
 }
 

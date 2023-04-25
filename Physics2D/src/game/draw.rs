@@ -2,6 +2,7 @@
 use gfx_device_gl::{CommandBuffer, Resources};
 use gfx_graphics::GfxGraphics;
 use graphics::{color, types::Vec2d};
+use opengl_graphics::GlGraphics;
 use piston_window::{*, types::{Matrix2d}};
 
 use crate::vector::vector::Vec2;
@@ -12,11 +13,24 @@ use super::Variables;
 const CERISE_COLOR: [f32; 4] = [232.0 / 255.0, 61.0 / 255.0, 132.0 / 255.0, 1.0];
 const LIGHT_CERISE: &str = "ec5f99";
 
-pub fn draw(event: &Event, window: &mut PistonWindow, variables: &Variables) {
+// pub fn draw(event: &Event, window: &mut PistonWindow, variables: &Variables) {
+//     // Update application window.
+//     window.draw_2d(event, |context, graphics, _| {
+//         // Fill the window with white colour.
+//         piston_window::clear(CERISE_COLOR, graphics);
+
+//         // TODO: For loop all objects in simulation and render them (I think that it needs to be assigned to a variable)
+//         for item in &variables.objects {
+//             item.draw(graphics, context.transform);
+//         }
+//     });
+// }
+
+pub fn draw(event: &Event, args: &RenderArgs, gl: GlGraphics, variables: &Variables) {
     // Update application window.
-    window.draw_2d(event, |context, graphics, _| {
+    gl.draw(args.viewport(), |context, gl| {
         // Fill the window with white colour.
-        piston_window::clear(CERISE_COLOR, graphics);
+        // piston_window::clear(CERISE_COLOR, gl);
 
         // TODO: For loop all objects in simulation and render them (I think that it needs to be assigned to a variable)
         for item in &variables.objects {
@@ -53,8 +67,10 @@ pub fn draw_rect(
     pos: Vec2,
     size: [f64; 2],
     transform: Matrix2d,
-    g: &mut GfxGraphics<Resources, CommandBuffer>,
+    g: &mut GlGraphics,
 ) {
+    // Polygon::new(rgb_to_color(131, 176, 247))
+
     Polygon::new(rgb_to_color(131, 176, 247)).draw(
         &conv_pos_size_to_vertices_rect(pos, size),
         &piston_window::DrawState::default(),
