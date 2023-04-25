@@ -69,12 +69,14 @@ impl Object for Rectangle {
                 ) {
                     Some((norm, scalar_of_vel)) => {
                         // scalar_of_vel should be improved, it works on the relative distance, not the distance
+                        // print normal x and y
                         
                         return Some(collisionRecord {
                             desired_movement: match record {
                                 Some(value) => value.desired_movement,
                                 None => Vec2::new(0.0, 0.0),
                             } + scalar_of_vel * self.velocity,
+                            impulse: calculate_impulse(self.velocity-other.getvel(), self.mass, other.get_mass(), norm, 1.0)
                         });
                     }
                     None => (),
@@ -89,18 +91,26 @@ impl Object for Rectangle {
                     lines.push([self.vertices[i], self.vertices[i + 1]]);
                 }
             }
+            let mut max_distance = Vec2::new(0.0, 0.0);
             for line in lines.iter() {
                 let (collision, local_collision_offset) =
                     checkCircleCollisionWithPolygon(other.getcenter(), other.getradius(), *line);
-                if collision {
-                    return Some(collisionRecord {
-                        desired_movement: match record {
-                            Some(value) => value.desired_movement,
-                            None => Vec2::new(0.0, 0.0),
-                        } + local_collision_offset,
-                    });
+                if collision && max_distance.squared_length() < local_collision_offset.squared_length() {
+                    max_distance = local_collision_offset;
                 }
             }
+            if max_distance.squared_length() != 0.0 {
+                let relative_speed = self.velocity - other.getvel();
+                let impulse = calculate_impulse(relative_speed, self.mass, other.get_mass(), max_distance, 1.0);
+                return Some(collisionRecord {
+                    desired_movement: match record {
+                        Some(value) => value.desired_movement,
+                        None => Vec2::new(0.0, 0.0),
+                    } + Vec2::unit_vector(relative_speed) * max_distance.length()*-1.0,
+                    impulse: impulse
+                });
+            }
+            
         }
         return record;
     }
@@ -112,6 +122,7 @@ impl Object for Rectangle {
         }
         match record {
             Some(value) => {
+                self.velocity+=value.impulse;
                 self.moverelative(value.desired_movement + self.velocity);
             }
             None => self.moverelative(self.velocity),
@@ -160,6 +171,9 @@ impl Object for Rectangle {
     fn set_static(&mut self, set: bool) {
         self.staticshape = set;
     }
+    fn get_mass (&self) -> f64 {
+        return self.mass;
+    }
 }
 
 impl Circle {
@@ -191,11 +205,14 @@ impl Object for Circle {
                 let axis = Vec2::unit_vector(distance);
                 let posmovment = axis * overlap;
 
+                let impulse = calculate_impulse(self.velocity - other.getvel(), self.mass, other.get_mass(), distance, 1.);
+
                 return Some(collisionRecord {
                     desired_movement: match record {
                         Some(value) => value.desired_movement,
                         None => Vec2::new(0.0, 0.0),
                     } + posmovment,
+                    impulse: impulse
                 });
             }
         } else if other.gettype() == "Rectangle" {
@@ -207,19 +224,30 @@ impl Object for Circle {
                     lines.push([other.getvertices()[i], other.getvertices()[i + 1]]);
                 }
             }
+            let mut max_distance = Vec2::new(0.0, 0.0);
             for line in lines.iter() {
                 let (collision, local_collision_offset) =
                     checkCircleCollisionWithPolygon(self.center_of_mass, self.radius, *line);
-                if collision {
-                    //return Some(collisionRecord {desired_movement: local_collision_offset*-1.0});
-                    return Some(collisionRecord {
-                        desired_movement: match record {
-                            Some(value) => value.desired_movement,
-                            None => Vec2::new(0.0, 0.0),
-                        } + local_collision_offset * -1.0,
-                    }); //The -1.0 is to make sure the circle moves away from the rectangle and not into it since the offset is based on the rectangle
+                if collision && local_collision_offset.squared_length() > max_distance.squared_length() {
+                    max_distance = local_collision_offset;
                 }
             }
+            if max_distance.squared_length() != 0.0 {
+                let relative_speed = self.velocity - other.getvel();
+                //Calulcate the normal of the collision
+                let normal = Vec2::unit_vector(max_distance);
+                let impulse = calculate_impulse(relative_speed, self.mass, other.get_mass(), normal, 1.);
+                return Some(collisionRecord {
+                    desired_movement: match record {
+                        Some(value) => value.desired_movement,
+                        None => Vec2::new(0.0, 0.0),
+                    } + max_distance * Vec2::unit_vector(relative_speed),
+                    impulse: impulse
+                    //return Some(collisionRecord {desired_movement: local_collision_offset*-1.0});
+                     //The -1.0 is to make sure the circle moves away from the rectangle and not into it since the offset is based on the rectangle
+                });
+            }
+            
         }
         return record;
     }
@@ -227,13 +255,16 @@ impl Object for Circle {
         if self.staticshape {
             return;
         }
-        self.center_of_mass += self.velocity;
         match record {
             Some(value) => {
-                self.moverelative(value.desired_movement);
+                self.velocity += value.impulse;
+                self.moverelative(value.desired_movement+self.velocity);
+                
             }
-            None => {}
+            None => {self.moverelative(self.velocity)}
         }
+        
+
     }
     fn draw(&self, graphics: &mut GfxGraphics<Resources, CommandBuffer>, transform: Matrix2d) {
         draw_circle(self.center_of_mass, self.radius as f64, transform, graphics);
@@ -265,6 +296,9 @@ impl Object for Circle {
     }
     fn set_static(&mut self, set: bool) {
         self.staticshape = set;
+    }
+    fn get_mass (&self) -> f64 {
+        return self.mass;
     }
 }
 
@@ -534,4 +568,11 @@ pub fn vector_projection(a: Vec2, b: Vec2) -> Vec2 {
     let dot = Vec2::dot(a, b);
     let length = b.length() * b.length();
     return b * (dot / length);
+}
+
+
+fn calculate_impulse(relative_speed: Vec2, mass: f64, mass_other: f64, normal: Vec2, restitution: f64) -> Vec2 {
+    let normal_unit = Vec2::unit_vector(normal);
+    let j = -(1.0 + restitution) * Vec2::dot(relative_speed, normal_unit) / (1.0/mass + 1.0/mass_other);
+    return (j/mass)*normal_unit;
 }

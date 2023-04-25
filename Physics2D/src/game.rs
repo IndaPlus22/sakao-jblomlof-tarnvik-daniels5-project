@@ -68,16 +68,19 @@ impl Game {
             .objects
             .push(Box::new(objects::Rectangle::new(
                 Vec2::new(300., 100.),
-                vec![[50.0,50.0],[50.0,80.0],[70.0,80.0],[70.0,50.0]],
+                vec![[50.0,30.0],[50.0,60.0],[70.0,60.0],[60.0,20.0]],
                 10.0,
             )));
         self.variables
             .objects
             .push(Box::new(objects::Rectangle::new(
                 Vec2::new(300., 100.),
-                vec![[100.0,50.0],[100.0,70.0],[120.0,70.0],[120.0,50.0]],
+                vec![[100.0,50.0], [105.0, 65.0],[120.0,70.0],[120.0,50.0]],
                 10.0,
             )));
+        self.variables.objects.push(Box::new(objects::Circle::new(Vec2::new(100., 200.), 40.0, 10.)));
+        self.variables.objects.push(Box::new(objects::Circle::new(Vec2::new(200., 240.), 40.0, 10.)));
+
             // self.variables
             // .objects
             // .push(Box::new(objects::Rectangle::new(
@@ -85,9 +88,13 @@ impl Game {
             //     vec![[110.0,50.0],[100.0,60.0],[120.0,70.0],[120.0,50.0]],
             //     10.0,
             // )));
-        self.variables.objects[0].setvel(Vec2::new(1.0, 0.0));
-        self.variables.objects[1].setvel(Vec2::new(-1.0, 0.0));
-        //self.variables.objects[2].setvel(Vec2::new(0.1, 0.0));
+        self.variables.objects[0].setvel(Vec2::new(1.0, 1.0));
+        self.variables.objects[1].setvel(Vec2::new(1.0, 0.5));
+        self.variables.objects[2].setvel(Vec2::new(1., 0.0));
+        self.variables.objects[3].setvel(Vec2::new(1., 0.0));
+        self.variables.objects[1].set_static(false);
+
+
         //self.variables.objects[1].set_static(true);
 
     }

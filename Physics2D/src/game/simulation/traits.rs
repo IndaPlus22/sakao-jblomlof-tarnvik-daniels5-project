@@ -18,8 +18,10 @@ pub trait Object {
     fn setvel (&mut self, vel: Vec2);
     fn moverelative (&mut self, pos: Vec2);
     fn set_static (&mut self, set: bool);
+    fn get_mass (&self) -> f64;
 }
 
 pub struct collisionRecord {
     pub desired_movement: Vec2,
+    pub impulse: Vec2,
 }
