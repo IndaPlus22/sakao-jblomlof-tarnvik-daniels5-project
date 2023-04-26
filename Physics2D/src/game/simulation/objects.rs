@@ -119,6 +119,7 @@ impl Object for Rectangle {
 
     fn update(&mut self, record: &Option<collisionRecord>, dt: f64) {
         //self.center += self.velocity;
+        rotate_vertices(self.center_of_mass, &mut self.vertices, 0.01);
         if self.staticshape {
             return;
         }
@@ -176,6 +177,16 @@ impl Object for Rectangle {
     }
     fn get_mass (&self) -> f64 {
         return self.mass;
+    }
+}
+
+
+fn rotate_vertices(center: Vec2, vertices: &mut Vec<[f64; 2]>, angle: f64) {
+    for point in vertices.iter_mut() {
+        let x = point[0] - center.x;
+        let y = point[1] - center.y;
+        point[0] = x * angle.cos() - y * angle.sin() + center.x;
+        point[1] = x * angle.sin() + y * angle.cos() + center.y;
     }
 }
 
