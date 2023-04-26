@@ -6,6 +6,7 @@ use graphics::types::Matrix2d;
 use nalgebra::Matrix2;
 use nalgebra::Vector2;
 use opengl_graphics::GlGraphics;
+use piston::RenderArgs;
 
 use super::collision::approx_are_colliding;
 use super::collision::collision_between_polygons;
@@ -38,7 +39,7 @@ pub struct Circle {
 }
 
 impl Rectangle {
-    pub fn new(center: Vec2, vertices: Vec<[f64; 2]>, mass: f64) -> Rectangle {
+    pub fn new(vertices: Vec<[f64; 2]>, mass: f64) -> Rectangle {
         let c = approx_circle_hitbox(&vertices);
         Rectangle {
             center_of_mass: calc_mass_center(&vertices),
@@ -129,16 +130,17 @@ impl Object for Rectangle {
             None => self.moverelative(self.velocity),
         }
     }
-    fn draw(&self, graphics: &mut GlGraphics, transform: Matrix2d) {
+    fn draw(&self, graphics: &mut GlGraphics, transform: Matrix2d, args: &RenderArgs) {
         //draw_rect(self.center, [(self.width) as f64, self.height as f64], transform, graphics)
         //draw_circle(self.circle_center, self.radius, transform, graphics);
         draw_polygon(
             self.vertices.as_slice(),
             transform,
             graphics,
-            self.getcenter(),
+            args,
         );
-        draw_circle(self.getcenter(), 1.0, transform, graphics)
+        // pls dont i am angry :()
+        // draw_circle(self.getcenter(), 1.0, transform, graphics, args)
     }
     fn getcenter(&self) -> Vec2 {
         return self.center_of_mass;
@@ -267,8 +269,8 @@ impl Object for Circle {
         
 
     }
-    fn draw(&self, graphics: &mut GlGraphics, transform: Matrix2d) {
-        draw_circle(self.center_of_mass, self.radius as f64, transform, graphics);
+    fn draw(&self, graphics: &mut GlGraphics, transform: Matrix2d, args: &RenderArgs) {
+        draw_circle(self.center_of_mass, self.radius as f64, transform, graphics, args);
     }
     fn getcenter(&self) -> Vec2 {
         return self.center_of_mass;

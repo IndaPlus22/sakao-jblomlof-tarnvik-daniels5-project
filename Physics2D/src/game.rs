@@ -1,7 +1,8 @@
 // boilerplate use for the game
+use glutin_window::GlutinWindow as Window;
 use graphics::types::Vec2d;
 use opengl_graphics::{GlGraphics, OpenGL, Texture};
-use piston::{UpdateArgs, RenderArgs, Event};
+use piston::{Event, RenderArgs, UpdateArgs};
 
 // IMPORTS form our code
 use self::ui::{ui_draw, ui_input};
@@ -28,8 +29,8 @@ mod ui {
 }
 
 // constants
-pub const SCREEN_WIDTH: u32 = 640;
-pub const SCREEN_HEIGHT: u32 = 480;
+pub const SCREEN_WIDTH: u32 = 600;
+pub const SCREEN_HEIGHT: u32 = 600;
 pub const GRAVITY: Vec2d = [0.0, -1.0];
 
 //Game state
@@ -59,7 +60,7 @@ impl Game {
                 objects: vec![],
                 game_state,
             },
-            ui_objects
+            ui_objects,
         }
     }
 
@@ -74,33 +75,38 @@ impl Game {
         self.variables
             .objects
             .push(Box::new(objects::Rectangle::new(
-                Vec2::new(300., 100.),
-                vec![[50.0,30.0],[50.0,60.0],[70.0,60.0],[60.0,20.0]],
+                vec![[0.15, 0.1], [0.15, 0.2], [0.25, 0.2], [0.25, 0.1]],
                 10.0,
             )));
         self.variables
             .objects
             .push(Box::new(objects::Rectangle::new(
-                Vec2::new(300., 100.),
-                vec![[100.0,50.0], [105.0, 65.0],[120.0,70.0],[120.0,50.0]],
+                vec![[0.3, 0.1], [0.3, 0.3], [0.7, 0.3], [0.7, 0.1]],
                 10.0,
             )));
-        self.variables.objects.push(Box::new(objects::Circle::new(Vec2::new(100., 200.), 40.0, 10.)));
-        self.variables.objects.push(Box::new(objects::Circle::new(Vec2::new(200., 240.), 40.0, 10.)));
+        self.variables.objects.push(Box::new(objects::Circle::new(
+            Vec2::new(0.4, 0.6),
+            0.01,
+            10.,
+        )));
+        self.variables.objects.push(Box::new(objects::Circle::new(
+            Vec2::new(0.6, 0.4),
+            0.04,
+            10.,
+        )));
 
-            // self.variables
-            // .objects
-            // .push(Box::new(objects::Rectangle::new(
-            //     Vec2::new(300., 100.),
-            //     vec![[110.0,50.0],[100.0,60.0],[120.0,70.0],[120.0,50.0]],
-            //     10.0,
-            // )));
+        // self.variables
+        // .objects
+        // .push(Box::new(objects::Rectangle::new(
+        //     Vec2::new(300., 100.),
+        //     vec![[110.0,50.0],[100.0,60.0],[120.0,70.0],[120.0,50.0]],
+        //     10.0,
+        // )));
         self.variables.objects[0].setvel(Vec2::new(1.0, 1.0));
         self.variables.objects[1].setvel(Vec2::new(1.0, 0.5));
         self.variables.objects[2].setvel(Vec2::new(1., 0.0));
         self.variables.objects[3].setvel(Vec2::new(1., 0.0));
         self.variables.objects[1].set_static(false);
-
 
         // self.variables
         // .objects
