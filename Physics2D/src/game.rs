@@ -40,6 +40,14 @@ pub enum GameState {
     Paused,
 }
 
+pub enum Tool {
+    None,
+    Move,
+    Scale,
+    Rotate,
+    Draw,
+}
+
 // Game struct
 //TODO game_state probably shouldn't just be public, something smart should happen instead
 pub struct Game {
@@ -54,11 +62,13 @@ impl Game {
     pub fn new(opengl: OpenGL) -> Game {
         let ui_objects: Objects = Objects::new();
         let mut game_state = GameState::Paused;
+        let mut current_tool = Tool::None;
         Game {
             gl: GlGraphics::new(opengl),
             variables: Variables {
                 objects: vec![],
                 game_state,
+                current_tool,
             },
             ui_objects,
         }
@@ -148,4 +158,5 @@ impl Game {
 pub struct Variables {
     objects: Vec<Box<dyn traits::Object>>,
     game_state: GameState,
+    current_tool: Tool,
 }
