@@ -2,13 +2,14 @@ use gfx_device_gl::{Resources, CommandBuffer};
 use graphics::types::{Vec2d, Matrix2d};
 use opengl_graphics::GlGraphics;
 use gfx_graphics::GfxGraphics;
+use piston::RenderArgs;
 
 use crate::vector::vector::Vec2;
 
 pub trait Object {
     fn collisions(&self, other: &Box<dyn Object>, record: Option<collisionRecord>) -> Option<collisionRecord>;
     fn update(&mut self, record: &Option<collisionRecord>, dt: f64);
-    fn draw(&self, graphics: &mut GlGraphics, transform: Matrix2d);
+    fn draw(&self, graphics: &mut GlGraphics, transform: Matrix2d, args: &RenderArgs);
     fn getcenter(&self) -> Vec2;
     fn gettype(&self) -> String;
     fn get_circle_center(&self) -> Vec2;

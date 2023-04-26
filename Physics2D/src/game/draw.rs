@@ -4,6 +4,7 @@ use gfx_graphics::GfxGraphics;
 use graphics::{color, types::{Vec2d, Matrix2d}, clear, rectangle, Polygon, draw_state::DrawState, Ellipse};
 use opengl_graphics::GlGraphics;
 use piston::{Event, RenderArgs};
+use glutin_window::GlutinWindow as Window;
 
 use crate::vector::vector::Vec2;
 
@@ -34,7 +35,7 @@ pub fn draw(event: &Event, args: &RenderArgs, gl: &mut GlGraphics, variables: &V
 
         // TODO: For loop all objects in simulation and render them (I think that it needs to be assigned to a variable)
         for item in &variables.objects {
-            item.draw(gl, context.transform);
+            item.draw(gl, context.transform, args);
         }
     });
 }
@@ -84,10 +85,12 @@ pub fn draw_polygon(
     vertices: &[[f64; 2]],
     transform: Matrix2d,
     gl: &mut GlGraphics,
-    pos: Vec2
+    args: &RenderArgs
 ) {
+    let abs_vertices = rel_to_abs_pos_arr(&vertices, args.window_size);
+    // println!("Drawing polygon at: {:?}", abs_vertices);
     Polygon::new(rgb_to_color(131, 176, 247)).draw_tri(
-        vertices,
+        &abs_vertices,
         &DrawState::default(),
         transform,
         gl,
@@ -100,13 +103,17 @@ pub fn draw_circle(
     radius: f64,
     transform: Matrix2d,
     gl: &mut GlGraphics,
+    args: &RenderArgs
 ) {
     // For debugging
     // println!("Drawing circle at: ({}, {})", pos[0], pos[1]);
     // --------------
-
-    let circle = graphics::ellipse::circle(pos.x, pos.y, radius);
-    Ellipse::new(color::hex(LIGHT_CERISE)).draw(circle, &DrawState::default(), transform, gl);
+    let abs_pos = rel_to_abs_pos([pos.x, pos.y], args.window_size);
+    // println!("Drawing circle at: ({}, {})", abs_pos[0], abs_pos[1]);
+    // radius is relative to window x length
+    let abs_radius = radius * args.window_size[0];
+    let circle = graphics::ellipse::circle(abs_pos[0], abs_pos[1], abs_radius);
+    Ellipse::new(color::hex("202d42")).draw(circle, &DrawState::default(), transform, gl);
 }
 
 // Converts two vec2d one for position and one for size to a 4x2 array of corners. ONLY works for rectangles.
@@ -118,6 +125,19 @@ fn conv_pos_size_to_vertices_rect(pos: Vec2, size: [f64; 2]) -> [[f64; 2]; 4]{
         [pos.x + size[0]/2.0, pos.y - size[1]/2.0]
     ];
     corners
+}
+
+// converts a relative position array (0. - 1.) to an absolute position array
+fn rel_to_abs_pos_arr(rel_poses: &[Vec2d], win_size: Vec2d) -> Vec<Vec2d> {
+    let mut abs_poses: Vec<Vec2d> = Vec::new();
+    for i in 0..rel_poses.len() {
+        abs_poses.push([rel_poses[i][0] * win_size[0], rel_poses[i][1] * win_size[1]]);
+    }
+    abs_poses
+}
+
+fn rel_to_abs_pos(rel_pos: Vec2d, win_size: Vec2d) -> Vec2d {
+    [rel_pos[0] * win_size[0], rel_pos[1] * win_size[1]]
 }
 
 // Converts rgb to color. Helper because I(Toshi) likes to copy from google color picker.
