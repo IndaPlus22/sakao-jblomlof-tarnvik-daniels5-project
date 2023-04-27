@@ -1,7 +1,3 @@
-use std::f64::consts::PI;
-
-use gfx_device_gl::{CommandBuffer, Resources};
-use gfx_graphics::GfxGraphics;
 use graphics::types::Matrix2d;
 use nalgebra::Matrix2;
 use nalgebra::Vector2;
@@ -14,7 +10,7 @@ use super::collision::line_math;
 use super::collision::norm_of;
 use super::traits::{collisionRecord, Object};
 use crate::{
-    game::draw::{draw_circle, draw_polygon, draw_rect},
+    game::draw::{draw_circle, draw_polygon},
     vector::vector::Vec2,
 };
 
@@ -24,6 +20,7 @@ pub struct Rectangle {
     radius: f64,
     vertices: Vec<[f64; 2]>,
     mass: f64,
+    angular_velocity: f64,      // Positive direction clockwise.
     velocity: Vec2,
     potnrg: f64,
     form: String,
@@ -50,6 +47,7 @@ impl Rectangle {
             radius: c.1,
             vertices,
             mass,
+            angular_velocity: 0.01,
             velocity: Vec2::new(0.2, 0.2),
             potnrg: 0.0,
             form: "Rectangle".to_string(),
@@ -142,7 +140,7 @@ impl Object for Rectangle {
 
     fn update(&mut self, record: &Option<collisionRecord>, dt: f64) {
         //self.center += self.velocity;
-        rotate_vertices(self.center_of_mass, &mut self.vertices, 0.01, &mut self.circle_center);
+        rotate_vertices(self.center_of_mass, &mut self.vertices, self.angular_velocity, &mut self.circle_center);
         if self.staticshape {
             return;
         }
@@ -156,16 +154,16 @@ impl Object for Rectangle {
     }
     fn draw(&self, graphics: &mut GlGraphics, transform: Matrix2d, args: &RenderArgs) {
         //draw_rect(self.center, [(self.width) as f64, self.height as f64], transform, graphics)
-        //draw_circle(self.circle_center, self.radius, transform, graphics, args);
+        // draw the circle that approximates the polygon
+        draw_circle(self.circle_center, self.radius, transform, graphics, args);
         draw_polygon(
             self.vertices.as_slice(),
             transform,
             graphics,
             args,
         );
-        // pls dont i am angry :()
-        //draw_circle(self.getcenter(), 1.0, transform, graphics, args)
-        //draw_circle(, radius, transform, gl, args)
+        // draw the mass_centre
+        draw_circle(self.getcenter(), 0.001, transform, graphics, args)
     }
     fn getcenter(&self) -> Vec2 {
         return self.center_of_mass;
