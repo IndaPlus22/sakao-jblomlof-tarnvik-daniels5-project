@@ -75,7 +75,7 @@ impl Game {
         self.variables
             .objects
             .push(Box::new(objects::Rectangle::new(
-                vec![[0.15, 0.1], [0.15, 0.2], [0.25, 0.2], [0.25, 0.1]],
+                vec![[0.15, 0.1], [0.15, 0.3], [0.25, 0.2], [0.25, 0.1]],
                 10.0,
             )));
             self.variables
