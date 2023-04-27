@@ -142,6 +142,7 @@ impl Object for Rectangle {
 
     fn update(&mut self, record: &Option<collisionRecord>, dt: f64) {
         //self.center += self.velocity;
+        rotate_vertices(self.center_of_mass, &mut self.vertices, 0.01, &mut self.circle_center);
         if self.staticshape {
             return;
         }
@@ -155,10 +156,16 @@ impl Object for Rectangle {
     }
     fn draw(&self, graphics: &mut GlGraphics, transform: Matrix2d, args: &RenderArgs) {
         //draw_rect(self.center, [(self.width) as f64, self.height as f64], transform, graphics)
-        //draw_circle(self.circle_center, self.radius, transform, graphics);
-        draw_polygon(self.vertices.as_slice(), transform, graphics, args);
+        //draw_circle(self.circle_center, self.radius, transform, graphics, args);
+        draw_polygon(
+            self.vertices.as_slice(),
+            transform,
+            graphics,
+            args,
+        );
         // pls dont i am angry :()
-        draw_circle(self.getcenter(), 0.001, transform, graphics, args)
+        //draw_circle(self.getcenter(), 1.0, transform, graphics, args)
+        //draw_circle(, radius, transform, gl, args)
     }
     fn getcenter(&self) -> Vec2 {
         return self.center_of_mass;
@@ -195,6 +202,24 @@ impl Object for Rectangle {
     fn get_mass(&self) -> f64 {
         return self.mass;
     }
+}
+
+
+fn rotate_vertices(center: Vec2, vertices: &mut Vec<[f64; 2]>, angle: f64, circle_center: &mut Vec2) {
+    for point in vertices.iter_mut() {
+        let x = point[0] - center.x;
+        let y = point[1] - center.y;
+        point[0] = x * angle.cos() - y * angle.sin() + center.x;
+        point[1] = x * angle.sin() + y * angle.cos() + center.y;
+    }
+    //Rotate the circle center around the center of mass
+    let x = circle_center.x - center.x;
+    let y = circle_center.y - center.y;
+    circle_center.x = x * angle.cos() - y * angle.sin() + center.x;
+    circle_center.y = x * angle.sin() + y * angle.cos() + center.y;
+
+
+
 }
 
 impl Circle {
