@@ -10,6 +10,8 @@ use piston::RenderArgs;
 
 use super::collision::approx_are_colliding;
 use super::collision::collision_between_polygons;
+use super::collision::line_math;
+use super::collision::norm_of;
 use super::traits::{collisionRecord, Object};
 use crate::{
     game::draw::{draw_circle, draw_polygon, draw_rect},
@@ -39,8 +41,9 @@ pub struct Circle {
 }
 
 impl Rectangle {
-    pub fn new(vertices: Vec<[f64; 2]>, mass: f64) -> Rectangle {
+    pub fn new(mut vertices: Vec<[f64; 2]>, mass: f64) -> Rectangle {
         let c = approx_circle_hitbox(&vertices);
+        make_vertices_anti_clockwise(&mut vertices);
         Rectangle {
             center_of_mass: calc_mass_center(&vertices),
             circle_center: c.0,
@@ -62,7 +65,12 @@ impl Object for Rectangle {
         record: Option<collisionRecord>,
     ) -> Option<super::traits::collisionRecord> {
         if other.gettype() == "Rectangle" {
-            if approx_are_colliding(self.circle_center, self.radius, other.get_circle_center(), other.getradius()) {
+            if approx_are_colliding(
+                self.circle_center,
+                self.radius,
+                other.get_circle_center(),
+                other.getradius(),
+            ) {
                 let relative_velocity = self.velocity - other.getvel();
                 match collision_between_polygons(
                     &self.vertices,
@@ -72,13 +80,19 @@ impl Object for Rectangle {
                     Some((norm, scalar_of_vel)) => {
                         // scalar_of_vel should be improved, it works on the relative distance, not the distance
                         // print normal x and y
-                        
+
                         return Some(collisionRecord {
                             desired_movement: match record {
                                 Some(value) => value.desired_movement,
                                 None => Vec2::new(0.0, 0.0),
                             } + scalar_of_vel * self.velocity,
-                            impulse: calculate_impulse(self.velocity-other.getvel(), self.mass, other.get_mass(), norm, 1.0)
+                            impulse: calculate_impulse(
+                                self.velocity - other.getvel(),
+                                self.mass,
+                                other.get_mass(),
+                                norm,
+                                1.0,
+                            ),
                         });
                     }
                     None => (),
@@ -97,22 +111,31 @@ impl Object for Rectangle {
             for line in lines.iter() {
                 let (collision, local_collision_offset) =
                     checkCircleCollisionWithPolygon(other.getcenter(), other.getradius(), *line);
-                if collision && max_distance.squared_length() < local_collision_offset.squared_length() {
+                if collision
+                    && max_distance.squared_length() < local_collision_offset.squared_length()
+                {
                     max_distance = local_collision_offset;
                 }
             }
             if max_distance.squared_length() != 0.0 {
                 let relative_speed = self.velocity - other.getvel();
-                let impulse = calculate_impulse(relative_speed, self.mass, other.get_mass(), max_distance, 1.0);
+                let impulse = calculate_impulse(
+                    relative_speed,
+                    self.mass,
+                    other.get_mass(),
+                    max_distance,
+                    1.0,
+                );
                 return Some(collisionRecord {
                     desired_movement: match record {
                         Some(value) => value.desired_movement,
                         None => Vec2::new(0.0, 0.0),
-                    } + Vec2::unit_vector(relative_speed) * max_distance.length()*-1.0,
-                    impulse: impulse
+                    } + Vec2::unit_vector(relative_speed)
+                        * max_distance.length()
+                        * -1.0,
+                    impulse: impulse,
                 });
             }
-            
         }
         return record;
     }
@@ -125,7 +148,7 @@ impl Object for Rectangle {
         }
         match record {
             Some(value) => {
-                self.velocity+=value.impulse;
+                self.velocity += value.impulse;
                 self.moverelative(value.desired_movement + self.velocity);
             }
             None => self.moverelative(self.velocity),
@@ -176,7 +199,7 @@ impl Object for Rectangle {
     fn set_static(&mut self, set: bool) {
         self.staticshape = set;
     }
-    fn get_mass (&self) -> f64 {
+    fn get_mass(&self) -> f64 {
         return self.mass;
     }
 }
@@ -228,14 +251,20 @@ impl Object for Circle {
                 let axis = Vec2::unit_vector(distance);
                 let posmovment = axis * overlap;
 
-                let impulse = calculate_impulse(self.velocity - other.getvel(), self.mass, other.get_mass(), distance, 1.);
+                let impulse = calculate_impulse(
+                    self.velocity - other.getvel(),
+                    self.mass,
+                    other.get_mass(),
+                    distance,
+                    1.,
+                );
 
                 return Some(collisionRecord {
                     desired_movement: match record {
                         Some(value) => value.desired_movement,
                         None => Vec2::new(0.0, 0.0),
                     } + posmovment,
-                    impulse: impulse
+                    impulse: impulse,
                 });
             }
         } else if other.gettype() == "Rectangle" {
@@ -251,7 +280,9 @@ impl Object for Circle {
             for line in lines.iter() {
                 let (collision, local_collision_offset) =
                     checkCircleCollisionWithPolygon(self.center_of_mass, self.radius, *line);
-                if collision && local_collision_offset.squared_length() > max_distance.squared_length() {
+                if collision
+                    && local_collision_offset.squared_length() > max_distance.squared_length()
+                {
                     max_distance = local_collision_offset;
                 }
             }
@@ -259,18 +290,17 @@ impl Object for Circle {
                 let relative_speed = self.velocity - other.getvel();
                 //Calulcate the normal of the collision
                 let normal = Vec2::unit_vector(max_distance);
-                let impulse = calculate_impulse(relative_speed, self.mass, other.get_mass(), normal, 1.);
+                let impulse =
+                    calculate_impulse(relative_speed, self.mass, other.get_mass(), normal, 1.);
                 return Some(collisionRecord {
                     desired_movement: match record {
                         Some(value) => value.desired_movement,
                         None => Vec2::new(0.0, 0.0),
                     } + max_distance * Vec2::unit_vector(relative_speed),
-                    impulse: impulse
-                    //return Some(collisionRecord {desired_movement: local_collision_offset*-1.0});
-                     //The -1.0 is to make sure the circle moves away from the rectangle and not into it since the offset is based on the rectangle
+                    impulse: impulse, //return Some(collisionRecord {desired_movement: local_collision_offset*-1.0});
+                                      //The -1.0 is to make sure the circle moves away from the rectangle and not into it since the offset is based on the rectangle
                 });
             }
-            
         }
         return record;
     }
@@ -281,16 +311,19 @@ impl Object for Circle {
         match record {
             Some(value) => {
                 self.velocity += value.impulse;
-                self.moverelative(value.desired_movement+self.velocity);
-                
+                self.moverelative(value.desired_movement + self.velocity);
             }
-            None => {self.moverelative(self.velocity)}
+            None => self.moverelative(self.velocity),
         }
-        
-
     }
     fn draw(&self, graphics: &mut GlGraphics, transform: Matrix2d, args: &RenderArgs) {
-        draw_circle(self.center_of_mass, self.radius as f64, transform, graphics, args);
+        draw_circle(
+            self.center_of_mass,
+            self.radius as f64,
+            transform,
+            graphics,
+            args,
+        );
     }
     fn getcenter(&self) -> Vec2 {
         return self.center_of_mass;
@@ -320,7 +353,7 @@ impl Object for Circle {
     fn set_static(&mut self, set: bool) {
         self.staticshape = set;
     }
-    fn get_mass (&self) -> f64 {
+    fn get_mass(&self) -> f64 {
         return self.mass;
     }
 }
@@ -457,10 +490,11 @@ fn calc_mass_center(vert: &Vec<[f64; 2]>) -> Vec2 {
                 vertices[iplus2][0] - vertices[iplus1][0],
                 vertices[iplus2][1] - vertices[iplus1][1],
             );
-            // get the angle between, PI -.. because the angle is between the VECTORS, and not the LINES
-            let theta = PI - f64::acos(Vec2::dot(vec1, vec2) / (vec1.length() * vec2.length()));
-
-            if theta > PI / 2.0 {
+            // Check if the iplus1 vertex is a concave vertex
+            let line1 = [vertices[iplus1], vertices[i]];
+            let norm_of_first_line = norm_of(line1);
+            // if the scalar of the projection of vec2 onto norm_of_first_line is > 0.0 , abort
+            if Vec2::dot(vec2, norm_of_first_line) > 0.0 {
                 continue;
             }
 
@@ -559,8 +593,8 @@ fn approx_circle_hitbox(vertices: &Vec<[f64; 2]>) -> (Vec2, f64) {
     const NUMBER_OF_ITERATION_FOR_APPROXIMATION: usize = 10;
 
     let mut point = Vec2::new(vertices[0][0], vertices[0][1]);
-    let mut min_sq: f64 = f64::MAX;
-    let mut radius_sq: f64 = 0.0;
+    let mut min_sq: f64;
+    let mut radius_sq: f64;
     let mut best_direction = Vec2::new(0.0, 0.0);
     for _ in 0..NUMBER_OF_ITERATION_FOR_APPROXIMATION {
         min_sq = f64::MAX;
@@ -593,9 +627,70 @@ pub fn vector_projection(a: Vec2, b: Vec2) -> Vec2 {
     return b * (dot / length);
 }
 
-
-fn calculate_impulse(relative_speed: Vec2, mass: f64, mass_other: f64, normal: Vec2, restitution: f64) -> Vec2 {
+fn calculate_impulse(
+    relative_speed: Vec2,
+    mass: f64,
+    mass_other: f64,
+    normal: Vec2,
+    restitution: f64,
+) -> Vec2 {
     let normal_unit = Vec2::unit_vector(normal);
-    let j = -(1.0 + restitution) * Vec2::dot(relative_speed, normal_unit) / (1.0/mass + 1.0/mass_other);
-    return (j/mass)*normal_unit;
+    let j = -(1.0 + restitution) * Vec2::dot(relative_speed, normal_unit)
+        / (1.0 / mass + 1.0 / mass_other);
+    return (j / mass) * normal_unit;
+}
+
+/// reverses the vec, if it is ordered wrong. Vertices consiting of 2 points, might be problematic.
+/// # Panics
+/// Panics if length of the passed Vec is 1 or 0.
+fn make_vertices_anti_clockwise(vertices: &mut Vec<[f64; 2]>) {
+    let point = {
+        // taking middle point of the first edge.
+        let x_diff = vertices[1][0] - vertices[0][0];
+        let y_diff = vertices[1][1] - vertices[0][1];
+        let temp_vector = 0.5 * Vec2::new(x_diff, y_diff);
+        [
+            vertices[0][0] + temp_vector.x,
+            vertices[0][1] + temp_vector.y,
+        ]
+    };
+    let first_line = [vertices[1], vertices[0]];
+    let normal = norm_of(first_line);
+    let ray = [point, [point[0] + normal.x, point[1] + normal.y]];
+
+    let mut passed_lines = 0;
+    let mut prev_index = 1;
+    for index in 2..vertices.len() {
+        let colliding_line = [vertices[index], vertices[prev_index]];
+        let (t, s) = line_math(ray, colliding_line);
+        // if the lines are parallel, we should not need to worry.
+
+        if t > 0.0 && s < 1.0 && s > 0.0 {
+            passed_lines += 1;
+        } else if t > 0.0 && s == 1.0 {
+            // we are intersecting another vertex. This should only count if the next vertex is on the other side. since then we are actually crossing from inside to outside or vice-versa
+            // Invariant, prev_vertex cannot lie on the ray
+            // The vertices lies on different sides if solution to lines intersecting lies within 0.0 < ss < 1.0
+            let prev_vertex = vertices[prev_index];
+            let index_plus_one = {
+                if index == vertices.len() - 1 {
+                    0
+                } else {
+                    index + 1
+                }
+            };
+            let next_vertex = vertices[index_plus_one];
+            let vertex_line = [next_vertex, prev_vertex];
+            let (_, new_s) = line_math(ray, vertex_line);
+            if new_s > 0.0 && new_s < 1.0 {
+                passed_lines += 1;
+            }
+        }
+        prev_index = index;
+    }
+
+    if passed_lines % 2 == 1 {
+        // passed an odd amount, our ray started towards the inside.
+        vertices.reverse();
+    }
 }

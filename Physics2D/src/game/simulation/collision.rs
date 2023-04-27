@@ -96,7 +96,8 @@ fn type_of_collision(
     }
 }
 
-fn norm_of(line1: [[f64; 2]; 2]) -> Vec2 {
+/// Returns the vector that rotates the line (from index0 to index1) 90 degrees clockwise.
+pub fn norm_of(line1: [[f64; 2]; 2]) -> Vec2 {
     // assuming all vertex is ordered counter-clockwise it is
     return Vec2::new(line1[1][1] - line1[0][1], line1[0][0] - line1[1][0]);
 }
@@ -107,8 +108,8 @@ enum CollisionType {
 }
 
 /// returns t, s
-/// returns -0.01, -0.01 if line are parallell (garbage)
-fn line_math(line1: [[f64; 2]; 2], line2: [[f64; 2]; 2]) -> (f64, f64) {
+/// returns -0.01, -0.01 if line are parallell (garbage return)
+pub fn line_math(line1: [[f64; 2]; 2], line2: [[f64; 2]; 2]) -> (f64, f64) {
     let matrix = Matrix2::new(
         line1[0][0] - line1[1][0],
         line2[1][0] - line2[0][0],
