@@ -12,20 +12,31 @@ pub fn approx_are_colliding(centre1: Vec2, raduis1: f64, centre2: Vec2, radius2:
 
 /// If a polygon collides with the other polygon, this returns Some((normal, t)).
 /// Such that t*self.velocity is the relative movement such that the polygons only touches.
+/// 
+/// # Important
+/// angle_diff_relative needs to be the relative angle the objects moved
 pub fn collision_between_polygons(
     main_pol_vert: &Vec<[f64; 2]>,
-    relative_movement: &Vec2,
+    mass_center_main: Vec2,
     static_pol_vert: &Vec<[f64; 2]>,
-) -> Option<(Vec2, f64)> {
+    mass_center_static: Vec2,
+    relative_movement: &Vec2,
+    added_angle_move: f64,
+) -> Option<(Vec2, Vec2)> {
+
     match type_of_collision(main_pol_vert, static_pol_vert, relative_movement) {
-        CollisionType::No => return None,
-        CollisionType::Touching(norm) => return Some((norm, 0.0)),
+        CollisionType::No => {return None},
+        CollisionType::Touching(norm) => {return Some((norm, Vec2::new(0.0, 0.0)))}
         CollisionType::Interference => {
-            if relative_movement.squared_length() != 0.0 {
+            if relative_movement.squared_length() != 0.0 || added_angle_move != 0.0{
+             
                 return Some(calculate_scalar_distance(
                     main_pol_vert,
+                    mass_center_main,
                     static_pol_vert,
+                    mass_center_static,
                     relative_movement,
+                    added_angle_move,
                 ));
             } else {
                 return None;
@@ -83,6 +94,7 @@ fn type_of_collision(
     if some_contact {
         let mut total_norm = Vec2::new(0.0, 0.0);
         if norms.len() == 0 {
+            // this could be improved.
             total_norm = relative_movement.clone();
         } else {
             for n in norms {
@@ -132,13 +144,20 @@ pub fn line_math(line1: [[f64; 2]; 2], line2: [[f64; 2]; 2]) -> (f64, f64) {
 /// Returns norm and scalar, does not compute well with relative_vel.length == 0. Only valid when knows that polygons interfers
 fn calculate_scalar_distance(
     main_pol_vert: &Vec<[f64; 2]>,
+    mass_center_main: Vec2,
     static_pol_vert: &Vec<[f64; 2]>,
-    relative_movement: &Vec2,
-) -> (Vec2, f64) {
+    mass_center_static: Vec2,
+    relative_vel_diff: &Vec2,
+    angle_diff_relative: f64,
+) -> (Vec2, Vec2) {
+/*TODO */
+// store point of collision, handle multiple same t's, 
+
     let mut norms: Vec<Vec2> = Vec::new();
     let mut corner_corner_norm: Vec<Vec2> = Vec::new(); // corner-corner-only
-    let neg_vel = -*relative_movement;
-    let mut max_dist: f64 = 0.0;
+    let neg_vel = -*relative_vel_diff;
+    let neg_angle = -angle_diff_relative;
+    let mut max_move: Vec2 = Vec2::new(0.0, 0.0);
 
     let mut prev_index_for_main = main_pol_vert.len() - 1;
     for index_for_main in 0..main_pol_vert.len() {
@@ -159,27 +178,42 @@ fn calculate_scalar_distance(
             // but they need to move exactly onto line2
             // so also check if the opposite.
 
-            let move_1 = [line1[0], [line1[0][0] + neg_vel.x, line1[0][1] + neg_vel.y]];
-            let move_2 = [line1[1], [line1[1][0] + neg_vel.x, line1[1][1] + neg_vel.y]];
-            let move_3 = [line2[0], [line2[0][0] - neg_vel.x, line2[0][1] - neg_vel.y]];
-            let move_4 = [line2[1], [line2[1][0] - neg_vel.x, line2[1][1] - neg_vel.y]];
+            //rays from "main" to static
+            let corner_vel_1 = corner_vel(line1[0], mass_center_main, neg_vel, neg_angle);
+            let move_1 = [line1[0], [line1[0][0] + corner_vel_1.x, line1[0][1] + corner_vel_1.y]];
 
-            // Each element is (vec_from_base_line"+"relative_vel, line_to_check_collision, origin_line)
+            let corner_vel_2 = corner_vel(line1[1], mass_center_main, neg_vel, neg_angle);
+            let move_2 = [line1[1], [line1[1][0] + corner_vel_2.x, line1[1][1] + corner_vel_2.y]];
+
+            // from here we go from static towards the "main", thus changing direction on angle and vel (hence negative sign)
+            let corner_vel_3 = corner_vel(line2[0], mass_center_static, -neg_vel, neg_angle);
+            let move_3 = [line2[0], [line2[0][0] + corner_vel_3.x, line2[0][1] + corner_vel_3.y]];
+            
+            let corner_vel_4 = corner_vel(line2[1], mass_center_static, -neg_vel, neg_angle);
+            let move_4 = [line2[1], [line2[1][0] + corner_vel_4.x, line2[1][1] + corner_vel_4.y]];
+
+            // Each element is ((vec_from_base_line"+"direction_to_go), line_to_check_collision, origin_line, scalar (1 or -1))
             let compound_lines = [
-                (move_1, line2, line1),
-                (move_2, line2, line1),
-                (move_3, line1, line2),
-                (move_4, line1, line2),
+                (move_1, line2, line1, 1.0),
+                (move_2, line2, line1, 1.0),
+                (move_3, line1, line2, -1.0),
+                (move_4, line1, line2, -1.0),
             ];
-
-            for (mov, colliding_line, origin) in compound_lines {
+            for (mov, colliding_line, origin, scalar) in compound_lines {
                 let (t, s) = line_math(mov, colliding_line);
-                if t > 0.0 && s <= 1.0 && s >= 0.0 {
-                    if t >= max_dist {
-                        if t > max_dist {
+                if t <= 1.0 && t > 0.0 && s <= 1.0 && s >= 0.0 {
+                    let prev_sq = max_move.squared_length();
+                    let t_sq = t*t;
+                    // invariant t > 0, max_move.length >= 0.0 thus if t >= max_move.length so is t*t >= max_move.squared_length
+                    if t_sq >= prev_sq {
+                        // dont know what to do if they need to move the same length.
+                        // should probably take the closest one.
+                        if t_sq > prev_sq {
                             norms.clear();
                             corner_corner_norm.clear();
-                            max_dist = t;
+                            // we need to move from our point to end point * 
+                            // scalar indicates if we going from "main" or static, (1 resp. -1)
+                            max_move = scalar* t*Vec2::new(mov[1][0] - mov[0][0], mov[1][1] - mov[0][1]);
                         }
                         let s_on_end = s == 1.0 || s == 0.0;
                         if !s_on_end || parallel_line(origin, colliding_line) {
@@ -202,15 +236,29 @@ fn calculate_scalar_distance(
         } else if corner_corner_norm.len() > 0 {
             corner_corner_norm
         } else {
-            vec![relative_movement.clone()]
+            vec![relative_vel_diff.clone()]
         }
     };
 
     for n in norm_to_sum {
         total_norm += n;
     }
+    
+    //println!("Norm: {} ; {}; SCALAR: {} ", total_norm.x, total_norm.y, -max_dist);
+    return (total_norm, max_move);
+}
 
-    return (total_norm, -max_dist);
+// given a point, rotation_center, move, angle return a Vec2 in the direction
+fn corner_vel (point: [f64;2], center: Vec2, _move: Vec2, angle: f64) -> Vec2 {
+    let x = point[0] - center.x;
+    let y = point[1] - center.y;
+    let sine = angle.sin();
+    let cos_minus_one = angle.cos() - 1.0;
+    // returns Rw - w + v where w = (x, y), R = rotation matrix, v = velocity 
+    Vec2::new(
+        x * cos_minus_one - y * sine + _move.x,
+        x * sine + y * cos_minus_one + _move.y
+    )
 }
 
 fn corner_collision_norm(_line1: [[f64; 2]; 2], line2: [[f64; 2]; 2]) -> Vec2 {

@@ -70,20 +70,26 @@ impl Object for Rectangle {
                 other.getradius(),
             ) {
                 let relative_velocity = self.velocity - other.getvel();
+
+                // this works for simple collision (collision point between mass_centers) but probably not for complex collision (point of collision on same side of mass_center ( e.g left of both).)
+                // not hard to fix better. Store a "recent move" for each vertex and use that, since currently the angle is used to calculate that. 
+                let added_angle = self.angular_velocity + other.get_angular_vel();
                 match collision_between_polygons(
                     &self.vertices,
-                    &relative_velocity,
+                    self.center_of_mass,
                     &other.getvertices(),
+                    other.getcenter(),
+                    &relative_velocity,
+                    added_angle
                 ) {
-                    Some((norm, scalar_of_vel)) => {
+                    Some((norm, move_to_resolve)) => {
                         // scalar_of_vel should be improved, it works on the relative distance, not the distance
-                        // print normal x and y
 
                         return Some(collisionRecord {
                             desired_movement: match record {
                                 Some(value) => value.desired_movement,
                                 None => Vec2::new(0.0, 0.0),
-                            } + scalar_of_vel * self.velocity,
+                            } + move_to_resolve,
                             impulse: calculate_impulse(
                                 self.velocity - other.getvel(),
                                 self.mass,
@@ -179,6 +185,9 @@ impl Object for Rectangle {
     }
     fn getvertices(&self) -> Vec<[f64; 2]> {
         return self.vertices.to_vec();
+    }
+    fn get_angular_vel(&self) -> f64 {
+        self.angular_velocity
     }
     fn getvel(&self) -> Vec2 {
         self.velocity
@@ -337,6 +346,9 @@ impl Object for Circle {
     }
     fn getvertices(&self) -> Vec<[f64; 2]> {
         return vec![];
+    }
+    fn get_angular_vel(&self) -> f64 {
+        0.0                              // IF NEEDED TO KEEP TRACK; Change this
     }
     fn getvel(&self) -> Vec2 {
         self.velocity
