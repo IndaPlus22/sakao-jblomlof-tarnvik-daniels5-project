@@ -1,6 +1,3 @@
-
-use gfx_device_gl::{CommandBuffer, Resources};
-use gfx_graphics::GfxGraphics;
 use graphics::{color, types::{Vec2d, Matrix2d}, clear, rectangle, Polygon, draw_state::DrawState, Ellipse};
 use opengl_graphics::GlGraphics;
 use piston::{Event, RenderArgs};

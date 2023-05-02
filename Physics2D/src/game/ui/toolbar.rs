@@ -1,9 +1,6 @@
 
-use gfx_device_gl::{CommandBuffer, Resources};
-use gfx_graphics::GfxGraphics;
-use graphics::{Image, types::{Vec2d, Matrix2d}};
-use opengl_graphics::{Texture, TextureSettings, GlGraphics};
-use std::path::Path;
+use graphics::{types::{Vec2d, Matrix2d}};
+use opengl_graphics::GlGraphics;
 
 use crate::game::draw::abs_to_rel_pos;
 

@@ -1,5 +1,5 @@
 use graphics::types::Vec2d;
-use piston::{Event, MouseCursorEvent, PressEvent, ReleaseEvent};
+use piston::{Event, MouseCursorEvent, PressEvent};
 
 use crate::game::{simulation::objects, GameState, Tool, Variables};
 
@@ -64,7 +64,9 @@ pub fn input(event: &Event, objects: &mut Objects, variables: &mut Variables) {
 
 fn match_tools(variables: &mut Variables, button: piston::Button, objects: &mut Objects, win_size: Vec2d) {
     match variables.current_tool {
-        Tool::Move => {}
+        Tool::Move => {
+            
+        }
         Tool::Scale => {}
         Tool::Rotate => {}
         Tool::Draw => {
