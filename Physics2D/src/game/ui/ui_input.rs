@@ -65,10 +65,16 @@ pub fn input(event: &Event, objects: &mut Objects, variables: &mut Variables) {
 fn match_tools(variables: &mut Variables, button: piston::Button, objects: &mut Objects, win_size: Vec2d) {
     match variables.current_tool {
         Tool::Move => {
-            
+            // TODO: Check all objects for hover
+            // If hover, select object
+            // If selected make able to move object with mouse
         }
-        Tool::Scale => {}
-        Tool::Rotate => {}
+        Tool::Scale => {
+            // TODO: Same as move but with scale
+        }
+        Tool::Rotate => {
+            // TODO: Same as move but with rotate
+        }
         Tool::Draw => {
             if button == piston::Button::Mouse(piston::MouseButton::Left) {
                 println!("Left mouse button pressed");
@@ -90,4 +96,8 @@ fn match_tools(variables: &mut Variables, button: piston::Button, objects: &mut 
         }
         _ => {}
     }
+}
+
+fn check_hover_obj() {
+
 }
