@@ -31,7 +31,7 @@ pub fn input(event: &Event, objects: &mut Objects, variables: &mut Variables) {
         } else if objects.buttons[3].hover{
             Load();
         } else if objects.buttons[4].hover{
-            //TODO: Clear button functionality aka delete all objects, making the thing blank
+            variables.objects.clear();
         }
         
         for i in 0..objects.tool_bar.buttons.len() {
