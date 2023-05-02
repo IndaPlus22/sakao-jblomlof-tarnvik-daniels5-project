@@ -1,3 +1,6 @@
+use std::fs::File;
+use std::io::Write;
+
 // boilerplate use for the game
 use glutin_window::GlutinWindow as Window;
 use graphics::types::Vec2d;
@@ -65,9 +68,10 @@ impl Game {
     }
 
     // A function that only runs ones when the game starts
-    pub fn init(&mut self) {
+    pub fn init(&mut self) /*-> std::io::Result<()>*/{
         draw::init();
-
+        //let mut file = File::create("test.txt")?;
+        //file.write_all(b"plz work")?;
         // TEMPORARY CODE TO TEST OBJECTS
         //self.variables
         //    .objects
@@ -119,6 +123,7 @@ impl Game {
         self.variables.objects[1].setvel(Vec2::new(-1.0, 0.0));
         //self.variables.objects[2].setvel(Vec2::new(0.1, 0.0));
         //self.variables.objects[1].set_static(true);
+        //Ok(())
     }
 
     // A function that runs every update

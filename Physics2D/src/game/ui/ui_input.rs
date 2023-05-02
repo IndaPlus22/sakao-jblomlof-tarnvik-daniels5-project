@@ -1,6 +1,9 @@
+
+use std::{fs::{OpenOptions, File}, io::Write};
+
 use piston::{Event, MouseCursorEvent, PressEvent, ReleaseEvent};
 
-use crate::game::{GameState, Variables};
+use crate::game::{GameState, Variables, simulation::traits::{Object, self}};
 
 use super::ui_objects::Objects;
 
@@ -21,7 +24,7 @@ pub fn input(event: &Event, objects: &mut Objects, variables: &mut Variables) {
         } else if objects.buttons[1].hover{
             variables.game_state  = GameState::Paused;
         } else if objects.buttons[2].hover{
-            //TODO: Save button functionality aka save the current objects in a file
+            Save(&mut variables.objects);
         } else if objects.buttons[3].hover{
             //TODO: Restart button functionality aka reset the simulation to the last saved state 
             //TODO: If there is no saved state defualt is an empty file? 
@@ -38,4 +41,10 @@ pub fn input(event: &Event, objects: &mut Objects, variables: &mut Variables) {
     // if let Some(button) = event.release_args() {
     //     println!("Released {:?}", button);
     // }
+}
+
+pub fn Save (objects: &mut Vec<Box<dyn traits::Object>>) -> std::io::Result<()> {
+    let mut file = File::create("objects.txt")?;
+    file.write_all(b"THIS SHOULD BE ALL THE OBJECT INFO")?;
+    Ok(())
 }
