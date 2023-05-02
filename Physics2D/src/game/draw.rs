@@ -27,9 +27,10 @@ const LIGHT_CERISE: &str = "ec5f99";
 //     });
 // }
 
-pub fn draw(event: &Event, args: &RenderArgs, gl: &mut GlGraphics, variables: &Variables) {
+pub fn draw(event: &Event, args: &RenderArgs, gl: &mut GlGraphics, variables: &mut Variables) {
     // Update application window.
     gl.draw(args.viewport(), |context, gl| {
+        variables.win_size = args.window_size;
         // Fill the window with white colour.
         clear(CERISE_COLOR, gl);
 
@@ -89,7 +90,7 @@ pub fn draw_polygon(
 ) {
     let abs_vertices = rel_to_abs_pos_arr(&vertices, args.window_size);
     // println!("Drawing polygon at: {:?}", abs_vertices);
-    Polygon::new(rgb_to_color(131, 176, 247)).draw_tri(
+    Polygon::new(rgb_to_color(131, 176, 247)).draw(
         &abs_vertices,
         &DrawState::default(),
         transform,

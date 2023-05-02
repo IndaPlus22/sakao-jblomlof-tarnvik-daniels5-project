@@ -72,6 +72,7 @@ impl Game {
                 game_state,
                 current_tool,
                 last_mouse_pos,
+                win_size: [SCREEN_WIDTH as f64, SCREEN_HEIGHT as f64],
             },
             ui_objects,
         }
@@ -107,6 +108,10 @@ impl Game {
             0.04,
             1.,
         )));
+        // self.variables.objects.push(Box::new(objects::Rectangle::new(
+        //     vec![[0.6, 0.7], [0.6, 0.8], [0.7, 0.9], [0.8, 0.8], [0.8, 0.7], [0.7, 0.6], [0.6, 0.65], [0.58, 0.65]],
+        //     1.,
+        // )));
 
         // self.variables
         // .objects
@@ -119,7 +124,7 @@ impl Game {
         self.variables.objects[1].setvel(Vec2::new(0.01, 0.005));
         self.variables.objects[2].setvel(Vec2::new(0.01, 0.0));
         self.variables.objects[3].setvel(Vec2::new(0.01, 0.0));
-        self.variables.objects[1].set_static(false);
+        // self.variables.objects[1].set_static(false);
 
         // self.variables
         // .objects
@@ -130,7 +135,7 @@ impl Game {
         // )));
         self.variables.objects[0].setvel(Vec2::new(0.01, 0.0));
         self.variables.objects[1].setvel(Vec2::new(-0.01, 0.0));
-        //self.variables.objects[2].setvel(Vec2::new(0.1, 0.0));
+        self.variables.objects[2].setvel(Vec2::new(0.1, 0.0));
         //self.variables.objects[1].set_static(true);
     }
 
@@ -147,7 +152,7 @@ impl Game {
     //     ui_draw::draw(event, window, &mut self.ui_objects);
     // }
     pub fn draw(&mut self, event: &Event, args: &RenderArgs) {
-        draw::draw(event, args, &mut self.gl, &self.variables);
+        draw::draw(event, args, &mut self.gl, &mut self.variables);
         ui_draw::draw(event, args, &mut self.gl, &mut self.ui_objects);
     }
 
@@ -163,4 +168,5 @@ pub struct Variables {
     game_state: GameState,
     current_tool: Tool,
     last_mouse_pos: Vec2d,
+    win_size: Vec2d,
 }

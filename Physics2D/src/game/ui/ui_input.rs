@@ -19,29 +19,8 @@ pub fn input(event: &Event, objects: &mut Objects, variables: &mut Variables) {
         variables.last_mouse_pos = pos;
     }
     if let Some(button) = event.press_args() {
-        match variables.current_tool {
-            Tool::Move => {}
-            Tool::Scale => {}
-            Tool::Rotate => {}
-            Tool::Draw => {
-                if button == piston::Button::Mouse(piston::MouseButton::Left) {
-                    println!("Left mouse button pressed");
-                    objects.tool_bar.add_selected_button(variables.last_mouse_pos);
-
-                    println!("Selected poses: {:?}", objects.tool_bar.selected_poses);
-                }
-                if button == piston::Button::Keyboard(piston::Key::Return) {
-                    variables.objects.push(Box::new(objects::Rectangle::new(
-                        objects.tool_bar.selected_poses.clone(),
-                        10.0,
-                    )));
-                    objects.tool_bar.selected_poses.clear();
-                    println!("made polygon");
-                }
-            }
-            _ => {}
-        }
-
+        // for matching tools
+        match_tools(variables, button, objects, variables.win_size);
 
         if objects.buttons[0].hover {
             variables.game_state = GameState::Running;
@@ -81,4 +60,32 @@ pub fn input(event: &Event, objects: &mut Objects, variables: &mut Variables) {
     // if let Some(button) = event.release_args() {
     //     println!("Released {:?}", button);
     // }
+}
+
+fn match_tools(variables: &mut Variables, button: piston::Button, objects: &mut Objects, win_size: Vec2d) {
+    match variables.current_tool {
+        Tool::Move => {}
+        Tool::Scale => {}
+        Tool::Rotate => {}
+        Tool::Draw => {
+            if button == piston::Button::Mouse(piston::MouseButton::Left) {
+                println!("Left mouse button pressed");
+                objects
+                    .tool_bar
+                    .add_selected_button(variables.last_mouse_pos, win_size);
+
+                println!("Selected poses: {:?}", objects.tool_bar.selected_poses);
+            }
+            if button == piston::Button::Keyboard(piston::Key::Return) {
+                variables.objects.push(Box::new(objects::Rectangle::new(
+                    objects.tool_bar.selected_poses.clone(),
+                    10.0,
+                )));
+                objects.tool_bar.selected_poses.clear();
+                variables.current_tool = Tool::None;
+                println!("made polygon");
+            }
+        }
+        _ => {}
+    }
 }

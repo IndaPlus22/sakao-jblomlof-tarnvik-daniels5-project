@@ -38,8 +38,8 @@ impl Toolbar {
         }
     }
 
-    pub fn add_selected_button(&mut self, pos: Vec2d) {
-        self.selected_poses.push(abs_to_rel_pos(pos, [600., 600.]));
+    pub fn add_selected_button(&mut self, pos: Vec2d, win_size: Vec2d) {
+        self.selected_poses.push(abs_to_rel_pos(pos, win_size));
     }
 }
 
