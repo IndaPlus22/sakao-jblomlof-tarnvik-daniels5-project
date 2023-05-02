@@ -140,6 +140,10 @@ fn rel_to_abs_pos(rel_pos: Vec2d, win_size: Vec2d) -> Vec2d {
     [rel_pos[0] * win_size[0], rel_pos[1] * win_size[1]]
 }
 
+pub fn abs_to_rel_pos(abs_pos: Vec2d, win_size: Vec2d) -> Vec2d {
+    [abs_pos[0] / win_size[0], abs_pos[1] / win_size[1]]
+}
+
 // Converts rgb to color. Helper because I(Toshi) likes to copy from google color picker.
 fn rgb_to_color(r: u16, g: u16, b: u16) -> [f32; 4] {
     [r as f32 / 255.0, g as f32  / 255.0, b as f32  / 255.0, 1.0]

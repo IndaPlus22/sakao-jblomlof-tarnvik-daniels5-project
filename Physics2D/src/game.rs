@@ -40,6 +40,7 @@ pub enum GameState {
     Paused,
 }
 
+#[derive(PartialEq)]
 pub enum Tool {
     None,
     Move,
@@ -63,12 +64,14 @@ impl Game {
         let ui_objects: Objects = Objects::new();
         let mut game_state = GameState::Paused;
         let mut current_tool = Tool::None;
+        let last_mouse_pos: Vec2d = [0.0, 0.0];
         Game {
             gl: GlGraphics::new(opengl),
             variables: Variables {
                 objects: vec![],
                 game_state,
                 current_tool,
+                last_mouse_pos,
             },
             ui_objects,
         }
@@ -159,4 +162,5 @@ pub struct Variables {
     objects: Vec<Box<dyn traits::Object>>,
     game_state: GameState,
     current_tool: Tool,
+    last_mouse_pos: Vec2d,
 }

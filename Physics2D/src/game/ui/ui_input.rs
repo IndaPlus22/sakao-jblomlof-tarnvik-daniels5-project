@@ -1,6 +1,7 @@
+use graphics::types::Vec2d;
 use piston::{Event, MouseCursorEvent, PressEvent, ReleaseEvent};
 
-use crate::game::{GameState, Tool, Variables, simulation::objects};
+use crate::game::{simulation::objects, GameState, Tool, Variables};
 
 use super::ui_objects::Objects;
 
@@ -14,8 +15,34 @@ pub fn input(event: &Event, objects: &mut Objects, variables: &mut Variables) {
             objects.tool_bar.buttons[i].check_hover(pos);
             // println!("TOOLBAR: Button {}: hover={}", i, objects.tool_bar.buttons[i].hover);
         }
+
+        variables.last_mouse_pos = pos;
     }
     if let Some(button) = event.press_args() {
+        match variables.current_tool {
+            Tool::Move => {}
+            Tool::Scale => {}
+            Tool::Rotate => {}
+            Tool::Draw => {
+                if button == piston::Button::Mouse(piston::MouseButton::Left) {
+                    println!("Left mouse button pressed");
+                    objects.tool_bar.add_selected_button(variables.last_mouse_pos);
+
+                    println!("Selected poses: {:?}", objects.tool_bar.selected_poses);
+                }
+                if button == piston::Button::Keyboard(piston::Key::Return) {
+                    variables.objects.push(Box::new(objects::Rectangle::new(
+                        objects.tool_bar.selected_poses.clone(),
+                        10.0,
+                    )));
+                    objects.tool_bar.selected_poses.clear();
+                    println!("made polygon");
+                }
+            }
+            _ => {}
+        }
+
+
         if objects.buttons[0].hover {
             variables.game_state = GameState::Running;
         } else if objects.buttons[1].hover {
@@ -33,30 +60,22 @@ pub fn input(event: &Event, objects: &mut Objects, variables: &mut Variables) {
         if variables.game_state == GameState::Paused {
             if objects.tool_bar.buttons[0].hover {
                 // TODO: Move tool
+                println!("Move tool selected");
                 variables.current_tool = Tool::Move;
             } else if objects.tool_bar.buttons[1].hover {
                 // TODO: scale tool
+                println!("Scale tool selected");
                 variables.current_tool = Tool::Scale;
             } else if objects.tool_bar.buttons[2].hover {
                 // TODO: rotate tool
+                println!("Rotate tool selected");
                 variables.current_tool = Tool::Rotate;
             } else if objects.tool_bar.buttons[3].hover {
                 // TODO: Draw tool
+                println!("Draw tool selected");
                 variables.current_tool = Tool::Draw;
+                objects.tool_bar.selected_poses.clear();
             }
-        }
-
-        match variables.current_tool {
-            Tool::Move => {}
-            Tool::Scale => {}
-            Tool::Rotate => {}
-            Tool::Draw => {
-                variables.objects.push(Box::new(objects::Rectangle::new(
-                    vec![[0.15, 0.1], [0.15, 0.2], [0.25, 0.2], [0.25, 0.1]],
-                    10.0,
-                )));
-            }
-            _ => {}
         }
     }
     // if let Some(button) = event.release_args() {
