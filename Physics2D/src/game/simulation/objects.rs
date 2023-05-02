@@ -47,7 +47,7 @@ impl Rectangle {
             radius: c.1,
             vertices,
             mass,
-            velocity: Vec2::new(0.2, 0.2),
+            velocity: Vec2::new(0., 0.),
             potnrg: 0.0,
             form: "Rectangle".to_string(),
             staticshape: false,
