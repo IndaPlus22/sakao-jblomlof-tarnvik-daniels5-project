@@ -25,6 +25,7 @@ pub struct Rectangle {
     potnrg: f64,
     form: String,
     staticshape: bool,
+    triangulations: Vec<Vec<usize>>,
 }
 
 pub struct Circle {
@@ -41,17 +42,19 @@ impl Rectangle {
     pub fn new(mut vertices: Vec<[f64; 2]>, mass: f64) -> Rectangle {
         let c = approx_circle_hitbox(&vertices);
         make_vertices_anti_clockwise(&mut vertices);
+        let (center_of_mass, triangles) = calc_mass_center(&vertices);
         Rectangle {
-            center_of_mass: calc_mass_center(&vertices),
+            center_of_mass: center_of_mass,
             circle_center: c.0,
             radius: c.1,
             vertices,
             mass,
-            angular_velocity: 0.01,
+            angular_velocity: 0.0,
             velocity: Vec2::new(0.2, 0.2),
             potnrg: 0.0,
             form: "Rectangle".to_string(),
             staticshape: false,
+            triangulations: triangles,
         }
     }
 }
@@ -166,7 +169,14 @@ impl Object for Rectangle {
         //draw_rect(self.center, [(self.width) as f64, self.height as f64], transform, graphics)
         // draw the circle that approximates the polygon
         //draw_circle(self.circle_center, self.radius, transform, graphics, args);
-        draw_polygon(self.vertices.as_slice(), transform, graphics, args);
+        //draw_polygon(self.vertices.as_slice(), transform, graphics, args);
+        for tri in self.triangulations.iter() {
+            let mut draw_tri = Vec::new();
+            for p in tri.iter() {
+                draw_tri.push(self.vertices[*p]);
+            }
+            draw_polygon(draw_tri.as_slice(), transform, graphics, args);
+        }
         // draw point of collision
         //draw_circle(self.temp, 0.01, transform, graphics, args);
         // draw the mass_centre
@@ -462,13 +472,16 @@ fn checkCircleCollisionWithPolygon(
 /// Takes a reference to a vec of points such that it is ordered after connecting vertices.
 /// # Panics
 /// Panics if vertices consists of 1 or 0 elements
-fn calc_mass_center(vert: &Vec<[f64; 2]>) -> Vec2 {
+fn calc_mass_center(vert: &Vec<[f64; 2]>) -> (Vec2, Vec<Vec<usize>>) {
     assert!(vert.len() >= 2);
     if vert.len() == 2 {
         // a line, return the average of x and y
-        return Vec2::new(
-            (vert[0][0] + vert[1][0]) / 2.0,
-            (vert[0][1] + vert[1][1]) / 2.0,
+        return (
+            Vec2::new(
+                (vert[0][0] + vert[1][0]) / 2.0,
+                (vert[0][1] + vert[1][1]) / 2.0,
+            ),
+            vec![vec![0,1]],
         );
     }
     // using math from https://en.wikipedia.org/wiki/Centroid
@@ -481,6 +494,7 @@ fn calc_mass_center(vert: &Vec<[f64; 2]>) -> Vec2 {
 
     // Find triangles and "tear them apart" from the main polygon.
     // This could definitly be improved.
+    let mut triangles = vec![];
     let mut vertices = vert.clone();
     let mut sum_of_centre = Vec2::new(0.0, 0.0);
     let mut area_sum = 0.0;
@@ -554,6 +568,7 @@ fn calc_mass_center(vert: &Vec<[f64; 2]>) -> Vec2 {
                 vertices[iplus1],
                 vertices[iplus2],
             ]);
+            triangles.push(vec![vertices[i], vertices[iplus1], vertices[iplus2]]);
             sum_of_centre += temp.0;
             area_sum += temp.1;
             vertices.remove(iplus1);
@@ -563,7 +578,23 @@ fn calc_mass_center(vert: &Vec<[f64; 2]>) -> Vec2 {
     let temp = calc_triangle_mass_center_and_area([vertices[0], vertices[1], vertices[2]]);
     sum_of_centre += temp.0;
     area_sum += temp.1;
-    return sum_of_centre / area_sum;
+    triangles.push(vertices);
+
+    let mut mapped_index = Vec::new();
+    for tri in triangles {
+        let mut middle_stage = Vec::new();
+        for p in tri {
+            for (index, real_p) in vert.iter().enumerate() {
+                if p == *real_p {
+                    middle_stage.push(index);
+                    break;
+                }
+            }
+        }
+        mapped_index.push(middle_stage);
+    }
+
+    return (sum_of_centre / area_sum, mapped_index);
 }
 
 fn calc_triangle_mass_center_and_area(vertices: [[f64; 2]; 3]) -> (Vec2, f64) {
