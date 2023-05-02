@@ -17,7 +17,6 @@ impl Objects {
         }
     }
 
-
     pub fn create_buttons () -> [Button; 5]{
         let pos = Vec2d::from([0.0, 0.0]);
         let width = 40.0;
@@ -33,7 +32,6 @@ impl Objects {
         let save_button = Button::new(save_pos, width, height, [0.0,0.0,0.0,1.0], SPRITES[0]);
         let restart_button = Button::new(restart_pos, width, height, [0.0,0.0,0.0,1.0], SPRITES[0]);
         let clear_button = Button::new(clear_pos, width, height, [0.0,0.0,0.0,1.0], SPRITES[0]);
-
 
         [play_button, pause_button, save_button, restart_button, clear_button]
     }
