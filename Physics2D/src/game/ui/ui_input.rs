@@ -1,6 +1,7 @@
 
 use std::{fs::{OpenOptions, File}, io::Write};
 
+use graphics::types::Radius;
 use piston::{Event, MouseCursorEvent, PressEvent, ReleaseEvent};
 
 use crate::game::{GameState, Variables, simulation::traits::{Object, self}};
@@ -53,8 +54,16 @@ pub fn Save (objects: &mut Vec<Box<dyn traits::Object>>) -> std::io::Result<()> 
         file.write_all(b"\n")?;
 
         if shape == "Rectangle" {
-
-        } else if shape == Circle
+            let vertices = ob.getvertices();
+            let vertices_json = serde_json::to_string(&vertices).unwrap();
+            file.write_all(vertices_json.as_bytes())?;
+            file.write_all(b"\n")?;
+        } else if shape == "Circle" {
+            let radius: f64 = ob.getradius();
+            let radius_json = serde_json::to_string(&radius).unwrap();
+            file.write_all(radius_json.as_bytes())?;
+            file.write_all(b"\n")?;
+        }
 
         let center = ob.getcenter();
         let center_json = serde_json::to_string(&center).unwrap();
