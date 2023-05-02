@@ -10,9 +10,9 @@ pub fn approx_are_colliding(centre1: Vec2, raduis1: f64, centre2: Vec2, radius2:
     // since distance is >= 0, rad >= 0;
 }
 
-/// If a polygon collides with the other polygon, this returns Some((normal, t)).
+/// If a polygon collides with the other polygon, this returns Some((normal, t, point_of_collision)).
 /// Such that t*self.velocity is the relative movement such that the polygons only touches.
-/// 
+///
 /// # Important
 /// angle_diff_relative needs to be the relative angle the objects moved
 pub fn collision_between_polygons(
@@ -22,26 +22,18 @@ pub fn collision_between_polygons(
     mass_center_static: Vec2,
     relative_movement: &Vec2,
     added_angle_move: f64,
-) -> Option<(Vec2, Vec2)> {
-
-    match type_of_collision(main_pol_vert, static_pol_vert, relative_movement) {
-        CollisionType::No => {return None},
-        CollisionType::Touching(norm) => {return Some((norm, Vec2::new(0.0, 0.0)))}
-        CollisionType::Interference => {
-            if relative_movement.squared_length() != 0.0 || added_angle_move != 0.0{
-             
-                return Some(calculate_scalar_distance(
-                    main_pol_vert,
-                    mass_center_main,
-                    static_pol_vert,
-                    mass_center_static,
-                    relative_movement,
-                    added_angle_move,
-                ));
-            } else {
-                return None;
-            }
-        }
+) -> Option<(Vec2, Vec2, Vec2)> {
+    if relative_movement.squared_length() != 0.0 || added_angle_move != 0.0 {
+        calculate_scalar_distance(
+            main_pol_vert,
+            mass_center_main,
+            static_pol_vert,
+            mass_center_static,
+            relative_movement,
+            added_angle_move,
+        )
+    } else {
+        None
     }
 }
 
@@ -51,6 +43,7 @@ fn type_of_collision(
     relative_movement: &Vec2,
 ) -> CollisionType {
     let mut norms: Vec<Vec2> = Vec::new();
+    let mut points_of_collision: Vec<Vec2> = Vec::new();
     let mut some_contact = false;
 
     let mut prev_index_for_main = main_pol_vert.len() - 1;
@@ -67,6 +60,35 @@ fn type_of_collision(
                 static_pol_vert[static_index],
             ];
 
+            if parallel_line(line1, line2) {
+                let x_diff_same_line = line1[1][0] - line1[0][0];
+                if x_diff_same_line != 0.0 {
+                    let x_diff_first = line2[0][0] - line1[0][0];
+                    let x_diff_second = line2[1][0] - line1[0][0];
+                    if x_diff_first * x_diff_second < 0.0 {
+                        norms.push(norm_of(line2));
+                    } else {
+                        let x_diff_first = line2[0][0] - line1[1][0];
+                        let x_diff_second = line2[1][0] - line1[1][0];
+                        if x_diff_first * x_diff_second < 0.0 {
+                            norms.push(norm_of(line2));
+                        }
+                    }
+                } else {
+                    let y_diff_first = line2[0][1] - line1[0][1];
+                    let y_diff_second = line2[1][1] - line1[0][1];
+                    if y_diff_first * y_diff_second < 0.0 {
+                        norms.push(norm_of(line2));
+                    } else {
+                        let y_diff_first = line2[0][1] - line1[1][1];
+                        let y_diff_second = line2[1][1] - line1[1][1];
+                        if y_diff_first * y_diff_second < 0.0 {
+                            norms.push(norm_of(line2));
+                        }
+                    }
+                }
+            }
+
             let (t, s) = line_math(line1, line2);
             if t <= 1.0 && t >= 0.0 && s <= 1.0 && s >= 0.0 {
                 let t_on_end = t == 1.0 || t == 0.0;
@@ -74,14 +96,34 @@ fn type_of_collision(
                 match (t_on_end, s_on_end) {
                     (false, false) => return CollisionType::Interference,
                     (true, false) => {
+                        some_contact = true;
                         norms.push(norm_of(line2));
+                        let point = {
+                            let x_diff = line1[1][0] - line1[0][0];
+                            let y_diff = line1[1][1] - line1[0][1];
+                            Vec2::new(line1[0][0] + t * x_diff, line1[0][1] + t * y_diff)
+                        };
+                        points_of_collision.push(point)
                     }
                     (false, true) => {
+                        some_contact = true;
                         norms.push(norm_of(line1));
+                        let point = {
+                            let x_diff = line1[1][0] - line1[0][0];
+                            let y_diff = line1[1][1] - line1[0][1];
+                            Vec2::new(line1[0][0] + t * x_diff, line1[0][1] + t * y_diff)
+                        };
+                        points_of_collision.push(point)
                     }
                     (true, true) => {
                         // improve norm calculation for corner-corner-collision.
                         some_contact = true;
+                        let point = {
+                            let x_diff = line1[1][0] - line1[0][0];
+                            let y_diff = line1[1][1] - line1[0][1];
+                            Vec2::new(line1[0][0] + t * x_diff, line1[0][1] + t * y_diff)
+                        };
+                        points_of_collision.push(point)
                     }
                 }
             }
@@ -93,6 +135,7 @@ fn type_of_collision(
 
     if some_contact {
         let mut total_norm = Vec2::new(0.0, 0.0);
+        let mut avg_pos = Vec2::new(0.0, 0.0);
         if norms.len() == 0 {
             // this could be improved.
             total_norm = relative_movement.clone();
@@ -101,8 +144,12 @@ fn type_of_collision(
                 total_norm += n;
             }
         }
+        for p in points_of_collision.iter() {
+            avg_pos += *p;
+        }
+        avg_pos /= points_of_collision.len() as f64;
         //total_norm /= total_norm.length();
-        return CollisionType::Touching(total_norm);
+        return CollisionType::Touching(total_norm, avg_pos);
     } else {
         return CollisionType::No;
     }
@@ -115,7 +162,7 @@ pub fn norm_of(line1: [[f64; 2]; 2]) -> Vec2 {
 }
 enum CollisionType {
     Interference,
-    Touching(Vec2),
+    Touching(Vec2, Vec2),
     No,
 }
 
@@ -149,11 +196,10 @@ fn calculate_scalar_distance(
     mass_center_static: Vec2,
     relative_vel_diff: &Vec2,
     angle_diff_relative: f64,
-) -> (Vec2, Vec2) {
-/*TODO */
-// store point of collision, handle multiple same t's, 
-
+) -> Option<(Vec2, Vec2, Vec2)> {
+    const MARGIN: f64 = 0.0000001; // MARGIN FOR when parallell lines interfere.
     let mut norms: Vec<Vec2> = Vec::new();
+    let mut points_of_collision: Vec<Vec2> = Vec::new();
     let mut corner_corner_norm: Vec<Vec2> = Vec::new(); // corner-corner-only
     let neg_vel = -*relative_vel_diff;
     let neg_angle = -angle_diff_relative;
@@ -180,17 +226,29 @@ fn calculate_scalar_distance(
 
             //rays from "main" to static
             let corner_vel_1 = corner_vel(line1[0], mass_center_main, neg_vel, neg_angle);
-            let move_1 = [line1[0], [line1[0][0] + corner_vel_1.x, line1[0][1] + corner_vel_1.y]];
+            let move_1 = [
+                line1[0],
+                [line1[0][0] + corner_vel_1.x, line1[0][1] + corner_vel_1.y],
+            ];
 
             let corner_vel_2 = corner_vel(line1[1], mass_center_main, neg_vel, neg_angle);
-            let move_2 = [line1[1], [line1[1][0] + corner_vel_2.x, line1[1][1] + corner_vel_2.y]];
+            let move_2 = [
+                line1[1],
+                [line1[1][0] + corner_vel_2.x, line1[1][1] + corner_vel_2.y],
+            ];
 
             // from here we go from static towards the "main", thus changing direction on angle and vel (hence negative sign)
             let corner_vel_3 = corner_vel(line2[0], mass_center_static, -neg_vel, neg_angle);
-            let move_3 = [line2[0], [line2[0][0] + corner_vel_3.x, line2[0][1] + corner_vel_3.y]];
-            
+            let move_3 = [
+                line2[0],
+                [line2[0][0] + corner_vel_3.x, line2[0][1] + corner_vel_3.y],
+            ];
+
             let corner_vel_4 = corner_vel(line2[1], mass_center_static, -neg_vel, neg_angle);
-            let move_4 = [line2[1], [line2[1][0] + corner_vel_4.x, line2[1][1] + corner_vel_4.y]];
+            let move_4 = [
+                line2[1],
+                [line2[1][0] + corner_vel_4.x, line2[1][1] + corner_vel_4.y],
+            ];
 
             // Each element is ((vec_from_base_line"+"direction_to_go), line_to_check_collision, origin_line, scalar (1 or -1))
             let compound_lines = [
@@ -203,23 +261,37 @@ fn calculate_scalar_distance(
                 let (t, s) = line_math(mov, colliding_line);
                 if t <= 1.0 && t > 0.0 && s <= 1.0 && s >= 0.0 {
                     let prev_sq = max_move.squared_length();
-                    let t_sq = t*t;
+                    let new_sq = t
+                        * t
+                        * Vec2::new(mov[1][0] - mov[0][0], mov[1][1] - mov[0][1]).squared_length();
                     // invariant t > 0, max_move.length >= 0.0 thus if t >= max_move.length so is t*t >= max_move.squared_length
-                    if t_sq >= prev_sq {
+                    if new_sq >= prev_sq - MARGIN {
                         // dont know what to do if they need to move the same length.
                         // should probably take the closest one.
-                        if t_sq > prev_sq {
+                        if new_sq > prev_sq {
                             norms.clear();
+                            points_of_collision.clear();
                             corner_corner_norm.clear();
-                            // we need to move from our point to end point * 
+                            // we need to move from our point to end point *
                             // scalar indicates if we going from "main" or static, (1 resp. -1)
-                            max_move = scalar* t*Vec2::new(mov[1][0] - mov[0][0], mov[1][1] - mov[0][1]);
+                            max_move = scalar
+                                * t
+                                * Vec2::new(mov[1][0] - mov[0][0], mov[1][1] - mov[0][1]);
                         }
+                        let point = {
+                            let x_diff = colliding_line[1][0] - colliding_line[0][0];
+                            let y_diff = colliding_line[1][1] - colliding_line[0][1];
+                            Vec2::new(
+                                colliding_line[0][0] + s * x_diff,
+                                colliding_line[0][1] + s * y_diff,
+                            )
+                        };
+                        points_of_collision.push(point);
                         let s_on_end = s == 1.0 || s == 0.0;
                         if !s_on_end || parallel_line(origin, colliding_line) {
                             norms.push(norm_of(colliding_line))
                         } else {
-                            corner_corner_norm.push(corner_collision_norm(origin, colliding_line))
+                            corner_corner_norm.push(relative_vel_diff.clone())
                         }
                     }
                 }
@@ -236,28 +308,45 @@ fn calculate_scalar_distance(
         } else if corner_corner_norm.len() > 0 {
             corner_corner_norm
         } else {
-            vec![relative_vel_diff.clone()]
+            return None;
         }
     };
 
     for n in norm_to_sum {
-        total_norm += n;
+        // doing a hack. Since direction shouldnot matter.
+        // we make sure they are all the same orientation
+        // by a hack.
+        let dot = Vec2::dot(*relative_vel_diff, n);
+        if dot < 0.0 {
+            total_norm -= n
+        } else if dot == 0.0 {
+            let dot = Vec2::dot(*relative_vel_diff, Vec2::new(n.y, -n.x));
+            if dot < 0.0 {
+                total_norm -= n
+            }
+        } else {
+            total_norm += n
+        }
     }
-    
+    let mut avg_pos = Vec2::new(0.0, 0.0);
+    for p in points_of_collision.iter() {
+        avg_pos += *p;
+    }
+    avg_pos /= points_of_collision.len() as f64;
     //println!("Norm: {} ; {}; SCALAR: {} ", total_norm.x, total_norm.y, -max_dist);
-    return (total_norm, max_move);
+    return Some((total_norm, max_move, avg_pos));
 }
 
 // given a point, rotation_center, move, angle return a Vec2 in the direction
-fn corner_vel (point: [f64;2], center: Vec2, _move: Vec2, angle: f64) -> Vec2 {
+fn corner_vel(point: [f64; 2], center: Vec2, _move: Vec2, angle: f64) -> Vec2 {
     let x = point[0] - center.x;
     let y = point[1] - center.y;
     let sine = angle.sin();
     let cos_minus_one = angle.cos() - 1.0;
-    // returns Rw - w + v where w = (x, y), R = rotation matrix, v = velocity 
+    // returns Rw - w + v where w = (x, y), R = rotation matrix, v = velocity
     Vec2::new(
         x * cos_minus_one - y * sine + _move.x,
-        x * sine + y * cos_minus_one + _move.y
+        x * sine + y * cos_minus_one + _move.y,
     )
 }
 

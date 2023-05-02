@@ -20,7 +20,7 @@ pub struct Rectangle {
     radius: f64,
     vertices: Vec<[f64; 2]>,
     mass: f64,
-    angular_velocity: f64,      // Positive direction clockwise.
+    angular_velocity: f64, // Positive direction clockwise.
     velocity: Vec2,
     potnrg: f64,
     form: String,
@@ -72,7 +72,7 @@ impl Object for Rectangle {
                 let relative_velocity = self.velocity - other.getvel();
 
                 // this works for simple collision (collision point between mass_centers) but probably not for complex collision (point of collision on same side of mass_center ( e.g left of both).)
-                // not hard to fix better. Store a "recent move" for each vertex and use that, since currently the angle is used to calculate that. 
+                // not hard to fix better. Store a "recent move" for each vertex and use that, since currently the angle is used to calculate that.
                 let added_angle = self.angular_velocity + other.get_angular_vel();
                 match collision_between_polygons(
                     &self.vertices,
@@ -80,11 +80,10 @@ impl Object for Rectangle {
                     &other.getvertices(),
                     other.getcenter(),
                     &relative_velocity,
-                    added_angle
+                    added_angle,
                 ) {
-                    Some((norm, move_to_resolve)) => {
+                    Some((norm, move_to_resolve, point_of_collision)) => {
                         // scalar_of_vel should be improved, it works on the relative distance, not the distance
-
                         return Some(collisionRecord {
                             desired_movement: match record {
                                 Some(value) => value.desired_movement,
@@ -146,7 +145,12 @@ impl Object for Rectangle {
 
     fn update(&mut self, record: &Option<collisionRecord>, dt: f64) {
         //self.center += self.velocity;
-        rotate_vertices(self.center_of_mass, &mut self.vertices, self.angular_velocity, &mut self.circle_center);
+        rotate_vertices(
+            self.center_of_mass,
+            &mut self.vertices,
+            self.angular_velocity,
+            &mut self.circle_center,
+        );
         if self.staticshape {
             return;
         }
@@ -161,13 +165,10 @@ impl Object for Rectangle {
     fn draw(&self, graphics: &mut GlGraphics, transform: Matrix2d, args: &RenderArgs) {
         //draw_rect(self.center, [(self.width) as f64, self.height as f64], transform, graphics)
         // draw the circle that approximates the polygon
-        draw_circle(self.circle_center, self.radius, transform, graphics, args);
-        draw_polygon(
-            self.vertices.as_slice(),
-            transform,
-            graphics,
-            args,
-        );
+        //draw_circle(self.circle_center, self.radius, transform, graphics, args);
+        draw_polygon(self.vertices.as_slice(), transform, graphics, args);
+        // draw point of collision
+        //draw_circle(self.temp, 0.01, transform, graphics, args);
         // draw the mass_centre
         draw_circle(self.getcenter(), 0.001, transform, graphics, args)
     }
@@ -211,8 +212,12 @@ impl Object for Rectangle {
     }
 }
 
-
-fn rotate_vertices(center: Vec2, vertices: &mut Vec<[f64; 2]>, angle: f64, circle_center: &mut Vec2) {
+fn rotate_vertices(
+    center: Vec2,
+    vertices: &mut Vec<[f64; 2]>,
+    angle: f64,
+    circle_center: &mut Vec2,
+) {
     for point in vertices.iter_mut() {
         let x = point[0] - center.x;
         let y = point[1] - center.y;
@@ -224,9 +229,6 @@ fn rotate_vertices(center: Vec2, vertices: &mut Vec<[f64; 2]>, angle: f64, circl
     let y = circle_center.y - center.y;
     circle_center.x = x * angle.cos() - y * angle.sin() + center.x;
     circle_center.y = x * angle.sin() + y * angle.cos() + center.y;
-
-
-
 }
 
 impl Circle {
@@ -348,7 +350,7 @@ impl Object for Circle {
         return vec![];
     }
     fn get_angular_vel(&self) -> f64 {
-        0.0                              // IF NEEDED TO KEEP TRACK; Change this
+        0.0 // IF NEEDED TO KEEP TRACK; Change this
     }
     fn getvel(&self) -> Vec2 {
         self.velocity
