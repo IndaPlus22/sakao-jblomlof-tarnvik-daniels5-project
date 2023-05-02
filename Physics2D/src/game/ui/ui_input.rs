@@ -7,6 +7,8 @@ use crate::game::{GameState, Variables, simulation::traits::{Object, self}};
 
 use super::ui_objects::Objects;
 
+use serde::{Serialize};
+
 pub fn input(event: &Event, objects: &mut Objects, variables: &mut Variables) {
     if let Some(pos) = event.mouse_cursor_args() {
         for i in 0..5 {
@@ -26,8 +28,7 @@ pub fn input(event: &Event, objects: &mut Objects, variables: &mut Variables) {
         } else if objects.buttons[2].hover{
             Save(&mut variables.objects);
         } else if objects.buttons[3].hover{
-            //TODO: Restart button functionality aka reset the simulation to the last saved state 
-            //TODO: If there is no saved state defualt is an empty file? 
+            Load();
         } else if objects.buttons[4].hover{
             //TODO: Clear button functionality aka delete all objects, making the thing blank
         }
@@ -44,7 +45,37 @@ pub fn input(event: &Event, objects: &mut Objects, variables: &mut Variables) {
 }
 
 pub fn Save (objects: &mut Vec<Box<dyn traits::Object>>) -> std::io::Result<()> {
-    let mut file = File::create("objects.txt")?;
-    file.write_all(b"THIS SHOULD BE ALL THE OBJECT INFO")?;
+    let mut file = File::create("objects.json")?;
+    for ob in objects{
+
+        let shape = ob.gettype();
+        file.write_all(shape.as_bytes())?;
+        file.write_all(b"\n")?;
+
+        if shape == "Rectangle" {
+
+        } else if shape == Circle
+
+        let center = ob.getcenter();
+        let center_json = serde_json::to_string(&center).unwrap();
+        file.write_all(center_json.as_bytes())?;
+        file.write_all(b"\n")?;
+        
+        let velocity = ob.getvel();
+        let velocity_json = serde_json::to_string(&velocity).unwrap();
+        file.write_all(velocity_json.as_bytes())?;
+        file.write_all(b"\n")?;
+        
+        let mass = ob.get_mass();
+        let mass_json = serde_json::to_string(&mass).unwrap();
+        file.write_all(mass_json.as_bytes())?;
+        file.write_all(b"\n")?;
+    }
     Ok(())
+}
+
+//TODO: Restart button functionality aka reset the simulation to the last saved state 
+//TODO: If there is no saved state defualt is an empty file? 
+pub fn Load (){
+
 }
