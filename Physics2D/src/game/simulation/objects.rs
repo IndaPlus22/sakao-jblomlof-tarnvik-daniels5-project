@@ -91,8 +91,11 @@ impl Object for Rectangle {
                 ) {
                     Some((norm, move_to_resolve, point_of_collision)) => {
                         // scalar_of_vel should be improved, it works on the relative distance, not the distance
+                        let v1 = self.velocity + self.angular_velocity*(point_of_collision-self.center_of_mass);
+                        let v2 = other.getvel() + other.get_angular_vel()*(point_of_collision-other.getcenter());
+                        let relative_velocityy = v1 - v2;
                         let impulse = calculate_impulse(
-                            self.velocity - other.getvel(),
+                            relative_velocityy,
                             self.mass,
                             other.get_mass(),
                             norm,
@@ -173,15 +176,24 @@ impl Object for Rectangle {
                 self.moverelative(value.desired_movement + self.velocity);
                 println!("impulse: {:?}", value.impulse_angular);
                 self.angular_velocity += value.impulse_angular;
+                rotate_vertices(
+                    self.center_of_mass,
+                    &mut self.vertices,
+                    self.angular_velocity,
+                    &mut self.circle_center,
+                );
             }
-            None => self.moverelative(self.velocity),
+            None => {
+                self.moverelative(self.velocity);
+                rotate_vertices(
+                    self.center_of_mass,
+                    &mut self.vertices,
+                    self.angular_velocity,
+                    &mut self.circle_center,
+                );
+            },
         }
-        rotate_vertices(
-            self.center_of_mass,
-            &mut self.vertices,
-            self.angular_velocity,
-            &mut self.circle_center,
-        );
+        
     }
     fn draw(&self, graphics: &mut GlGraphics, transform: Matrix2d, args: &RenderArgs) {
         //draw_rect(self.center, [(self.width) as f64, self.height as f64], transform, graphics)
@@ -217,6 +229,9 @@ impl Object for Rectangle {
     }
     fn get_angular_vel(&self) -> f64 {
         self.angular_velocity
+    }
+    fn set_angular_vel(&mut self, vel: f64) {
+        self.angular_velocity = vel;
     }
     fn getvel(&self) -> Vec2 {
         self.velocity
@@ -431,6 +446,9 @@ impl Object for Circle {
     }
     fn get_angular_vel(&self) -> f64 {
         0.0 // IF NEEDED TO KEEP TRACK; Change this
+    }
+    fn set_angular_vel(&mut self, vel: f64) {
+        0.0; // IF NEEDED TO KEEP TRACK; Change this
     }
     fn getvel(&self) -> Vec2 {
         self.velocity
