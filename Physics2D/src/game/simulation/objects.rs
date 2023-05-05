@@ -8,6 +8,7 @@ use super::collision::approx_are_colliding;
 use super::collision::collision_between_polygons;
 use super::collision::line_math;
 use super::collision::norm_of;
+use super::collision::point_in_polygon;
 use super::traits::{collisionRecord, Object};
 use crate::{
     game::draw::{draw_circle, draw_polygon},
@@ -224,12 +225,13 @@ impl Object for Rectangle {
         return self.mass;
     }
 
-    fn check_hover (&mut self, mouse_pos: Vec2) {
-        // if point_in_polygon(mouse_pos, &self.vertices) {
-        //     self.hovered = true;
-        // } else {
-        //     self.hovered = false;
-        // }
+    fn check_hover(&mut self, mouse_pos: Vec2) {
+        if point_in_polygon(mouse_pos, &self.vertices) {
+            println!("HOVERING POLY AT: {} {}", mouse_pos.x, mouse_pos.y);
+            self.hovered = true;
+        } else {
+            self.hovered = false;
+        }
     }
 }
 
@@ -391,10 +393,10 @@ impl Object for Circle {
         return self.mass;
     }
 
-    fn check_hover (&mut self, mouse_pos: Vec2) {
+    fn check_hover(&mut self, mouse_pos: Vec2) {
         // println!("bruuuuuuh: {}", (mouse_pos - self.center_of_mass).length());
         if (mouse_pos - self.center_of_mass).length() < self.radius as f64 {
-            // println!("yey");
+            println!("HOVERING circle AT: {} {}", mouse_pos.x, mouse_pos.y);
             self.hovered = true;
         } else {
             self.hovered = false;
@@ -503,7 +505,7 @@ fn calc_mass_center(vert: &Vec<[f64; 2]>) -> (Vec2, Vec<Vec<usize>>) {
                 (vert[0][0] + vert[1][0]) / 2.0,
                 (vert[0][1] + vert[1][1]) / 2.0,
             ),
-            vec![vec![0,1]],
+            vec![vec![0, 1]],
         );
     }
     // using math from https://en.wikipedia.org/wiki/Centroid
@@ -759,3 +761,4 @@ fn make_vertices_anti_clockwise(vertices: &mut Vec<[f64; 2]>) {
         vertices.reverse();
     }
 }
+
