@@ -1,7 +1,10 @@
 use graphics::types::Vec2d;
 use piston::{Event, MouseCursorEvent, PressEvent};
 
-use crate::game::{simulation::objects, GameState, Tool, Variables};
+use crate::{
+    game::{simulation::objects, GameState, Tool, Variables},
+    vector::vector::Vec2,
+};
 
 use super::ui_objects::Objects;
 
@@ -14,6 +17,13 @@ pub fn input(event: &Event, objects: &mut Objects, variables: &mut Variables) {
         for i in 0..objects.tool_bar.buttons.len() {
             objects.tool_bar.buttons[i].check_hover(pos);
             // println!("TOOLBAR: Button {}: hover={}", i, objects.tool_bar.buttons[i].hover);
+        }
+        for i in 0..variables.objects.len() {
+            // TODO: FIx this now it is for 600x600
+            variables.objects[i].check_hover(Vec2::new(
+                pos[0] / variables.win_size[0],
+                pos[1] / variables.win_size[1],
+            ));
         }
 
         variables.last_mouse_pos = pos;
@@ -62,10 +72,16 @@ pub fn input(event: &Event, objects: &mut Objects, variables: &mut Variables) {
     // }
 }
 
-fn match_tools(variables: &mut Variables, button: piston::Button, objects: &mut Objects, win_size: Vec2d) {
+fn match_tools(
+    variables: &mut Variables,
+    button: piston::Button,
+    objects: &mut Objects,
+    win_size: Vec2d,
+) {
     match variables.current_tool {
         Tool::Move => {
             // TODO: Check all objects for hover
+            
             // If hover, select object
             // If selected make able to move object with mouse
         }
@@ -98,6 +114,4 @@ fn match_tools(variables: &mut Variables, button: piston::Button, objects: &mut 
     }
 }
 
-fn check_hover_obj() {
-
-}
+fn check_hover_obj() {}

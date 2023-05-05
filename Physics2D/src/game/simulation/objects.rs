@@ -26,6 +26,7 @@ pub struct Rectangle {
     potnrg: f64,
     form: String,
     staticshape: bool,
+    hovered: bool,
 }
 
 pub struct Circle {
@@ -36,6 +37,7 @@ pub struct Circle {
     potnrg: f64,
     form: String,
     staticshape: bool,
+    hovered: bool,
 }
 
 impl Rectangle {
@@ -51,6 +53,7 @@ impl Rectangle {
             potnrg: 0.0,
             form: "Rectangle".to_string(),
             staticshape: false,
+            hovered: false,
         }
     }
 }
@@ -177,6 +180,14 @@ impl Object for Rectangle {
     fn get_mass (&self) -> f64 {
         return self.mass;
     }
+
+    fn check_hover (&mut self, mouse_pos: Vec2) {
+        // if point_in_polygon(mouse_pos, &self.vertices) {
+        //     self.hovered = true;
+        // } else {
+        //     self.hovered = false;
+        // }
+    }
 }
 
 impl Circle {
@@ -189,6 +200,7 @@ impl Circle {
             potnrg: 0.0,
             form: "Circle".to_string(),
             staticshape: false,
+            hovered: false,
         }
     }
 }
@@ -302,6 +314,16 @@ impl Object for Circle {
     }
     fn get_mass (&self) -> f64 {
         return self.mass;
+    }
+
+    fn check_hover (&mut self, mouse_pos: Vec2) {
+        // println!("bruuuuuuh: {}", (mouse_pos - self.center_of_mass).length());
+        if (mouse_pos - self.center_of_mass).length() < self.radius as f64 {
+            // println!("yey");
+            self.hovered = true;
+        } else {
+            self.hovered = false;
+        }
     }
 }
 
