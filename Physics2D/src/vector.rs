@@ -1,6 +1,8 @@
 pub mod vector {
     use std::{ops, iter::Sum};
 
+    use serde::{Serialize, Serializer, ser::SerializeTuple};
+
     #[derive(Copy, Clone)]
     pub struct Vec2{
         pub x: f64,
@@ -25,6 +27,17 @@ pub mod vector {
         }
 
 
+    }
+    impl Serialize for Vec2 {
+        fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+        where
+            S: Serializer,
+        {
+            let mut tuple = serializer.serialize_tuple(2)?;
+            tuple.serialize_element(&self.x)?;
+            tuple.serialize_element(&self.y)?;
+            tuple.end()
+        }
     }
     impl ops::Add<Vec2> for Vec2 {
         type Output = Vec2;

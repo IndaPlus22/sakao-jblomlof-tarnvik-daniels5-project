@@ -15,6 +15,7 @@ pub trait Object {
     fn get_circle_center(&self) -> Vec2;
     fn getradius(&self) -> f64;
     fn getvertices(&self) -> Vec<[f64;2]>;
+    fn get_angular_vel(&self) -> f64;
     fn getvel(&self) -> Vec2;
     fn setvel (&mut self, vel: Vec2);
     fn moverelative (&mut self, pos: Vec2);

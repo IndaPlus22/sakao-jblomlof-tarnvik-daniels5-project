@@ -1,3 +1,6 @@
+use std::fs::File;
+use std::io::Write;
+
 // boilerplate use for the game
 use glutin_window::GlutinWindow as Window;
 use graphics::types::Vec2d;
@@ -79,9 +82,10 @@ impl Game {
     }
 
     // A function that only runs ones when the game starts
-    pub fn init(&mut self) {
+    pub fn init(&mut self) /*-> std::io::Result<()>*/{
         draw::init();
-
+        //let mut file = File::create("test.txt")?;
+        //file.write_all(b"plz work")?;
         // TEMPORARY CODE TO TEST OBJECTS
         //self.variables
         //    .objects
@@ -89,13 +93,13 @@ impl Game {
         self.variables
             .objects
             .push(Box::new(objects::Rectangle::new(
-                vec![[0.15, 0.1], [0.15, 0.2], [0.25, 0.2], [0.25, 0.1]],
+                vec![[0.15, 0.1], [0.15, 0.3], [0.25, 0.2], [0.25, 0.1]],
                 10.0,
             )));
-        self.variables
+            self.variables
             .objects
             .push(Box::new(objects::Rectangle::new(
-                vec![[0.3, 0.1], [0.3, 0.3], [0.7, 0.3], [0.7, 0.1]],
+                vec![[0.4, 0.1], [0.42, 0.15], [0.4, 0.2], [0.45, 0.18], [0.5, 0.2], [0.48, 0.15], [0.5, 0.1], [0.45, 0.12]],
                 10.0,
             )));
         // self.variables.objects.push(Box::new(objects::Circle::new(
@@ -112,7 +116,6 @@ impl Game {
         //     vec![[0.6, 0.7], [0.6, 0.8], [0.7, 0.9], [0.8, 0.8], [0.8, 0.7], [0.7, 0.6], [0.6, 0.65], [0.58, 0.65]],
         //     1.,
         // )));
-
         // self.variables
         // .objects
         // .push(Box::new(objects::Rectangle::new(
@@ -120,8 +123,8 @@ impl Game {
         //     vec![[110.0,50.0],[100.0,60.0],[120.0,70.0],[120.0,50.0]],
         //     10.0,
         // )));
-        self.variables.objects[0].setvel(Vec2::new(0.01, 0.01));
-        self.variables.objects[1].setvel(Vec2::new(0.01, 0.005));
+        self.variables.objects[0].setvel(Vec2::new(0.0, 0.0));
+        self.variables.objects[1].setvel(Vec2::new(-0.0001, 0.0));
         self.variables.objects[2].setvel(Vec2::new(0.01, 0.0));
         // self.variables.objects[3].setvel(Vec2::new(0.01, 0.0));
         // self.variables.objects[1].set_static(false);
@@ -136,7 +139,9 @@ impl Game {
         self.variables.objects[0].setvel(Vec2::new(0.01, 0.0));
         self.variables.objects[1].setvel(Vec2::new(-0.01, 0.0));
         self.variables.objects[2].setvel(Vec2::new(0.1, 0.0));
+        
         //self.variables.objects[1].set_static(true);
+        //Ok(())
     }
 
     // A function that runs every update
