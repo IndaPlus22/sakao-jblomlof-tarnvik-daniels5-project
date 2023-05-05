@@ -227,7 +227,7 @@ impl Object for Rectangle {
 
     fn check_hover(&mut self, mouse_pos: Vec2) {
         if point_in_polygon(mouse_pos, &self.vertices) {
-            println!("HOVERING POLY AT: {} {}", mouse_pos.x, mouse_pos.y);
+            //println!("HOVERING POLY AT: {} {}", mouse_pos.x, mouse_pos.y);
             self.hovered = true;
         } else {
             self.hovered = false;
@@ -396,7 +396,7 @@ impl Object for Circle {
     fn check_hover(&mut self, mouse_pos: Vec2) {
         // println!("bruuuuuuh: {}", (mouse_pos - self.center_of_mass).length());
         if (mouse_pos - self.center_of_mass).length() < self.radius as f64 {
-            println!("HOVERING circle AT: {} {}", mouse_pos.x, mouse_pos.y);
+            //println!("HOVERING circle AT: {} {}", mouse_pos.x, mouse_pos.y);
             self.hovered = true;
         } else {
             self.hovered = false;
