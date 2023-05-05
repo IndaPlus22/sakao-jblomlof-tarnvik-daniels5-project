@@ -21,6 +21,7 @@ pub trait Object {
     fn moverelative (&mut self, pos: Vec2);
     fn set_static (&mut self, set: bool);
     fn get_mass (&self) -> f64;
+    fn check_hover (&mut self, mouse_pos: Vec2);
 }
 
 pub struct collisionRecord {

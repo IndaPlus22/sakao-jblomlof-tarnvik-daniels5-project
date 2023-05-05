@@ -1,7 +1,3 @@
-use std::path::Path;
-
-use gfx_device_gl::{CommandBuffer, Resources};
-use gfx_graphics::GfxGraphics;
 use graphics::{
     types::{Color, Matrix2d, Vec2d},
     DrawState, Image, Rectangle,
