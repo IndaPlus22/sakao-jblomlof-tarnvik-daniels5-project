@@ -4,7 +4,7 @@ use std::{fs::{OpenOptions, File}, io::Write};
 use graphics::types::Radius;
 use piston::{Event, MouseCursorEvent, PressEvent, ReleaseEvent};
 
-use crate::{game::{GameState, Variables, simulation::traits::{Object, self}}, vector::vector::Vec2};
+use crate::{game::{GameState, Variables, simulation::{traits::{Object, self}, objects}, Tool}, vector::vector::Vec2};
 
 use super::ui_objects::Objects;
 
@@ -157,5 +157,5 @@ pub fn Save (objects: &mut Vec<Box<dyn traits::Object>>) -> std::io::Result<()> 
 
 //TODO: Restart button functionality aka reset the simulation to the last saved state 
 //TODO: If there is no saved state defualt is an empty file? 
-pub fn Load (){
+pub fn Load (){}
 
