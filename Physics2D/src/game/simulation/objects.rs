@@ -111,7 +111,7 @@ impl Object for Rectangle {
                                 None => Vec2::new(0.0, 0.0),
                             } + move_to_resolve,
                             impulse: impulse*norm/self.mass,
-                            impulse_angular: impulse*Vec2::dot(norm, point_of_collision-self.center_of_mass)/self.inertia,
+                            impulse_angular: impulse*Vec2::cross(norm, point_of_collision-self.center_of_mass)/self.inertia,
                         });
                     }
                     None => (),
@@ -170,6 +170,7 @@ impl Object for Rectangle {
         if self.staticshape {
             return;
         }
+        self.velocity += Vec2::new(0.0, 0.00000982);
         match record {
             Some(value) => {
                 self.velocity += value.impulse;
@@ -780,6 +781,7 @@ fn calculate_impulse(
     let normal_unit = Vec2::unit_vector(normal);
     //let j = -(1.0 + restitution) * Vec2::dot(relative_speed, normal_unit)
     //    / (1.0 / mass + 1.0 / mass_other);
+    //let rel = Vec2::cross(relative_speed, normal);
     let part1 = Vec2::dot(normal, normal)*((1.0/mass) + (1.0/mass_other));
     let part2 = (Vec2::dot(r, normal)*Vec2::dot(r, normal))/inertia;
     let part3 = (Vec2::dot(r_other, normal)*Vec2::dot(r_other, normal))/inertia_other;

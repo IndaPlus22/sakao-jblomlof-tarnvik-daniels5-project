@@ -34,7 +34,7 @@ mod ui {
 // constants
 pub const SCREEN_WIDTH: u32 = 600;
 pub const SCREEN_HEIGHT: u32 = 600;
-pub const GRAVITY: Vec2d = [0.0, -1.0];
+pub const GRAVITY: Vec2d = [0.0, -9.81];
 
 //Game state
 #[derive(PartialEq)]
@@ -88,6 +88,7 @@ impl Game {
                 vec![[0.4, 0.1], [0.42, 0.15], [0.4, 0.2], [0.45, 0.18], [0.5, 0.2], [0.48, 0.15], [0.5, 0.1], [0.45, 0.12]],
                 10.0,
             )));
+            //self.variables.objects.push(Box::new(objects::Rectangle::new(vec![[0.0,0.7],[0.0,1.0],[1.0,1.0],[1.0,0.9]], 10.0)));
         // self.variables
         // .objects
         // .push(Box::new(objects::Rectangle::new(
@@ -96,9 +97,10 @@ impl Game {
         //     10.0,
         // )));
         self.variables.objects[0].setvel(Vec2::new(0.0, 0.0));
-        self.variables.objects[1].setvel(Vec2::new(-0.0001, 0.0));
+        self.variables.objects[1].setvel(Vec2::new(-0.0000, 0.0));
         self.variables.objects[1].set_angular_vel(0.0);
-        self.variables.objects[0].set_angular_vel(0.0);
+        self.variables.objects[0].set_angular_vel(0.00);
+        self.variables.objects[2].set_static(true);
 
 
 
