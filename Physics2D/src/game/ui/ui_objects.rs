@@ -30,8 +30,8 @@ impl Objects {
         let mut buttons = Vec::new();
     
         for i in 0..5 {
-            let button_pos = Vec2d::from([pos[0] + 10.*(i as f64 + 1.) + width*(i as f64 + 1.), pos[1] + 10.*(i as f64 + 1.) + height*(i as f64 + 1.)]);
-            let button = Button::new(button_pos, width, height, [0.0,0.0,0.0,1.0], SPRITES[0]);
+            let button_pos = Vec2d::from([pos[0] + 10.*(i as f64 + 1.) + width*(i as f64), pos[1] + 10.]);
+            let button = Button::new(button_pos, width, height, [0.0,0.0,0.0,1.0], SPRITES[i]);
             buttons.push(button);
         }
     
