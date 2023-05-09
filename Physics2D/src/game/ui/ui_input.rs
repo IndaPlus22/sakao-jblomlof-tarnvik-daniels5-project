@@ -1,10 +1,9 @@
-
 use std::{fs::{OpenOptions, File}, io::{Write, BufReader, BufRead}};
 
 use graphics::types::Radius;
 use piston::{Event, MouseCursorEvent, PressEvent, ReleaseEvent};
 
-use crate::{game::{GameState, Variables, simulation::{traits::{Object, self}, objects}}, vector::vector::Vec2};
+use crate::{game::{GameState, Variables, simulation::{traits::{Object, self}, objects::{self, Rectangle, Circle}}}, vector::vector::Vec2};
 
 use super::ui_objects::Objects;
 
@@ -74,5 +73,30 @@ pub fn Save(objects: &mut Vec<Box<dyn traits::Object>>) -> std::io::Result<()> {
         file.write_all(b"\n")?;
     }
 
+    Ok(())
+}
+
+pub fn Load(objects: &mut Vec<Box<dyn traits::Object>>) -> std::io::Result<()> {
+    let file = File::open("objects.json")?;
+    let reader = BufReader::new(file);
+    let json_string: String = reader.lines().map(|line| line.unwrap()).collect();
+    let json_objs: Vec<serde_json::Value> = serde_json::from_str(&json_string)?;
+
+    for obj in json_objs {
+        let shape = obj["shape"].as_str().unwrap();
+        let center: Vec2 = serde_json::from_value(obj["center"].clone())?;
+        let velocity: Vec2 = serde_json::from_value(obj["velocity"].clone())?;
+        let mass: f64 = serde_json::from_value(obj["mass"].clone())?;
+        let mut new_obj: Box<dyn traits::Object>;
+        if shape == "Rectangle" {
+            let vertices: Vec<[f64; 2]> = serde_json::from_value(obj["vertices"].clone())?;
+            new_obj = Box::new(Rectangle::new(vertices, mass));
+        } else {
+            let radius: f64 = serde_json::from_value(obj["radius"].clone())?;
+            new_obj = Box::new(Circle::new(center, radius, mass));
+        }
+        new_obj.setvel(velocity);
+        objects.push(new_obj);
+    }
     Ok(())
 }
