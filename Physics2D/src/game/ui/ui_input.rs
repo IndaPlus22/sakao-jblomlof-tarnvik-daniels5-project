@@ -1,13 +1,10 @@
-use std::{fs::{OpenOptions, File}, io::{Write, BufReader, BufRead}};
+use std::{fs::{File}, io::{Write, BufReader, BufRead}};
 
-use graphics::types::Radius;
-use piston::{Event, MouseCursorEvent, PressEvent, ReleaseEvent};
+use piston::{Event, MouseCursorEvent, PressEvent};
 
-use crate::{game::{GameState, Variables, simulation::{traits::{Object, self}, objects::{self, Rectangle, Circle}}}, vector::vector::Vec2};
+use crate::{game::{GameState, Variables, simulation::{traits::{self}, objects::{Rectangle, Circle}}}, vector::vector::Vec2};
 
 use super::ui_objects::Objects;
-
-use serde::{Serialize};
 
 pub fn input(event: &Event, objects: &mut Objects, variables: &mut Variables) {
     if let Some(pos) = event.mouse_cursor_args() {
@@ -20,16 +17,27 @@ pub fn input(event: &Event, objects: &mut Objects, variables: &mut Variables) {
             // println!("TOOLBAR: Button {}: hover={}", i, objects.tool_bar.buttons[i].hover);
         }
     }
-    if let Some(button) = event.press_args() {
-        if objects.buttons[0].hover {
+    if let Some(_button) = event.press_args() {
+        if objects.buttons[0].hover { 
+            //PLAY BUTTON (starts/un pauses simulation)
             variables.game_state = GameState::Running;
         } else if objects.buttons[1].hover{
+            //PAUSE BUTTON (pauses simulation) 
             variables.game_state  = GameState::Paused;
-        } else if objects.buttons[2].hover{
-            Save(&mut variables.objects);
-        } else if objects.buttons[3].hover{
-            Load(&mut variables.objects);
-        } else if objects.buttons[4].hover{
+        } else if objects.buttons[2].hover{ 
+            //SAVE BUTTON (saves current objects to file)
+            match save(&mut variables.objects) {
+                Ok(()) => (),
+                Err(e) => eprintln!("Error saving objects: {}", e),
+            }
+        } else if objects.buttons[3].hover{ 
+            //RESET BUTTON (resets simulation to saved state)
+            match load(&mut variables.objects) {
+                Ok(()) => (),
+                Err(e) => eprintln!("Error loading objects: {}", e),
+            }
+        } else if objects.buttons[4].hover{ 
+            //CLEAR BUTTON (clear all objects from the simulation)
             variables.objects.clear();
         }
         
@@ -44,7 +52,7 @@ pub fn input(event: &Event, objects: &mut Objects, variables: &mut Variables) {
     // }
 }
 
-pub fn Save(objects: &mut Vec<Box<dyn traits::Object>>) -> std::io::Result<()> {
+pub fn save(objects: &mut Vec<Box<dyn traits::Object>>) -> std::io::Result<()> {
     let mut obj_vec = Vec::new();
     for ob in objects {
         let shape = ob.gettype();
@@ -76,7 +84,7 @@ pub fn Save(objects: &mut Vec<Box<dyn traits::Object>>) -> std::io::Result<()> {
     Ok(())
 }
 
-pub fn Load(objects: &mut Vec<Box<dyn traits::Object>>) -> std::io::Result<()> {
+pub fn load(objects: &mut Vec<Box<dyn traits::Object>>) -> std::io::Result<()> {
     let file = File::open("objects.json")?;
     let reader = BufReader::new(file);
     let json_string: String = reader.lines().map(|line| line.unwrap()).collect();
