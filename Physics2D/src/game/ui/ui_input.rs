@@ -45,8 +45,7 @@ pub fn input(event: &Event, objects: &mut Objects, variables: &mut Variables) {
 }
 
 pub fn Save(objects: &mut Vec<Box<dyn traits::Object>>) -> std::io::Result<()> {
-    let mut file = File::create("objects.json")?;
-
+    let mut obj_vec = Vec::new();
     for ob in objects {
         let shape = ob.gettype();
         let center = ob.getcenter();
@@ -67,12 +66,13 @@ pub fn Save(objects: &mut Vec<Box<dyn traits::Object>>) -> std::io::Result<()> {
         obj_map.insert("center".to_string(), serde_json::json!(center));
         obj_map.insert("velocity".to_string(), serde_json::json!(velocity));
         obj_map.insert("mass".to_string(), serde_json::json!(mass));
-
-        let obj_json = serde_json::to_string_pretty(&serde_json::json!(obj_map))?;
-        file.write_all(obj_json.as_bytes())?;
-        file.write_all(b"\n")?;
+        
+        obj_vec.push(serde_json::json!(obj_map));
     }
 
+    let obj_json = serde_json::to_string_pretty(&obj_vec)?;
+    let mut file = File::create("objects.json")?;
+    file.write_all(obj_json.as_bytes())?;
     Ok(())
 }
 
