@@ -1,14 +1,27 @@
 use graphics::types::Vec2d;
-use std::{fs::{OpenOptions, File}, io::Write};
+use std::{
+    fs::{File, OpenOptions},
+    io::Write,
+};
 
 use graphics::types::Radius;
 use piston::{Event, MouseCursorEvent, PressEvent, ReleaseEvent};
 
-use crate::{game::{GameState, Variables, simulation::traits::{Object, self}}, vector::vector::Vec2};
+use crate::{
+    game::{
+        draw::draw_circle,
+        simulation::{
+            objects,
+            traits::{self, Object},
+        },
+        GameState, Tool, Variables,
+    },
+    vector::vector::Vec2,
+};
 
 use super::ui_objects::Objects;
 
-use serde::{Serialize};
+use serde::Serialize;
 
 pub fn input(event: &Event, objects: &mut Objects, variables: &mut Variables) {
     if let Some(pos) = event.mouse_cursor_args() {
@@ -21,7 +34,33 @@ pub fn input(event: &Event, objects: &mut Objects, variables: &mut Variables) {
             // println!("TOOLBAR: Button {}: hover={}", i, objects.tool_bar.buttons[i].hover);
         }
         for i in 0..variables.objects.len() {
-            // TODO: FIx this now it is for 600x600
+            
+            if variables.objects[i].get_selected(0) == 1 {
+                // Move object
+                variables.objects[i].set_pos(Vec2::new(
+                    pos[0] / variables.win_size[0],
+                    pos[1] / variables.win_size[1],
+                ))
+            } else if variables.objects[i].get_selected(1) == 1 {
+                // Scale
+                if variables.objects[i].gettype() == "Circle" {
+                    let radius = (variables.objects[i].get_pos().x - pos[0] / variables.win_size[0])
+                        .powf(2.0)
+                        + (variables.objects[i].get_pos().y - pos[1] / variables.win_size[1])
+                            .powf(2.0);
+                    // TODO: Set radius
+                    // variables.objects[i].set_radius(radius.sqrt());
+                } else if variables.objects[i].gettype() == "Rectangle" {
+                    // TODO: Set scalar value
+                }
+            } else if variables.objects[i].get_selected(2) == 1 {
+                // Rotate
+                // Only rotate rects(polygons)
+                if variables.objects[i].gettype() == "Rectangle" {
+                    
+                }
+            }
+
             variables.objects[i].check_hover(Vec2::new(
                 pos[0] / variables.win_size[0],
                 pos[1] / variables.win_size[1],
@@ -36,13 +75,13 @@ pub fn input(event: &Event, objects: &mut Objects, variables: &mut Variables) {
 
         if objects.buttons[0].hover {
             variables.game_state = GameState::Running;
-        } else if objects.buttons[1].hover{
-            variables.game_state  = GameState::Paused;
-        } else if objects.buttons[2].hover{
+        } else if objects.buttons[1].hover {
+            variables.game_state = GameState::Paused;
+        } else if objects.buttons[2].hover {
             Save(&mut variables.objects);
-        } else if objects.buttons[3].hover{
+        } else if objects.buttons[3].hover {
             Load();
-        } else if objects.buttons[4].hover{
+        } else if objects.buttons[4].hover {
             //TODO: Clear button functionality aka delete all objects, making the thing blank
         }
 
@@ -68,9 +107,17 @@ pub fn input(event: &Event, objects: &mut Objects, variables: &mut Variables) {
             }
         }
     }
-    // if let Some(button) = event.release_args() {
-    //     println!("Released {:?}", button);
-    // }
+    if let Some(button) = event.release_args() {
+        if button == piston::Button::Mouse(piston::MouseButton::Left) {
+            for i in 0..variables.objects.len() {
+                for j in 0..3 {
+                    if variables.objects[i].get_selected(j) == 1 {
+                        variables.objects[i].set_selected(j, 0);
+                    }
+                }
+            }
+        }
+    }
 }
 
 fn match_tools(
@@ -81,16 +128,17 @@ fn match_tools(
 ) {
     match variables.current_tool {
         Tool::Move => {
-            // TODO: Check all objects for hover
-            
+            select_object(variables, button, 0);
             // If hover, select object
             // If selected make able to move object with mouse
         }
         Tool::Scale => {
             // TODO: Same as move but with scale
+            select_object(variables, button, 1);
         }
         Tool::Rotate => {
             // TODO: Same as move but with rotate
+            select_object(variables, button, 2);
         }
         Tool::Draw => {
             if button == piston::Button::Mouse(piston::MouseButton::Left) {
@@ -115,12 +163,30 @@ fn match_tools(
     }
 }
 
-fn check_hover_obj() {}
+fn check_hover_obj(variables: &mut Variables) -> Option<usize> {
+    for i in 0..variables.objects.len() {
+        if variables.objects[i].get_hover() {
+            return Some(i);
+        }
+    }
 
-pub fn Save (objects: &mut Vec<Box<dyn traits::Object>>) -> std::io::Result<()> {
+    None
+}
+
+fn select_object(variables: &mut Variables, button: piston::Button, func: u8) {
+    let hovered_i = check_hover_obj(variables);
+    if let Some(i) = hovered_i {
+        if button == piston::Button::Mouse(piston::MouseButton::Left) {
+            println!("MOVE, Pressed object: {}", i);
+
+            variables.objects[i].set_selected(func, 1);
+        }
+    }
+}
+
+pub fn Save(objects: &mut Vec<Box<dyn traits::Object>>) -> std::io::Result<()> {
     let mut file = File::create("objects.json")?;
-    for ob in objects{
-
+    for ob in objects {
         let shape = ob.gettype();
         file.write_all(shape.as_bytes())?;
         file.write_all(b"\n")?;
@@ -141,12 +207,12 @@ pub fn Save (objects: &mut Vec<Box<dyn traits::Object>>) -> std::io::Result<()> 
         let center_json = serde_json::to_string(&center).unwrap();
         file.write_all(center_json.as_bytes())?;
         file.write_all(b"\n")?;
-        
+
         let velocity = ob.getvel();
         let velocity_json = serde_json::to_string(&velocity).unwrap();
         file.write_all(velocity_json.as_bytes())?;
         file.write_all(b"\n")?;
-        
+
         let mass = ob.get_mass();
         let mass_json = serde_json::to_string(&mass).unwrap();
         file.write_all(mass_json.as_bytes())?;
@@ -155,7 +221,6 @@ pub fn Save (objects: &mut Vec<Box<dyn traits::Object>>) -> std::io::Result<()> 
     Ok(())
 }
 
-//TODO: Restart button functionality aka reset the simulation to the last saved state 
-//TODO: If there is no saved state defualt is an empty file? 
-pub fn Load (){
-
+//TODO: Restart button functionality aka reset the simulation to the last saved state
+//TODO: If there is no saved state defualt is an empty file?
+pub fn Load() {}

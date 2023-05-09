@@ -25,8 +25,9 @@ pub struct Rectangle {
     potnrg: f64,
     form: String,
     staticshape: bool,
-    hovered: bool,
     triangulations: Vec<Vec<usize>>,
+    hovered: bool,
+    selected: [u8; 3],
 }
 
 pub struct Circle {
@@ -38,6 +39,7 @@ pub struct Circle {
     form: String,
     staticshape: bool,
     hovered: bool,
+    selected: [u8; 3],
 }
 
 impl Rectangle {
@@ -51,12 +53,14 @@ impl Rectangle {
             radius: c.1,
             vertices,
             mass,
-            velocity: Vec2::new(0.02, 0.02),
+            angular_velocity: 0.0,
+            velocity: Vec2::new(0.001, 0.001),
             potnrg: 0.0,
             form: "Rectangle".to_string(),
             staticshape: false,
             hovered: false,
             triangulations: triangles,
+            selected: [0, 0, 0],
         }
     }
 }
@@ -230,6 +234,26 @@ impl Object for Rectangle {
         //     self.hovered = false;
         // }
     }
+
+    fn get_hover (&self) -> bool {
+        self.hovered
+    }
+
+    fn get_selected (&self, index: u8) -> u8 {
+        self.selected[index as usize]
+    }
+
+    fn set_selected (&mut self, index: u8, selected: u8) {
+        self.selected[index as usize] = selected;
+    }
+
+    fn get_pos (&self) -> Vec2 {
+        self.center_of_mass
+    }
+
+    fn set_pos (&mut self, pos: Vec2) {
+        self.center_of_mass = pos;
+    }
 }
 
 fn rotate_vertices(
@@ -257,13 +281,18 @@ impl Circle {
             center_of_mass: center,
             radius,
             mass,
-            velocity: Vec2::new(0.2, 0.2),
+            velocity: Vec2::new(0.001, 0.001),
             potnrg: 0.0,
             form: "Circle".to_string(),
             staticshape: false,
             hovered: false,
+            selected: [0, 0, 0],
         }
     }
+
+    // fn set_radius(&mut self, radius: f64) {
+    //     self.radius = radius;
+    // }
 }
 
 impl Object for Circle {
@@ -398,6 +427,26 @@ impl Object for Circle {
         } else {
             self.hovered = false;
         }
+    }
+
+    fn get_hover (&self) -> bool {
+        self.hovered
+    }
+
+    fn get_selected (&self, index: u8) -> u8 {
+        self.selected[index as usize]
+    }
+
+    fn set_selected (&mut self, index: u8, selected: u8) {
+        self.selected[index as usize] = selected;
+    }
+
+    fn get_pos (&self) -> Vec2 {
+        self.center_of_mass
+    }
+
+    fn set_pos (&mut self, pos: Vec2) {
+        self.center_of_mass = pos;
     }
 }
 

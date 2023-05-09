@@ -22,6 +22,11 @@ pub trait Object {
     fn set_static (&mut self, set: bool);
     fn get_mass (&self) -> f64;
     fn check_hover (&mut self, mouse_pos: Vec2);
+    fn get_hover (&self) -> bool;
+    fn get_selected (&self, index: u8) -> u8;
+    fn set_selected (&mut self, index: u8, selected: u8);
+    fn get_pos (&self) -> Vec2;
+    fn set_pos (&mut self, pos: Vec2);
 }
 
 pub struct collisionRecord {
