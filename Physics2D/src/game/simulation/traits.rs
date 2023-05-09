@@ -15,16 +15,19 @@ pub trait Object {
     fn get_circle_center(&self) -> Vec2;
     fn getradius(&self) -> f64;
     fn getvertices(&self) -> Vec<[f64;2]>;
+    fn set_angular_vel(&mut self, vel: f64);
     fn get_angular_vel(&self) -> f64;
     fn getvel(&self) -> Vec2;
     fn setvel (&mut self, vel: Vec2);
     fn moverelative (&mut self, pos: Vec2);
     fn set_static (&mut self, set: bool);
     fn get_mass (&self) -> f64;
+    fn get_inertia(&self) -> f64;
     fn check_hover (&mut self, mouse_pos: Vec2);
 }
 
 pub struct collisionRecord {
     pub desired_movement: Vec2,
     pub impulse: Vec2,
+    pub impulse_angular: f64,
 }

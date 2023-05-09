@@ -334,7 +334,7 @@ fn calculate_scalar_distance(
     }
     avg_pos /= points_of_collision.len() as f64;
     //println!("Norm: {} ; {}; SCALAR: {} ", total_norm.x, total_norm.y, -max_dist);
-    return Some((total_norm, max_move, avg_pos));
+    return Some((total_norm, -max_move, avg_pos));
 }
 
 // given a point, rotation_center, move, angle return a Vec2 in the direction
