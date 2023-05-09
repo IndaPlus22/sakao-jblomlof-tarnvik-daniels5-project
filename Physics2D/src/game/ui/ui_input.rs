@@ -80,6 +80,7 @@ pub fn save(objects: &mut Vec<Box<dyn traits::Object>>) -> std::io::Result<()> {
 
     let obj_json = serde_json::to_string_pretty(&obj_vec)?;
     let mut file = File::create("objects.json")?;
+    file.write_all(b"")?;
     file.write_all(obj_json.as_bytes())?;
     Ok(())
 }
@@ -89,6 +90,7 @@ pub fn load(objects: &mut Vec<Box<dyn traits::Object>>) -> std::io::Result<()> {
     let reader = BufReader::new(file);
     let json_string: String = reader.lines().map(|line| line.unwrap()).collect();
     let json_objs: Vec<serde_json::Value> = serde_json::from_str(&json_string)?;
+    objects.clear();
 
     for obj in json_objs {
         let shape = obj["shape"].as_str().unwrap();
