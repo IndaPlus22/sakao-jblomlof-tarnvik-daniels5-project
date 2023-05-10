@@ -1,4 +1,5 @@
 use graphics::types::Vec2d;
+use serde_json::Value;
 use std::{fs::{OpenOptions, File}, io::{Write, BufReader, BufRead}};
 
 use graphics::types::Radius;
@@ -8,7 +9,7 @@ use crate::{
     game::{
         draw::draw_circle,
         simulation::{
-            objects::{self, Rectangle, Circle}},
+            objects::{self, Rectangle, Circle},
             traits::{self, Object},
         },
         GameState, Tool, Variables,
@@ -185,6 +186,8 @@ fn check_hover_obj(variables: &mut Variables) -> Option<usize> {
             return Some(i);
         }
     }
+    None
+}
 
 
 fn select_object(variables: &mut Variables, button: piston::Button, func: u8) {
@@ -199,7 +202,7 @@ fn select_object(variables: &mut Variables, button: piston::Button, func: u8) {
 }
 
   pub fn save(objects: &mut Vec<Box<dyn traits::Object>>) -> std::io::Result<()> {
-    // let mut obj_vec = Vec::new();
+    let mut obj_vec: Vec<Value> = Vec::new();
     let mut file = File::create("objects.json")?;
     for ob in objects {
         let shape = ob.gettype();

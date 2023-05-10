@@ -49,7 +49,8 @@ impl Rectangle {
     pub fn new(mut vertices: Vec<[f64; 2]>, mass: f64) -> Rectangle {
         let c = approx_circle_hitbox(&vertices);
         make_vertices_anti_clockwise(&mut vertices);
-        let (center_of_mass, triangles, total_area,triangle_inertia ,triangle_propeties) = calc_mass_center(&vertices);
+        let (center_of_mass, triangles, total_area, triangle_inertia, triangle_propeties) =
+            calc_mass_center(&vertices);
         Rectangle {
             center_of_mass: center_of_mass,
             circle_center: c.0,
@@ -64,7 +65,12 @@ impl Rectangle {
             hovered: false,
             triangulations: triangles,
             density: mass / total_area,
-            inertia: calculate_moment_of_inertia_of_polygon(triangle_inertia, triangle_propeties, center_of_mass, mass),
+            inertia: calculate_moment_of_inertia_of_polygon(
+                triangle_inertia,
+                triangle_propeties,
+                center_of_mass,
+                mass,
+            ),
             selected: [0, 0, 0],
         }
     }
@@ -98,8 +104,10 @@ impl Object for Rectangle {
                 ) {
                     Some((norm, move_to_resolve, point_of_collision)) => {
                         // scalar_of_vel should be improved, it works on the relative distance, not the distance
-                        let v1 = self.velocity + self.angular_velocity*(point_of_collision-self.center_of_mass);
-                        let v2 = other.getvel() + other.get_angular_vel()*(point_of_collision-other.getcenter());
+                        let v1 = self.velocity
+                            + self.angular_velocity * (point_of_collision - self.center_of_mass);
+                        let v2 = other.getvel()
+                            + other.get_angular_vel() * (point_of_collision - other.getcenter());
                         let relative_velocityy = v1 - v2;
                         let impulse = calculate_impulse(
                             relative_velocityy,
@@ -107,8 +115,8 @@ impl Object for Rectangle {
                             other.get_mass(),
                             norm,
                             1.0,
-                            point_of_collision-self.center_of_mass,
-                            point_of_collision-other.getcenter(),
+                            point_of_collision - self.center_of_mass,
+                            point_of_collision - other.getcenter(),
                             self.inertia,
                             other.get_inertia(),
                         );
@@ -117,8 +125,10 @@ impl Object for Rectangle {
                                 Some(value) => value.desired_movement,
                                 None => Vec2::new(0.0, 0.0),
                             } + move_to_resolve,
-                            impulse: impulse*norm/self.mass,
-                            impulse_angular: impulse*Vec2::cross(norm, point_of_collision-self.center_of_mass)/self.inertia,
+                            impulse: impulse * norm / self.mass,
+                            impulse_angular: impulse
+                                * Vec2::cross(norm, point_of_collision - self.center_of_mass)
+                                / self.inertia,
                         });
                     }
                     None => (),
@@ -163,7 +173,7 @@ impl Object for Rectangle {
                     } + Vec2::unit_vector(relative_speed)
                         * max_distance.length()
                         * -1.0,
-                    impulse: impulse*max_distance/self.mass,
+                    impulse: impulse * max_distance / self.mass,
                     impulse_angular: 0.0,
                 });
             }
@@ -173,7 +183,7 @@ impl Object for Rectangle {
 
     fn update(&mut self, record: &Option<collisionRecord>, dt: f64) {
         //self.center += self.velocity;
-        
+
         if self.staticshape {
             return;
         }
@@ -199,9 +209,8 @@ impl Object for Rectangle {
                     self.angular_velocity,
                     &mut self.circle_center,
                 );
-            },
+            }
         }
-        
     }
     fn draw(&self, graphics: &mut GlGraphics, transform: Matrix2d, args: &RenderArgs) {
         //draw_rect(self.center, [(self.width) as f64, self.height as f64], transform, graphics)
@@ -265,7 +274,6 @@ impl Object for Rectangle {
         return self.inertia;
     }
 
-
     fn check_hover(&mut self, mouse_pos: Vec2) {
         if point_in_polygon(mouse_pos, &self.vertices) {
             //println!("HOVERING POLY AT: {} {}", mouse_pos.x, mouse_pos.y);
@@ -274,10 +282,38 @@ impl Object for Rectangle {
             self.hovered = false;
         }
     }
+
+    fn get_hover(&self) -> bool {
+        self.hovered
+    }
+
+    fn get_selected(&self, index: u8) -> u8 {
+        self.selected[index as usize]
+    }
+
+    fn set_selected(&mut self, index: u8, selected: u8) {
+        self.selected[index as usize] = selected;
+    }
+
+    fn get_pos(&self) -> Vec2 {
+        self.center_of_mass
+    }
+
+    fn set_pos(&mut self, pos: Vec2) {
+        self.center_of_mass = pos;
+    }
+
+    fn rescale(&mut self, scale: f64) {
+        self.mass *= scale;
+        for point in self.vertices.iter_mut() {
+            point[0] *= scale;
+            point[1] *= scale;
+        }
+    }
 }
 
 fn calculate_moment_of_inertia_of_polygon(
-    triangles: Vec<Vec<[f64;2]>>,
+    triangles: Vec<Vec<[f64; 2]>>,
     triangle_propeties: Vec<(Vec2, f64)>,
     polygon_center: Vec2,
     mass: f64,
@@ -290,63 +326,33 @@ fn calculate_moment_of_inertia_of_polygon(
         let p3 = Vec2::new(triangle[2][0], triangle[2][1]);
         let center = properties.0;
         let area = properties.1;
-        let width_total = (p2-p1).length();
-        let height = 2.0*area/width_total;
-        let density = mass/area;
+        let width_total = (p2 - p1).length();
+        let height = 2.0 * area / width_total;
+        let density = mass / area;
         let u1 = p2 - p1;
-        let u2 = p3-p1;
+        let u2 = p3 - p1;
 
-        let p4 = p1 + Vec2::dot(u1, u2)*u1/Vec2::dot(u1, u1);
+        let p4 = p1 + Vec2::dot(u1, u2) * u1 / Vec2::dot(u1, u1);
         let w1 = (p4 - p1).length();
         let w2 = (p4 - p2).length();
-        let I1 = density*(height*w1*w1*w1/4.0 + height*height*height*w1/12.0);
-        let I2 = density*(height*w2*w2*w2/4.0 + height*height*height*w2/12.0);
-        
-        if Vec2::cross(p1-p3, p4-p3) > 0.0 {
+        let I1 = density * (height * w1 * w1 * w1 / 4.0 + height * height * height * w1 / 12.0);
+        let I2 = density * (height * w2 * w2 * w2 / 4.0 + height * height * height * w2 / 12.0);
+
+        if Vec2::cross(p1 - p3, p4 - p3) > 0.0 {
             moment += I1;
         } else {
             moment -= I1;
         }
-        if Vec2::cross(p4-p3, p2-p3) > 0.0 {
+        if Vec2::cross(p4 - p3, p2 - p3) > 0.0 {
             moment += I2;
         } else {
             moment -= I2;
         }
-        moment_total += moment - mass*(p3-polygon_center).squared_length();
-
+        moment_total += moment - mass * (p3 - polygon_center).squared_length();
     }
     println!("moment of inertia: {}", moment_total);
     return moment_total.abs();
 }
-
-    fn get_hover (&self) -> bool {
-        self.hovered
-    }
-
-    fn get_selected (&self, index: u8) -> u8 {
-        self.selected[index as usize]
-    }
-
-    fn set_selected (&mut self, index: u8, selected: u8) {
-        self.selected[index as usize] = selected;
-    }
-
-    fn get_pos (&self) -> Vec2 {
-        self.center_of_mass
-    }
-
-    fn set_pos (&mut self, pos: Vec2) {
-        self.center_of_mass = pos;
-    }
-
-    fn rescale (&mut self, scale: f64) {
-        self.mass *= scale;
-        for point in self.vertices.iter_mut() {
-            point[0] *= scale;
-            point[1] *= scale;
-        }
-    }
-
 
 fn rotate_vertices(
     center: Vec2,
@@ -411,7 +417,7 @@ impl Object for Circle {
                     Vec2::new(0.0, 0.0),
                     Vec2::new(0.0, 0.0),
                     1.0,
-                    1.0
+                    1.0,
                 );
 
                 return Some(collisionRecord {
@@ -419,7 +425,7 @@ impl Object for Circle {
                         Some(value) => value.desired_movement,
                         None => Vec2::new(0.0, 0.0),
                     } + posmovment,
-                    impulse: impulse*distance/self.mass,
+                    impulse: impulse * distance / self.mass,
                     impulse_angular: 0.0,
                 });
             }
@@ -446,15 +452,24 @@ impl Object for Circle {
                 let relative_speed = self.velocity - other.getvel();
                 //Calulcate the normal of the collision
                 let normal = Vec2::unit_vector(max_distance);
-                let impulse =
-                    calculate_impulse(relative_speed, self.mass, other.get_mass(), normal, 1., Vec2::new(0.0, 0.0),Vec2::new(0.0, 0.0), 1.0, 1.0);
+                let impulse = calculate_impulse(
+                    relative_speed,
+                    self.mass,
+                    other.get_mass(),
+                    normal,
+                    1.,
+                    Vec2::new(0.0, 0.0),
+                    Vec2::new(0.0, 0.0),
+                    1.0,
+                    1.0,
+                );
                 return Some(collisionRecord {
                     desired_movement: match record {
                         Some(value) => value.desired_movement,
                         None => Vec2::new(0.0, 0.0),
                     } + max_distance * Vec2::unit_vector(relative_speed),
-                    impulse: impulse*normal/self.mass, //return Some(collisionRecord {desired_movement: local_collision_offset*-1.0});
-                                      //The -1.0 is to make sure the circle moves away from the rectangle and not into it since the offset is based on the rectangle
+                    impulse: impulse * normal / self.mass, //return Some(collisionRecord {desired_movement: local_collision_offset*-1.0});
+                    //The -1.0 is to make sure the circle moves away from the rectangle and not into it since the offset is based on the rectangle
                     impulse_angular: 0.0,
                 });
             }
@@ -523,7 +538,6 @@ impl Object for Circle {
         return 0.0;
     }
 
-
     fn check_hover(&mut self, mouse_pos: Vec2) {
         // println!("bruuuuuuh: {}", (mouse_pos - self.center_of_mass).length());
         if (mouse_pos - self.center_of_mass).length() < self.radius as f64 {
@@ -534,27 +548,27 @@ impl Object for Circle {
         }
     }
 
-    fn get_hover (&self) -> bool {
+    fn get_hover(&self) -> bool {
         self.hovered
     }
 
-    fn get_selected (&self, index: u8) -> u8 {
+    fn get_selected(&self, index: u8) -> u8 {
         self.selected[index as usize]
     }
 
-    fn set_selected (&mut self, index: u8, selected: u8) {
+    fn set_selected(&mut self, index: u8, selected: u8) {
         self.selected[index as usize] = selected;
     }
 
-    fn get_pos (&self) -> Vec2 {
+    fn get_pos(&self) -> Vec2 {
         self.center_of_mass
     }
 
-    fn set_pos (&mut self, pos: Vec2) {
+    fn set_pos(&mut self, pos: Vec2) {
         self.center_of_mass = pos;
     }
 
-    fn rescale (&mut self, scale: f64) {
+    fn rescale(&mut self, scale: f64) {
         self.mass *= scale;
         self.radius *= scale;
     }
@@ -652,7 +666,15 @@ fn checkCircleCollisionWithPolygon(
 /// Takes a reference to a vec of points such that it is ordered after connecting vertices.
 /// # Panics
 /// Panics if vertices consists of 1 or 0 elements
-fn calc_mass_center(vert: &Vec<[f64; 2]>) -> (Vec2, Vec<Vec<usize>>, f64, Vec<Vec<[f64;2]>>, Vec<(Vec2, f64)>) {
+fn calc_mass_center(
+    vert: &Vec<[f64; 2]>,
+) -> (
+    Vec2,
+    Vec<Vec<usize>>,
+    f64,
+    Vec<Vec<[f64; 2]>>,
+    Vec<(Vec2, f64)>,
+) {
     assert!(vert.len() >= 2);
     if vert.len() == 2 {
         // a line, return the average of x and y
@@ -661,7 +683,7 @@ fn calc_mass_center(vert: &Vec<[f64; 2]>) -> (Vec2, Vec<Vec<usize>>, f64, Vec<Ve
                 (vert[0][0] + vert[1][0]) / 2.0,
                 (vert[0][1] + vert[1][1]) / 2.0,
             ),
-            vec![vec![0,1]],
+            vec![vec![0, 1]],
             0.0,
             vec![],
             vec![],
@@ -754,17 +776,16 @@ fn calc_mass_center(vert: &Vec<[f64; 2]>) -> (Vec2, Vec<Vec<usize>>, f64, Vec<Ve
             ]);
             triangles.push(vec![vertices[i], vertices[iplus1], vertices[iplus2]]);
             triangle_propeties.push(temp);
-            sum_of_centre += temp.0*temp.1;
+            sum_of_centre += temp.0 * temp.1;
             area_sum += temp.1;
             vertices.remove(iplus1);
             break;
         }
     }
     let temp = calc_triangle_mass_center_and_area([vertices[0], vertices[1], vertices[2]]);
-    sum_of_centre += temp.0*temp.1;
+    sum_of_centre += temp.0 * temp.1;
     area_sum += temp.1;
     triangles.push(vertices);
-    
 
     let mut mapped_index = Vec::new();
     for tri in &triangles {
@@ -779,7 +800,13 @@ fn calc_mass_center(vert: &Vec<[f64; 2]>) -> (Vec2, Vec<Vec<usize>>, f64, Vec<Ve
         }
         mapped_index.push(middle_stage);
     }
-    return (sum_of_centre / area_sum, mapped_index, area_sum, triangles, triangle_propeties);
+    return (
+        sum_of_centre / area_sum,
+        mapped_index,
+        area_sum,
+        triangles,
+        triangle_propeties,
+    );
 }
 
 fn calc_triangle_mass_center_and_area(vertices: [[f64; 2]; 3]) -> (Vec2, f64) {
@@ -870,10 +897,10 @@ fn calculate_impulse(
     //let j = -(1.0 + restitution) * Vec2::dot(relative_speed, normal_unit)
     //    / (1.0 / mass + 1.0 / mass_other);
     //let rel = Vec2::cross(relative_speed, normal);
-    let part1 = Vec2::dot(normal, normal)*((1.0/mass) + (1.0/mass_other));
-    let part2 = (Vec2::dot(r, normal)*Vec2::dot(r, normal))/inertia;
-    let part3 = (Vec2::dot(r_other, normal)*Vec2::dot(r_other, normal))/inertia_other;
-    let j = -(1.0 + restitution)*Vec2::dot(relative_speed, normal)/(part1 + part2 + part3);
+    let part1 = Vec2::dot(normal, normal) * ((1.0 / mass) + (1.0 / mass_other));
+    let part2 = (Vec2::dot(r, normal) * Vec2::dot(r, normal)) / inertia;
+    let part3 = (Vec2::dot(r_other, normal) * Vec2::dot(r_other, normal)) / inertia_other;
+    let j = -(1.0 + restitution) * Vec2::dot(relative_speed, normal) / (part1 + part2 + part3);
     return j;
 }
 
@@ -931,4 +958,3 @@ fn make_vertices_anti_clockwise(vertices: &mut Vec<[f64; 2]>) {
         vertices.reverse();
     }
 }
-
