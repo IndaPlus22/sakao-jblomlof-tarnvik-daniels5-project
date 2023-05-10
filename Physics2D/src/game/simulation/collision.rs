@@ -334,7 +334,7 @@ fn calculate_scalar_distance(
     }
     avg_pos /= points_of_collision.len() as f64;
     //println!("Norm: {} ; {}; SCALAR: {} ", total_norm.x, total_norm.y, -max_dist);
-    return Some((total_norm, max_move, avg_pos));
+    return Some((total_norm, -max_move, avg_pos));
 }
 
 // given a point, rotation_center, move, angle return a Vec2 in the direction
@@ -376,4 +376,26 @@ fn parallel_line(line1: [[f64; 2]; 2], line2: [[f64; 2]; 2]) -> bool {
         let quotient2 = dy2 / dx2;
         return (quotient1.abs() - quotient2.abs()).abs() < ERROR_MARGIN;
     }
+}
+
+/// Returns true iff the point lies inside or on the edge of the polyogon. 
+/// Returns false if vertices contains fewer elements than expected.
+pub fn point_in_polygon(point: Vec2, vertices: &Vec<[f64;2]>) -> bool {
+    let ray = [[10000.0 + point.x, point.y],[point.x, point.y]]; // sending the ray in positive direction.
+
+    /* LINE MATH SEEMS BUGGED. incorrectly returns t. */
+    let mut sum_of_passes = 0;
+    let mut prev_vert_index = vertices.len() - 1;
+    for index in 0..vertices.len() {
+        let line = [vertices[index], vertices[prev_vert_index]];
+        let (t,s) = line_math(ray, line);
+        if t <= 1.0 && t >= 0.0 && s >= 0.0 && s <= 1.0 {
+            sum_of_passes += 1;
+            //println!("SUM_OF_PASSES: {}", sum_of_passes);
+            //println!("  ray: {:?}   line {:?} WITH T: {}: S {}", ray, line, t, s)
+        }
+        prev_vert_index = index;
+    }
+
+    return sum_of_passes % 2 == 1;
 }
