@@ -184,17 +184,17 @@ fn match_tools(
 }
 
 fn rescale_polygon(variables: &mut Variables, i: usize, m_pos: Vec2d) {
-    // let local_m_pos = Vec2::new(
-    //     m_pos[0] / variables.win_size[0] - variables.objects[i].get_pos().x,
-    //     m_pos[1] / variables.win_size[1] - variables.objects[i].get_pos().y,
-    // );
-    // let local_vertex = Vec2::new(
-    //     variables.objects[i].getvertices()[0][0] - variables.objects[i].get_pos().x,
-    //     variables.objects[i].getvertices()[0][1] - variables.objects[i].get_pos().y,
-    // );
-    // let projection = Vec2::dot(local_m_pos, local_vertex) / local_vertex.squared_length() * local_vertex;
+    let local_m_pos = Vec2::new(
+        m_pos[0] / variables.win_size[0] - variables.objects[i].get_pos().x,
+        m_pos[1] / variables.win_size[1] - variables.objects[i].get_pos().y,
+    );
+    // one vertex with local coordinates
+    let local_vertex = Vec2::new(
+        variables.objects[i].getvertices()[0][0] - variables.objects[i].get_pos().x,
+        variables.objects[i].getvertices()[0][1] - variables.objects[i].get_pos().y,
+    );
     
-    // variables.objects[i].rescale((local_m_pos.length() / projection.length()));
+    variables.objects[i].rescale(local_m_pos.length() / local_vertex.length());
 }
 
 fn check_hover_obj(variables: &mut Variables) -> Option<usize> {
