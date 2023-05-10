@@ -361,7 +361,7 @@ fn calculate_moment_of_inertia_of_polygon(
     return moment_total.abs();
 }
 
-fn rotate_vertices(
+pub fn rotate_vertices(
     center: Vec2,
     vertices: &mut Vec<[f64; 2]>,
     angle: f64,

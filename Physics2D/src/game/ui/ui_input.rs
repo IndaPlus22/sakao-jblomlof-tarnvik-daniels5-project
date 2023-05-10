@@ -13,7 +13,7 @@ use crate::{
     game::{
         draw::draw_circle,
         simulation::{
-            objects::{self, Circle, Rectangle},
+            objects::{self, Circle, Rectangle, rotate_vertices},
             traits::{self, Object},
         },
         GameState, Tool, Variables,
@@ -22,8 +22,6 @@ use crate::{
 };
 
 use super::ui_objects::Objects;
-
-use serde::Serialize;
 
 pub fn input(event: &Event, objects: &mut Objects, variables: &mut Variables) {
     if let Some(pos) = event.mouse_cursor_args() {
@@ -36,31 +34,23 @@ pub fn input(event: &Event, objects: &mut Objects, variables: &mut Variables) {
             // println!("TOOLBAR: Button {}: hover={}", i, objects.tool_bar.buttons[i].hover);
         }
         for i in 0..variables.objects.len() {
-            if variables.objects[i].get_selected(0) == 1 {
-                // Move object
+            if variables.objects[i].get_selected(0) == 1 { // Move tool
                 variables.objects[i].set_pos(Vec2::new(
                     pos[0] / variables.win_size[0],
                     pos[1] / variables.win_size[1],
                 ))
-            } else if variables.objects[i].get_selected(1) == 1 {
-                // Scale
+            } else if variables.objects[i].get_selected(1) == 1 { // Scale tool
                 if variables.objects[i].gettype() == "Circle" {
-                    let radius = (variables.objects[i].get_pos().x
-                        - pos[0] / variables.win_size[0])
-                        .powf(2.0)
-                        + (variables.objects[i].get_pos().y - pos[1] / variables.win_size[1])
-                            .powf(2.0);
-                    // TODO: Set radius
-                    let old_radius = variables.objects[i].getradius();
-                    variables.objects[i].rescale(radius.sqrt() / old_radius);
+                    rescale_circle(variables, i, pos);
                 } else if variables.objects[i].gettype() == "Rectangle" {
-                    // TODO: Set scalar value
                     rescale_polygon(variables, i, pos);
                 }
-            } else if variables.objects[i].get_selected(2) == 1 {
+            } else if variables.objects[i].get_selected(2) == 1 { // Rotate tool
                 // Rotate
                 // Only rotate rects(polygons)
-                if variables.objects[i].gettype() == "Rectangle" {}
+                if variables.objects[i].gettype() == "Rectangle" {
+                    rotate_polygon(variables, i, pos);
+                }
             }
 
             variables.objects[i].check_hover(Vec2::new(
@@ -123,7 +113,7 @@ pub fn input(event: &Event, objects: &mut Objects, variables: &mut Variables) {
         // DEBUG BUTTONS
         // if button == piston::Button::Keyboard(piston::Key::T) {
         //     variables.objects[0].rescale(1.2);
-            
+
         // }
         // --------------------------------------
     }
@@ -193,8 +183,28 @@ fn rescale_polygon(variables: &mut Variables, i: usize, m_pos: Vec2d) {
         variables.objects[i].getvertices()[0][0] - variables.objects[i].get_pos().x,
         variables.objects[i].getvertices()[0][1] - variables.objects[i].get_pos().y,
     );
-    
+
     variables.objects[i].rescale(local_m_pos.length() / local_vertex.length());
+    // TODO: set the right circle center for the polygon
+}
+
+fn rescale_circle(variables: &mut Variables, i: usize, m_pos: Vec2d) {
+    let radius = (variables.objects[i].get_pos().x - m_pos[0] / variables.win_size[0]).powf(2.0)
+        + (variables.objects[i].get_pos().y - m_pos[1] / variables.win_size[1]).powf(2.0);
+    // TODO: Set radius
+    let old_radius = variables.objects[i].getradius();
+    variables.objects[i].rescale(radius.sqrt() / old_radius);
+}
+
+fn rotate_polygon(variables: &mut Variables, i: usize, m_pos: Vec2d) {
+    let angle: f64 = 0.0;
+    let bruh = 0;
+    rotate_vertices(
+        variables.objects[i].get_pos(),
+        &mut variables.objects[i].getvertices(),
+        angle,
+        &mut variables.objects[i].get_circle_center()
+    );
 }
 
 fn check_hover_obj(variables: &mut Variables) -> Option<usize> {
