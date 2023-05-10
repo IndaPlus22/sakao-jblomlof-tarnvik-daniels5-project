@@ -102,7 +102,10 @@ impl Game {
                 vec![[0.4, 0.1], [0.42, 0.15], [0.4, 0.2], [0.45, 0.18], [0.5, 0.2], [0.48, 0.15], [0.5, 0.1], [0.45, 0.12]],
                 10.0,
             )));
-            self.variables.objects.push(Box::new(objects::Rectangle::new(vec![[0.0,0.7],[0.0,1.0],[1.0,1.0],[1.0,0.9]], 100000.0)));
+            self.variables.objects.push(Box::new(objects::Rectangle::new(vec![[0.0,0.95],[0.0,1.0],[1.0,1.0],[1.0,0.95]], 100000.0)));
+            self.variables.objects.push(Box::new(objects::Rectangle::new(vec![[0.0,0.0],[0.0,1.0],[0.05,1.0],[0.05,0.0]], 100000.0)));
+            //self.variables.objects.push(Box::new(objects::Rectangle::new(vec![[0.0,0.95],[0.0,1.0],[1.0,1.0],[1.0,0.95]], 100000.0)));
+            //self.variables.objects.push(Box::new(objects::Rectangle::new(vec![[0.0,0.95],[0.0,1.0],[1.0,1.0],[1.0,0.95]], 100000.0)));
         // self.variables
         // .objects
         // .push(Box::new(objects::Rectangle::new(
@@ -112,11 +115,13 @@ impl Game {
         // )));
         self.variables.objects[0].setvel(Vec2::new(0.00, 0.00));
         self.variables.objects[1].setvel(Vec2::new(-0.0007, 0.0));
-        self.variables.objects[1].set_angular_vel(0.1);
-        self.variables.objects[0].set_angular_vel(0.1);
+        self.variables.objects[1].set_angular_vel(0.0);
+        self.variables.objects[0].set_angular_vel(0.0);
         self.variables.objects[2].set_angular_vel(0.0);
         //self.variables.objects[2].setvel(Vec2::new(0.0, -0.0001));
         self.variables.objects[2].set_static(true);
+        self.variables.objects[3].set_static(true);
+        
 
 
 
