@@ -58,7 +58,7 @@ impl Rectangle {
             vertices,
             mass,
             angular_velocity: 0.0,
-            velocity: Vec2::new(0.001, 0.001),
+            velocity: Vec2::new(0.0, 0.0),
             potnrg: 0.0,
             form: "Rectangle".to_string(),
             staticshape: false,
@@ -121,16 +121,28 @@ impl Object for Rectangle {
                             self.inertia,
                             other.get_inertia(),
                         );
-                        return Some(collisionRecord {
-                            desired_movement: match record {
-                                Some(value) => value.desired_movement,
-                                None => Vec2::new(0.0, 0.0),
-                            } + move_to_resolve,
-                            impulse: impulse * norm / self.mass,
-                            impulse_angular: impulse
-                                * Vec2::cross(norm, point_of_collision - self.center_of_mass)
-                                / self.inertia,
-                        });
+                        return Some(
+                            match record {
+                                Some(_rec) => {
+                                    collisionRecord {
+                                        desired_movement: _rec.desired_movement + move_to_resolve,
+                                        impulse: _rec.impulse + impulse * norm / self.mass,
+                                        impulse_angular: _rec.impulse_angular + impulse
+                                        * Vec2::cross(norm, point_of_collision - self.center_of_mass)
+                                         / self.inertia,
+                                    }
+                                }
+                                None => {
+                                    collisionRecord {
+                                        desired_movement: move_to_resolve,
+                                        impulse: impulse * norm / self.mass,
+                                        impulse_angular: impulse
+                                           * Vec2::cross(norm, point_of_collision - self.center_of_mass)
+                                            / self.inertia,
+                                    }
+                                }
+                            }
+                        );
                     }
                     None => (),
                 }
