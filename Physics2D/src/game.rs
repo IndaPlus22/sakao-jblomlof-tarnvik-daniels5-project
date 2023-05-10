@@ -114,7 +114,7 @@ impl Game {
         self.variables.objects[1].setvel(Vec2::new(-0.0000, 0.0));
         self.variables.objects[1].set_angular_vel(0.0);
         self.variables.objects[0].set_angular_vel(0.00);
-        self.variables.objects[2].set_static(true);
+        //self.variables.objects[2].set_static(true);
 
 
         // self.variables
@@ -126,7 +126,7 @@ impl Game {
         // )));
         self.variables.objects[0].setvel(Vec2::new(0.01, 0.0));
         self.variables.objects[1].setvel(Vec2::new(-0.01, 0.0));
-        self.variables.objects[2].setvel(Vec2::new(0.1, 0.0));
+        //self.variables.objects[2].setvel(Vec2::new(0.1, 0.0));
         
         //self.variables.objects[1].set_static(true);
         //Ok(())

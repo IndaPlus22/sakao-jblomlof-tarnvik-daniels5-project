@@ -261,7 +261,7 @@ impl Object for Rectangle {
     fn get_inertia(&self) -> f64 {
         return self.inertia;
     }
-}
+
 
     fn check_hover(&mut self, mouse_pos: Vec2) {
         if point_in_polygon(mouse_pos, &self.vertices) {
@@ -485,7 +485,7 @@ impl Object for Circle {
     fn get_inertia(&self) -> f64 {
         return 0.0;
     }
-}
+
 
     fn check_hover(&mut self, mouse_pos: Vec2) {
         // println!("bruuuuuuh: {}", (mouse_pos - self.center_of_mass).length());

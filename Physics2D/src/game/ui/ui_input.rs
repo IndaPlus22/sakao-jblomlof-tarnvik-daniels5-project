@@ -1,10 +1,10 @@
 use graphics::types::Vec2d;
-use std::{fs::{OpenOptions, File}, io::Write};
+use std::{fs::{OpenOptions, File}, io::{Write, BufReader, BufRead}};
 
 use graphics::types::Radius;
 use piston::{Event, MouseCursorEvent, PressEvent, ReleaseEvent};
 
-use crate::{game::{GameState, Variables, simulation::{traits::{Object, self}, objects}, Tool}, vector::vector::Vec2};
+use crate::{game::{GameState, Variables, simulation::{traits::{Object, self}, objects::{self, Rectangle, Circle}}, Tool}, vector::vector::Vec2};
 
 use super::ui_objects::Objects;
 
