@@ -300,14 +300,21 @@ impl Object for Rectangle {
     }
 
     fn set_pos(&mut self, pos: Vec2) {
+        let old_center = self.center_of_mass;
         self.center_of_mass = pos;
+        let diff = pos - old_center;
+
+        for point in self.vertices.iter_mut() {
+            point[0] += diff.x;
+            point[1] += diff.y;
+        }
     }
 
     fn rescale(&mut self, scale: f64) {
         self.mass *= scale;
         for point in self.vertices.iter_mut() {
-            point[0] *= scale;
-            point[1] *= scale;
+            point[0] = (point[0] - self.center_of_mass.x) * scale + self.center_of_mass.x;
+            point[1] = (point[1] - self.center_of_mass.y) * scale + self.center_of_mass.y;
         }
     }
 }

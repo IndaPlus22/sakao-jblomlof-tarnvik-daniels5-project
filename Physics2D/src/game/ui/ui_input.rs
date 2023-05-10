@@ -1,6 +1,10 @@
 use graphics::types::Vec2d;
 use serde_json::Value;
-use std::{fs::{OpenOptions, File}, io::{Write, BufReader, BufRead}};
+use std::{
+    fs::{File, OpenOptions},
+    io::{BufRead, BufReader, Write},
+    isize::MIN,
+};
 
 use graphics::types::Radius;
 use piston::{Event, MouseCursorEvent, PressEvent, ReleaseEvent};
@@ -9,7 +13,7 @@ use crate::{
     game::{
         draw::draw_circle,
         simulation::{
-            objects::{self, Rectangle, Circle},
+            objects::{self, Circle, Rectangle},
             traits::{self, Object},
         },
         GameState, Tool, Variables,
@@ -51,13 +55,7 @@ pub fn input(event: &Event, objects: &mut Objects, variables: &mut Variables) {
                     variables.objects[i].rescale(radius.sqrt() / old_radius);
                 } else if variables.objects[i].gettype() == "Rectangle" {
                     // TODO: Set scalar value
-                    let scalar = (variables.objects[i].get_pos().x
-                        - pos[0] / variables.win_size[0])
-                        .powf(2.0)
-                        + (variables.objects[i].get_pos().y - pos[1] / variables.win_size[1])
-                            .powf(2.0);
-                        let old_scalar = variables.objects[i].getvertices()[0][0];
-                    variables.objects[i].rescale(scalar.sqrt() / old_scalar);
+                    rescale_polygon(variables, i, pos);
                 }
             } else if variables.objects[i].get_selected(2) == 1 {
                 // Rotate
@@ -80,26 +78,24 @@ pub fn input(event: &Event, objects: &mut Objects, variables: &mut Variables) {
 
         if objects.buttons[0].hover {
             variables.game_state = GameState::Running;
-
-        } else if objects.buttons[1].hover{
-            //PAUSE BUTTON (pauses simulation) 
-            variables.game_state  = GameState::Paused;
-        } else if objects.buttons[2].hover{ 
+        } else if objects.buttons[1].hover {
+            //PAUSE BUTTON (pauses simulation)
+            variables.game_state = GameState::Paused;
+        } else if objects.buttons[2].hover {
             //SAVE BUTTON (saves current objects to file)
             match save(&mut variables.objects) {
                 Ok(()) => (),
                 Err(e) => eprintln!("Error saving objects: {}", e),
             }
-        } else if objects.buttons[3].hover{ 
+        } else if objects.buttons[3].hover {
             //RESET BUTTON (resets simulation to saved state)
             match load(&mut variables.objects) {
                 Ok(()) => (),
                 Err(e) => eprintln!("Error loading objects: {}", e),
             }
-        } else if objects.buttons[4].hover{ 
+        } else if objects.buttons[4].hover {
             //CLEAR BUTTON (clear all objects from the simulation)
             variables.objects.clear();
-
         }
 
         // Should not be able to interact with the tool bar if the game is running
@@ -123,6 +119,13 @@ pub fn input(event: &Event, objects: &mut Objects, variables: &mut Variables) {
                 objects.tool_bar.selected_poses.clear();
             }
         }
+
+        // DEBUG BUTTONS
+        // if button == piston::Button::Keyboard(piston::Key::T) {
+        //     variables.objects[0].rescale(1.2);
+            
+        // }
+        // --------------------------------------
     }
     if let Some(button) = event.release_args() {
         if button == piston::Button::Mouse(piston::MouseButton::Left) {
@@ -180,6 +183,36 @@ fn match_tools(
     }
 }
 
+fn rescale_polygon(variables: &mut Variables, i: usize, m_pos: Vec2d) {
+    // let local_m_pos = Vec2::new(
+    //     m_pos[0] / variables.win_size[0] - variables.objects[i].get_pos().x,
+    //     m_pos[1] / variables.win_size[1] - variables.objects[i].get_pos().y,
+    // );
+    // let distance = (local_m_pos - variables.objects[i].get_pos()).length();
+    // let mut diffs = Vec::new();
+    // for p in variables.objects[i].getvertices() {
+    //     diffs.push(Vec2::new(local_m_pos.x - p[0], local_m_pos.y - p[1]));
+    // }
+
+    // let scaled_vertex = Vec2::new(
+    //     variables.objects[i].getvertices()[0][0],
+    //     variables.objects[i].getvertices()[0][1],
+    // );
+    // let mut v = scaled_vertex - variables.objects[i].get_pos();
+    // v.x = v.x * distance / v.length();
+    // v.y = v.y * distance / v.length();
+    // variables.objects[i].rescale(v.length() / distance);
+    // variables.objects[i].rescale(1.1);
+    // get min index of vec2 in diffs
+    // let mut min_index = 0;
+    // let local_min_v = Vec2::new(
+    //     variables.objects[i].getvertices()[min_index][0] - variables.objects[i].get_pos().x,
+    //     variables.objects[i].getvertices()[min_index][1] - variables.objects[i].get_pos().y,
+    // );
+    // let projection = Vec2::dot(local_m_pos, local_min_v) / (local_min_v.length() * local_min_v.length());
+    // variables.objects[i].rescale(projection / local_min_v.length());
+}
+
 fn check_hover_obj(variables: &mut Variables) -> Option<usize> {
     for i in 0..variables.objects.len() {
         if variables.objects[i].get_hover() {
@@ -189,13 +222,10 @@ fn check_hover_obj(variables: &mut Variables) -> Option<usize> {
     None
 }
 
-
 fn select_object(variables: &mut Variables, button: piston::Button, func: u8) {
     let hovered_i = check_hover_obj(variables);
     if let Some(i) = hovered_i {
         if button == piston::Button::Mouse(piston::MouseButton::Left) {
-            println!("MOVE, Pressed object: {}", i);
-
             variables.objects[i].set_selected(func, 1);
         }
     }
@@ -223,7 +253,7 @@ pub fn save(objects: &mut Vec<Box<dyn traits::Object>>) -> std::io::Result<()> {
         obj_map.insert("center".to_string(), serde_json::json!(center));
         obj_map.insert("velocity".to_string(), serde_json::json!(velocity));
         obj_map.insert("mass".to_string(), serde_json::json!(mass));
-        
+
         obj_vec.push(serde_json::json!(obj_map));
     }
 

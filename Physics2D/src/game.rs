@@ -82,7 +82,8 @@ impl Game {
     }
 
     // A function that only runs ones when the game starts
-    pub fn init(&mut self) /*-> std::io::Result<()>*/{
+    pub fn init(&mut self) /*-> std::io::Result<()>*/
+    {
         draw::init();
         //let mut file = File::create("test.txt")?;
         //file.write_all(b"plz work")?;
@@ -96,13 +97,27 @@ impl Game {
                 vec![[0.15, 0.1], [0.15, 0.3], [0.25, 0.2], [0.25, 0.1]],
                 10.0,
             )));
-            self.variables
+        self.variables
             .objects
             .push(Box::new(objects::Rectangle::new(
-                vec![[0.4, 0.1], [0.42, 0.15], [0.4, 0.2], [0.45, 0.18], [0.5, 0.2], [0.48, 0.15], [0.5, 0.1], [0.45, 0.12]],
+                vec![
+                    [0.4, 0.1],
+                    [0.42, 0.15],
+                    [0.4, 0.2],
+                    [0.45, 0.18],
+                    [0.5, 0.2],
+                    [0.48, 0.15],
+                    [0.5, 0.1],
+                    [0.45, 0.12],
+                ],
                 10.0,
             )));
-            //self.variables.objects.push(Box::new(objects::Rectangle::new(vec![[0.0,0.7],[0.0,1.0],[1.0,1.0],[1.0,0.9]], 10.0)));
+        self.variables.objects.push(Box::new(objects::Circle::new(
+            Vec2::new(0.7, 0.2),
+            0.1,
+            10.0,
+        )));
+        //self.variables.objects.push(Box::new(objects::Rectangle::new(vec![[0.0,0.7],[0.0,1.0],[1.0,1.0],[1.0,0.9]], 10.0)));
         // self.variables
         // .objects
         // .push(Box::new(objects::Rectangle::new(
@@ -116,7 +131,6 @@ impl Game {
         self.variables.objects[0].set_angular_vel(0.00);
         //self.variables.objects[2].set_static(true);
 
-
         // self.variables
         // .objects
         // .push(Box::new(objects::Rectangle::new(
@@ -127,7 +141,7 @@ impl Game {
         self.variables.objects[0].setvel(Vec2::new(0.01, 0.0));
         self.variables.objects[1].setvel(Vec2::new(-0.01, 0.0));
         //self.variables.objects[2].setvel(Vec2::new(0.1, 0.0));
-        
+
         //self.variables.objects[1].set_static(true);
         //Ok(())
     }
