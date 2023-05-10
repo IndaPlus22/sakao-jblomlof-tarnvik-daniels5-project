@@ -1,6 +1,3 @@
-
-use gfx_device_gl::{CommandBuffer, Resources};
-use gfx_graphics::GfxGraphics;
 use graphics::{color, types::{Vec2d, Matrix2d}, clear, rectangle, Polygon, draw_state::DrawState, Ellipse};
 use opengl_graphics::GlGraphics;
 use piston::{Event, RenderArgs};
@@ -27,9 +24,10 @@ const LIGHT_CERISE: &str = "ec5f99";
 //     });
 // }
 
-pub fn draw(event: &Event, args: &RenderArgs, gl: &mut GlGraphics, variables: &Variables) {
+pub fn draw(event: &Event, args: &RenderArgs, gl: &mut GlGraphics, variables: &mut Variables) {
     // Update application window.
     gl.draw(args.viewport(), |context, gl| {
+        variables.win_size = args.window_size;
         // Fill the window with white colour.
         clear(CERISE_COLOR, gl);
 
@@ -89,7 +87,7 @@ pub fn draw_polygon(
 ) {
     let abs_vertices = rel_to_abs_pos_arr(&vertices, args.window_size);
     // println!("Drawing polygon at: {:?}", abs_vertices);
-    Polygon::new(rgb_to_color(131, 176, 247)).draw_tri(
+    Polygon::new(rgb_to_color(131, 176, 247)).draw(
         &abs_vertices,
         &DrawState::default(),
         transform,
@@ -138,6 +136,10 @@ fn rel_to_abs_pos_arr(rel_poses: &[Vec2d], win_size: Vec2d) -> Vec<Vec2d> {
 
 fn rel_to_abs_pos(rel_pos: Vec2d, win_size: Vec2d) -> Vec2d {
     [rel_pos[0] * win_size[0], rel_pos[1] * win_size[1]]
+}
+
+pub fn abs_to_rel_pos(abs_pos: Vec2d, win_size: Vec2d) -> Vec2d {
+    [abs_pos[0] / win_size[0], abs_pos[1] / win_size[1]]
 }
 
 // Converts rgb to color. Helper because I(Toshi) likes to copy from google color picker.

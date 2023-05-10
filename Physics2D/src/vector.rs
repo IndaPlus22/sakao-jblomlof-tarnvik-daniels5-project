@@ -25,6 +25,9 @@ pub mod vector {
         pub fn unit_vector(v1: Vec2) -> Vec2{
             return v1 / v1.length();
         }
+        pub fn cross(v1: Vec2, v2: Vec2) -> f64 {
+            return v1.x*v2.y - v1.y*v2.x;
+        }
 
 
     }

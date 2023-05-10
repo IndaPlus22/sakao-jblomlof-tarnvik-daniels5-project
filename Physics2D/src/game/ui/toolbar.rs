@@ -1,9 +1,8 @@
 
-use gfx_device_gl::{CommandBuffer, Resources};
-use gfx_graphics::GfxGraphics;
-use graphics::{Image, types::{Vec2d, Matrix2d}};
-use opengl_graphics::{Texture, TextureSettings, GlGraphics};
-use std::path::Path;
+use graphics::{types::{Vec2d, Matrix2d}};
+use opengl_graphics::GlGraphics;
+
+use crate::game::draw::abs_to_rel_pos;
 
 use super::ui_button::Button;
 
@@ -13,6 +12,7 @@ pub struct Toolbar {
     button_size: Vec2d,
     position: Vec2d,
     pub buttons: Vec<Button>,
+    pub selected_poses: Vec<Vec2d>,
     // textures: Vec<Texture>,
 }
 
@@ -20,10 +20,12 @@ impl Toolbar {
     pub fn new(button_size: Vec2d, position: Vec2d) -> Toolbar {
         // let textures = load_sprites();
         let buttons = init_buttons(button_size, position);
+        let selected_poses = Vec::new();
         Toolbar {
             button_size,
             position,
             buttons,
+            selected_poses, // Only for drawtool
         }
     }
 
@@ -31,6 +33,10 @@ impl Toolbar {
         for button in &self.buttons {
             button.draw(graphics, transform);
         }
+    }
+
+    pub fn add_selected_button(&mut self, pos: Vec2d, win_size: Vec2d) {
+        self.selected_poses.push(abs_to_rel_pos(pos, win_size));
     }
 }
 
