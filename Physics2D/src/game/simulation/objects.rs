@@ -103,6 +103,7 @@ impl Object for Rectangle {
                     added_angle,
                 ) {
                     Some((norm, move_to_resolve, point_of_collision)) => {
+                        println!("MOVE_TO_RESOLVE: {}; {}", move_to_resolve.x, move_to_resolve.y);
                         // scalar_of_vel should be improved, it works on the relative distance, not the distance
                         let v1 = self.velocity
                             + self.angular_velocity * (point_of_collision - self.center_of_mass);
@@ -183,17 +184,17 @@ impl Object for Rectangle {
 
     fn update(&mut self, record: &Option<collisionRecord>, dt: f64) {
         //self.center += self.velocity;
+        //println!("VEL: {}; {} ---- ANG: {}", self.velocity.x, self.velocity.y, self.angular_velocity);
 
         if self.staticshape {
             return;
         }
-        self.velocity += Vec2::new(0.0, 0.00000982);
         match record {
             Some(value) => {
                 self.velocity += value.impulse;
-                self.moverelative(value.desired_movement + self.velocity);
-                println!("impulse: {:?}", value.impulse_angular);
-                self.angular_velocity += value.impulse_angular;
+                self.moverelative(1.2*value.desired_movement + self.velocity);
+                //println!("impulse: {:?}", value.impulse_angular);
+                self.angular_velocity -= value.impulse_angular;
                 rotate_vertices(
                     self.center_of_mass,
                     &mut self.vertices,
@@ -209,7 +210,8 @@ impl Object for Rectangle {
                     self.angular_velocity,
                     &mut self.circle_center,
                 );
-            }
+                self.velocity += Vec2::new(0.0, 0.00000982);
+            },
         }
     }
     fn draw(&self, graphics: &mut GlGraphics, transform: Matrix2d, args: &RenderArgs) {
@@ -266,6 +268,12 @@ impl Object for Rectangle {
     }
     fn set_static(&mut self, set: bool) {
         self.staticshape = set;
+        if set {
+            self.velocity = Vec2::new(0.0, 0.0);
+            self.angular_velocity = 0.0;
+            self.inertia = 100000000000000000000000.0;
+            self. mass = 1000000000000000000000000.0;
+        }
     }
     fn get_mass(&self) -> f64 {
         return self.mass;
