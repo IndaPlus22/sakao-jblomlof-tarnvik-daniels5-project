@@ -93,14 +93,15 @@ impl Object for Rectangle {
 
                 // this works for simple collision (collision point between mass_centers) but probably not for complex collision (point of collision on same side of mass_center ( e.g left of both).)
                 // not hard to fix better. Store a "recent move" for each vertex and use that, since currently the angle is used to calculate that.
-                let added_angle = self.angular_velocity + other.get_angular_vel();
+                // let added_angle = self.angular_velocity + other.get_angular_vel();
                 match collision_between_polygons(
                     &self.vertices,
                     self.center_of_mass,
                     &other.getvertices(),
                     other.getcenter(),
                     &relative_velocity,
-                    added_angle,
+                    self.angular_velocity,
+                    other.get_angular_vel()
                 ) {
                     Some((norm, move_to_resolve, point_of_collision)) => {
                         println!("MOVE_TO_RESOLVE: {}; {}", move_to_resolve.x, move_to_resolve.y);
@@ -374,7 +375,7 @@ fn calculate_moment_of_inertia_of_polygon(
     return moment_total.abs();
 }
 
-fn rotate_vertices(
+pub fn rotate_vertices(
     center: Vec2,
     vertices: &mut Vec<[f64; 2]>,
     angle: f64,

@@ -1,6 +1,8 @@
 use nalgebra::{Matrix2, Vector2};
 
-use crate::vector::vector::Vec2;
+use crate::{main, vector::vector::Vec2};
+
+use super::objects::rotate_vertices;
 
 /// Returns whatever the polygons approximate circles collide.
 pub fn approx_are_colliding(centre1: Vec2, raduis1: f64, centre2: Vec2, radius2: f64) -> bool {
@@ -21,16 +23,35 @@ pub fn collision_between_polygons(
     static_pol_vert: &Vec<[f64; 2]>,
     mass_center_static: Vec2,
     relative_movement: &Vec2,
-    added_angle_move: f64,
+    main_angle_move: f64,
+    static_angle_move: f64,
 ) -> Option<(Vec2, Vec2, Vec2)> {
-    if relative_movement.squared_length() != 0.0 || added_angle_move != 0.0 {
+    if relative_movement.squared_length() != 0.0
+        || main_angle_move != 0.0
+        || static_angle_move != 0.0
+    {
+        let movement_main = make_movement_frame_of_reference_based(
+            main_pol_vert,
+            relative_movement,
+            main_angle_move,
+            mass_center_main,
+            static_angle_move,
+            mass_center_static,
+        );
+        let movement_static = make_movement_frame_of_reference_based(
+            static_pol_vert,
+            &(-(*relative_movement)),
+            static_angle_move,
+            mass_center_static,
+            main_angle_move,
+            mass_center_main,
+        );
         calculate_scalar_distance(
             main_pol_vert,
-            mass_center_main,
             static_pol_vert,
-            mass_center_static,
-            relative_movement,
-            added_angle_move,
+            &movement_main,
+            &movement_static,
+            relative_movement
         )
     } else {
         None
@@ -191,18 +212,15 @@ pub fn line_math(line1: [[f64; 2]; 2], line2: [[f64; 2]; 2]) -> (f64, f64) {
 /// Returns norm and scalar, does not compute well with relative_vel.length == 0. Only valid when knows that polygons interfers
 fn calculate_scalar_distance(
     main_pol_vert: &Vec<[f64; 2]>,
-    mass_center_main: Vec2,
     static_pol_vert: &Vec<[f64; 2]>,
-    mass_center_static: Vec2,
-    relative_vel_diff: &Vec2,
-    angle_diff_relative: f64,
+    movement_of_main: &Vec<Vec2>,
+    movement_of_static: &Vec<Vec2>,
+    relative_vel: &Vec2,
 ) -> Option<(Vec2, Vec2, Vec2)> {
     const MARGIN: f64 = 0.0000001; // MARGIN FOR when parallell lines interfere.
     let mut norms: Vec<Vec2> = Vec::new();
     let mut points_of_collision: Vec<Vec2> = Vec::new();
     let mut corner_corner_norm: Vec<Vec2> = Vec::new(); // corner-corner-only
-    let neg_vel = -*relative_vel_diff;
-    let neg_angle = -angle_diff_relative;
     let mut max_move: Vec2 = Vec2::new(0.0, 0.0);
 
     let mut prev_index_for_main = main_pol_vert.len() - 1;
@@ -225,30 +243,38 @@ fn calculate_scalar_distance(
             // so also check if the opposite.
 
             //rays from "main" to static
-            let corner_vel_1 = corner_vel(line1[0], mass_center_main, neg_vel, neg_angle);
             let move_1 = [
                 line1[0],
-                [line1[0][0] + corner_vel_1.x, line1[0][1] + corner_vel_1.y],
+                [
+                    line1[0][0] + movement_of_main[prev_index_for_main].x,
+                    line1[0][1] + movement_of_main[prev_index_for_main].y,
+                ],
             ];
 
-            let corner_vel_2 = corner_vel(line1[1], mass_center_main, neg_vel, neg_angle);
             let move_2 = [
                 line1[1],
-                [line1[1][0] + corner_vel_2.x, line1[1][1] + corner_vel_2.y],
+                [
+                    line1[1][0] + movement_of_main[index_for_main].x,
+                    line1[1][1] + movement_of_main[index_for_main].y,
+                ],
+            ];
+            let move_3 = [
+                line2[0],
+                [
+                    line2[0][0] + movement_of_static[prev_static_index].x,
+                    line2[0][1] + movement_of_static[prev_static_index].y,
+                ],
+            ];
+
+            let move_4 = [
+                line2[1],
+                [
+                    line2[1][0] + movement_of_static[static_index].x,
+                    line2[1][1] + movement_of_static[static_index].y,
+                ],
             ];
 
             // from here we go from static towards the "main", thus changing direction on angle and vel (hence negative sign)
-            let corner_vel_3 = corner_vel(line2[0], mass_center_static, -neg_vel, neg_angle);
-            let move_3 = [
-                line2[0],
-                [line2[0][0] + corner_vel_3.x, line2[0][1] + corner_vel_3.y],
-            ];
-
-            let corner_vel_4 = corner_vel(line2[1], mass_center_static, -neg_vel, neg_angle);
-            let move_4 = [
-                line2[1],
-                [line2[1][0] + corner_vel_4.x, line2[1][1] + corner_vel_4.y],
-            ];
 
             // Each element is ((vec_from_base_line"+"direction_to_go), line_to_check_collision, origin_line, scalar (1 or -1))
             let compound_lines = [
@@ -291,7 +317,7 @@ fn calculate_scalar_distance(
                         if !s_on_end || parallel_line(origin, colliding_line) {
                             norms.push(norm_of(colliding_line))
                         } else {
-                            corner_corner_norm.push(relative_vel_diff.clone())
+                            corner_corner_norm.push(relative_vel.clone())
                         }
                     }
                 }
@@ -316,11 +342,11 @@ fn calculate_scalar_distance(
         // doing a hack. Since direction shouldnot matter.
         // we make sure they are all the same orientation
         // by a hack.
-        let dot = Vec2::dot(*relative_vel_diff, n);
+        let dot = Vec2::dot(*relative_vel, n);
         if dot < 0.0 {
             total_norm -= n
         } else if dot == 0.0 {
-            let dot = Vec2::dot(*relative_vel_diff, Vec2::new(n.y, -n.x));
+            let dot = Vec2::dot(*relative_vel, Vec2::new(n.y, -n.x));
             if dot < 0.0 {
                 total_norm -= n
             }
@@ -378,17 +404,17 @@ fn parallel_line(line1: [[f64; 2]; 2], line2: [[f64; 2]; 2]) -> bool {
     }
 }
 
-/// Returns true iff the point lies inside or on the edge of the polyogon. 
+/// Returns true iff the point lies inside or on the edge of the polyogon.
 /// Returns false if vertices contains fewer elements than expected.
-pub fn point_in_polygon(point: Vec2, vertices: &Vec<[f64;2]>) -> bool {
-    let ray = [[10000.0 + point.x, point.y],[point.x, point.y]]; // sending the ray in positive direction.
+pub fn point_in_polygon(point: Vec2, vertices: &Vec<[f64; 2]>) -> bool {
+    let ray = [[10000.0 + point.x, point.y], [point.x, point.y]]; // sending the ray in positive direction.
 
     /* LINE MATH SEEMS BUGGED. incorrectly returns t. */
     let mut sum_of_passes = 0;
     let mut prev_vert_index = vertices.len() - 1;
     for index in 0..vertices.len() {
         let line = [vertices[index], vertices[prev_vert_index]];
-        let (t,s) = line_math(ray, line);
+        let (t, s) = line_math(ray, line);
         if t <= 1.0 && t >= 0.0 && s >= 0.0 && s <= 1.0 {
             sum_of_passes += 1;
             //println!("SUM_OF_PASSES: {}", sum_of_passes);
@@ -398,4 +424,52 @@ pub fn point_in_polygon(point: Vec2, vertices: &Vec<[f64;2]>) -> bool {
     }
 
     return sum_of_passes % 2 == 1;
+}
+
+fn make_movement_frame_of_reference_based(
+    main_pol_vert: &Vec<[f64; 2]>,
+    relative_vel: &Vec2,
+    main_angular_speed: f64,
+    main_mass_center: Vec2,
+    static_angular_speed: f64,
+    static_mass_center: Vec2,
+) -> Vec<Vec2> {
+    // We are creating a frame_of_reference from static one.
+    // translate so that the static_mass_center is origin.
+    let mut main_clone = main_pol_vert.clone();
+
+    for vert in main_clone.iter_mut() {
+        vert[0] -= static_mass_center.x;
+        vert[1] -= static_mass_center.y;
+    }
+
+    // rotate them back as if static is viewing the world rotate
+    let _sin = static_angular_speed.sin();
+    let _cos = static_angular_speed.cos();
+    for vert in main_clone.iter_mut() {
+        let prev = vert.clone();
+        vert[0] = prev[0] * _cos - prev[1] * _sin;
+        vert[1] = prev[0] * _sin + prev[1] * _cos;
+    }
+
+    // translate back
+    for vert in main_clone.iter_mut() {
+        vert[0] += static_mass_center.x;
+        vert[1] += static_mass_center.y;
+    }
+
+    // rotate them around the mass_center
+    rotate_vertices(
+        main_mass_center,
+        &mut main_clone,
+        -main_angular_speed,
+        &mut Vec2::new(0.0, 0.0),
+    );
+    let mut movement = vec![];
+    for i in 0..main_clone.len() {
+        let x_diff = main_clone[i][0] - main_pol_vert[i][0] - relative_vel.x;
+        let y_diff = main_clone[i][1] - main_pol_vert[i][1] - relative_vel.y;
+        movement.push(Vec2::new(x_diff, y_diff));
+    }
+    movement
 }
