@@ -198,9 +198,14 @@ fn select_object(variables: &mut Variables, button: piston::Button, func: u8) {
     }
 }
 
+<<<<<<< Updated upstream
   pub fn save(objects: &mut Vec<Box<dyn traits::Object>>) -> std::io::Result<()> {
     // let mut obj_vec = Vec::new();
     let mut file = File::create("objects.json")?;
+=======
+pub fn save(objects: &mut Vec<Box<dyn traits::Object>>) -> std::io::Result<()> {
+    let mut obj_vec = Vec::new();
+>>>>>>> Stashed changes
     for ob in objects {
         let shape = ob.gettype();
         let center = ob.getcenter();
@@ -218,21 +223,11 @@ fn select_object(variables: &mut Variables, button: piston::Button, func: u8) {
             obj_map.insert("radius".to_string(), serde_json::json!(radius));
         }
 
-
-        let center = ob.getcenter();
-        let center_json = serde_json::to_string(&center).unwrap();
-        file.write_all(center_json.as_bytes())?;
-        file.write_all(b"\n")?;
-
-        let velocity = ob.getvel();
-        let velocity_json = serde_json::to_string(&velocity).unwrap();
-        file.write_all(velocity_json.as_bytes())?;
-        file.write_all(b"\n")?;
-
-        let mass = ob.get_mass();
-        let mass_json = serde_json::to_string(&mass).unwrap();
-        file.write_all(mass_json.as_bytes())?;
-        file.write_all(b"\n")?;
+        obj_map.insert("center".to_string(), serde_json::json!(center));
+        obj_map.insert("velocity".to_string(), serde_json::json!(velocity));
+        obj_map.insert("mass".to_string(), serde_json::json!(mass));
+        
+        obj_vec.push(serde_json::json!(obj_map));
     }
 
     let obj_json = serde_json::to_string_pretty(&obj_vec)?;
