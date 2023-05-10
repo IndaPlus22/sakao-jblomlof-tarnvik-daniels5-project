@@ -119,6 +119,7 @@ impl Game {
         self.variables.objects[2].set_static(true);
 
 
+
         // self.variables
         // .objects
         // .push(Box::new(objects::Rectangle::new(
@@ -128,6 +129,7 @@ impl Game {
         // )));
         //self.variables.objects[0].setvel(Vec2::new(0.01, 0.0));
         //self.variables.objects[1].setvel(Vec2::new(-0.01, 0.0));
+
         //self.variables.objects[2].setvel(Vec2::new(0.1, 0.0));
         
         //self.variables.objects[1].set_static(true);
