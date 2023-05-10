@@ -105,19 +105,26 @@ impl Object for Rectangle {
                     Some((norm, move_to_resolve, point_of_collision)) => {
                         println!("MOVE_TO_RESOLVE: {}; {}", move_to_resolve.x, move_to_resolve.y);
                         // scalar_of_vel should be improved, it works on the relative distance, not the distance
-                        let v1 = self.velocity
-                            + self.angular_velocity * (point_of_collision - self.center_of_mass);
-                        let v2 = other.getvel()
-                            + other.get_angular_vel() * (point_of_collision - other.getcenter());
-                        let relative_velocityy = v1 - v2;
+                        let ra = point_of_collision - self.center_of_mass;
+                        let rb = point_of_collision - other.getcenter();
+
+                        let ra_perp = Vec2::new(-ra.y, ra.x);
+                        let rb_perp = Vec2::new(-rb.y, rb.x);
+
+                        let angularLinearVelocityA = ra_perp * self.angular_velocity;
+                        let angularLinearVelocityB = rb_perp * other.get_angular_vel();
+
+
+
+                        let relative_velocityy = (angularLinearVelocityB + other.getvel()) - (angularLinearVelocityA + self.velocity);
                         let impulse = calculate_impulse(
                             relative_velocityy,
                             self.mass,
                             other.get_mass(),
                             norm,
-                            1.0,
-                            point_of_collision - self.center_of_mass,
-                            point_of_collision - other.getcenter(),
+                            0.5,
+                            ra,
+                            rb,
                             self.inertia,
                             other.get_inertia(),
                         );
@@ -127,8 +134,8 @@ impl Object for Rectangle {
                                     collisionRecord {
                                         desired_movement: _rec.desired_movement + move_to_resolve,
                                         impulse: _rec.impulse + impulse * norm / self.mass,
-                                        impulse_angular: _rec.impulse_angular + impulse
-                                        * Vec2::cross(norm, point_of_collision - self.center_of_mass)
+                                        impulse_angular: _rec.impulse_angular +
+                                        Vec2::cross(norm*impulse, ra)
                                          / self.inertia,
                                     }
                                 }
@@ -917,11 +924,12 @@ fn calculate_impulse(
     //let j = -(1.0 + restitution) * Vec2::dot(relative_speed, normal_unit)
     //    / (1.0 / mass + 1.0 / mass_other);
     //let rel = Vec2::cross(relative_speed, normal);
+    println!("{:?}, {:?}", normal.x, normal.y);
     let part1 = Vec2::dot(normal, normal) * ((1.0 / mass) + (1.0 / mass_other));
     let part2 = (Vec2::dot(r, normal) * Vec2::dot(r, normal)) / inertia;
     let part3 = (Vec2::dot(r_other, normal) * Vec2::dot(r_other, normal)) / inertia_other;
     let j = -(1.0 + restitution) * Vec2::dot(relative_speed, normal) / (part1 + part2 + part3);
-    return j;
+    return -j;
 }
 
 /// reverses the vec, if it is ordered wrong. Vertices consiting of 2 points, might be problematic.
