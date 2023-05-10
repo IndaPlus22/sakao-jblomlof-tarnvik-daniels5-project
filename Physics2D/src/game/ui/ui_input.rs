@@ -8,8 +8,6 @@ use crate::{game::{GameState, Variables, simulation::{traits::{Object, self}, ob
 
 use super::ui_objects::Objects;
 
-use serde::{Serialize};
-
 pub fn input(event: &Event, objects: &mut Objects, variables: &mut Variables) {
     if let Some(pos) = event.mouse_cursor_args() {
         for i in 0..5 {
@@ -30,6 +28,7 @@ pub fn input(event: &Event, objects: &mut Objects, variables: &mut Variables) {
 
         variables.last_mouse_pos = pos;
     }
+
     if let Some(button) = event.press_args() {
         // for matching tools
         match_tools(variables, button, objects, variables.win_size);
@@ -37,13 +36,23 @@ pub fn input(event: &Event, objects: &mut Objects, variables: &mut Variables) {
         if objects.buttons[0].hover {
             variables.game_state = GameState::Running;
         } else if objects.buttons[1].hover{
+            //PAUSE BUTTON (pauses simulation) 
             variables.game_state  = GameState::Paused;
-        } else if objects.buttons[2].hover{
-            Save(&mut variables.objects);
-        } else if objects.buttons[3].hover{
-            Load();
-        } else if objects.buttons[4].hover{
-            //TODO: Clear button functionality aka delete all objects, making the thing blank
+        } else if objects.buttons[2].hover{ 
+            //SAVE BUTTON (saves current objects to file)
+            match save(&mut variables.objects) {
+                Ok(()) => (),
+                Err(e) => eprintln!("Error saving objects: {}", e),
+            }
+        } else if objects.buttons[3].hover{ 
+            //RESET BUTTON (resets simulation to saved state)
+            match load(&mut variables.objects) {
+                Ok(()) => (),
+                Err(e) => eprintln!("Error loading objects: {}", e),
+            }
+        } else if objects.buttons[4].hover{ 
+            //CLEAR BUTTON (clear all objects from the simulation)
+            variables.objects.clear();
         }
 
         // Should not be able to interact with the tool bar if the game is running
@@ -117,45 +126,62 @@ fn match_tools(
 
 fn check_hover_obj() {}
 
-pub fn Save (objects: &mut Vec<Box<dyn traits::Object>>) -> std::io::Result<()> {
-    let mut file = File::create("objects.json")?;
-    for ob in objects{
-
+      
+  pub fn save(objects: &mut Vec<Box<dyn traits::Object>>) -> std::io::Result<()> {
+    let mut obj_vec = Vec::new();
+    for ob in objects {
         let shape = ob.gettype();
-        file.write_all(shape.as_bytes())?;
-        file.write_all(b"\n")?;
+        let center = ob.getcenter();
+        let velocity = ob.getvel();
+        let mass = ob.get_mass();
+
+        let mut obj_map = serde_json::Map::new();
+        obj_map.insert("shape".to_string(), serde_json::json!(shape));
 
         if shape == "Rectangle" {
             let vertices = ob.getvertices();
-            let vertices_json = serde_json::to_string(&vertices).unwrap();
-            file.write_all(vertices_json.as_bytes())?;
-            file.write_all(b"\n")?;
+            obj_map.insert("vertices".to_string(), serde_json::json!(vertices));
         } else if shape == "Circle" {
-            let radius: f64 = ob.getradius();
-            let radius_json = serde_json::to_string(&radius).unwrap();
-            file.write_all(radius_json.as_bytes())?;
-            file.write_all(b"\n")?;
+            let radius = ob.getradius();
+            obj_map.insert("radius".to_string(), serde_json::json!(radius));
         }
 
-        let center = ob.getcenter();
-        let center_json = serde_json::to_string(&center).unwrap();
-        file.write_all(center_json.as_bytes())?;
-        file.write_all(b"\n")?;
+        obj_map.insert("center".to_string(), serde_json::json!(center));
+        obj_map.insert("velocity".to_string(), serde_json::json!(velocity));
+        obj_map.insert("mass".to_string(), serde_json::json!(mass));
         
-        let velocity = ob.getvel();
-        let velocity_json = serde_json::to_string(&velocity).unwrap();
-        file.write_all(velocity_json.as_bytes())?;
-        file.write_all(b"\n")?;
-        
-        let mass = ob.get_mass();
-        let mass_json = serde_json::to_string(&mass).unwrap();
-        file.write_all(mass_json.as_bytes())?;
-        file.write_all(b"\n")?;
+        obj_vec.push(serde_json::json!(obj_map));
     }
+
+    let obj_json = serde_json::to_string_pretty(&obj_vec)?;
+    let mut file = File::create("objects.json")?;
+    file.write_all(b"")?;
+    file.write_all(obj_json.as_bytes())?;
     Ok(())
 }
 
-//TODO: Restart button functionality aka reset the simulation to the last saved state 
-//TODO: If there is no saved state defualt is an empty file? 
-pub fn Load (){}
+pub fn load(objects: &mut Vec<Box<dyn traits::Object>>) -> std::io::Result<()> {
+    let file = File::open("objects.json")?;
+    let reader = BufReader::new(file);
+    let json_string: String = reader.lines().map(|line| line.unwrap()).collect();
+    let json_objs: Vec<serde_json::Value> = serde_json::from_str(&json_string)?;
+    objects.clear();
 
+    for obj in json_objs {
+        let shape = obj["shape"].as_str().unwrap();
+        let center: Vec2 = serde_json::from_value(obj["center"].clone())?;
+        let velocity: Vec2 = serde_json::from_value(obj["velocity"].clone())?;
+        let mass: f64 = serde_json::from_value(obj["mass"].clone())?;
+        let mut new_obj: Box<dyn traits::Object>;
+        if shape == "Rectangle" {
+            let vertices: Vec<[f64; 2]> = serde_json::from_value(obj["vertices"].clone())?;
+            new_obj = Box::new(Rectangle::new(vertices, mass));
+        } else {
+            let radius: f64 = serde_json::from_value(obj["radius"].clone())?;
+            new_obj = Box::new(Circle::new(center, radius, mass));
+        }
+        new_obj.setvel(velocity);
+        objects.push(new_obj);
+    }
+    Ok(())
+}

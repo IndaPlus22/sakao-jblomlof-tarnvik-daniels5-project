@@ -215,7 +215,7 @@ impl Object for Rectangle {
         // draw point of collision
         //draw_circle(self.temp, 0.01, transform, graphics, args);
         // draw the mass_centre
-        draw_circle(self.getcenter(), 0.001, transform, graphics, args)
+        //draw_circle(self.getcenter(), 0.001, transform, graphics, args)
     }
     fn getcenter(&self) -> Vec2 {
         return self.center_of_mass;

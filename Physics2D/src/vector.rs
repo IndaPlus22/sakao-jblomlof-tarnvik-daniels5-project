@@ -1,9 +1,9 @@
 pub mod vector {
     use std::{ops, iter::Sum};
 
-    use serde::{Serialize, Serializer, ser::SerializeTuple};
+    use serde::{Serialize, Serializer, ser::SerializeTuple, Deserialize};
 
-    #[derive(Copy, Clone)]
+    #[derive(Debug, Clone, Copy, PartialEq, PartialOrd, Deserialize)]
     pub struct Vec2{
         pub x: f64,
         pub y: f64,
