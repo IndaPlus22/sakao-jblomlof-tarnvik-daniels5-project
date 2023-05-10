@@ -254,6 +254,14 @@ impl Object for Rectangle {
     fn set_pos (&mut self, pos: Vec2) {
         self.center_of_mass = pos;
     }
+
+    fn rescale (&mut self, scale: f64) {
+        self.mass *= scale;
+        for point in self.vertices.iter_mut() {
+            point[0] *= scale;
+            point[1] *= scale;
+        }
+    }
 }
 
 fn rotate_vertices(
@@ -447,6 +455,11 @@ impl Object for Circle {
 
     fn set_pos (&mut self, pos: Vec2) {
         self.center_of_mass = pos;
+    }
+
+    fn rescale (&mut self, scale: f64) {
+        self.mass *= scale;
+        self.radius *= scale;
     }
 }
 

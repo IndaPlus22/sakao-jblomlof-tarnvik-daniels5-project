@@ -27,6 +27,7 @@ pub trait Object {
     fn set_selected (&mut self, index: u8, selected: u8);
     fn get_pos (&self) -> Vec2;
     fn set_pos (&mut self, pos: Vec2);
+    fn rescale (&mut self, scale: f64);
 }
 
 pub struct collisionRecord {

@@ -34,7 +34,6 @@ pub fn input(event: &Event, objects: &mut Objects, variables: &mut Variables) {
             // println!("TOOLBAR: Button {}: hover={}", i, objects.tool_bar.buttons[i].hover);
         }
         for i in 0..variables.objects.len() {
-            
             if variables.objects[i].get_selected(0) == 1 {
                 // Move object
                 variables.objects[i].set_pos(Vec2::new(
@@ -44,21 +43,28 @@ pub fn input(event: &Event, objects: &mut Objects, variables: &mut Variables) {
             } else if variables.objects[i].get_selected(1) == 1 {
                 // Scale
                 if variables.objects[i].gettype() == "Circle" {
-                    let radius = (variables.objects[i].get_pos().x - pos[0] / variables.win_size[0])
+                    let radius = (variables.objects[i].get_pos().x
+                        - pos[0] / variables.win_size[0])
                         .powf(2.0)
                         + (variables.objects[i].get_pos().y - pos[1] / variables.win_size[1])
                             .powf(2.0);
                     // TODO: Set radius
-                    // variables.objects[i].set_radius(radius.sqrt());
+                    let old_radius = variables.objects[i].getradius();
+                    variables.objects[i].rescale(radius.sqrt() / old_radius);
                 } else if variables.objects[i].gettype() == "Rectangle" {
                     // TODO: Set scalar value
+                    let scalar = (variables.objects[i].get_pos().x
+                        - pos[0] / variables.win_size[0])
+                        .powf(2.0)
+                        + (variables.objects[i].get_pos().y - pos[1] / variables.win_size[1])
+                            .powf(2.0);
+                        let old_scalar = variables.objects[i].getvertices()[0][0];
+                    variables.objects[i].rescale(scalar.sqrt() / old_scalar);
                 }
             } else if variables.objects[i].get_selected(2) == 1 {
                 // Rotate
                 // Only rotate rects(polygons)
-                if variables.objects[i].gettype() == "Rectangle" {
-                    
-                }
+                if variables.objects[i].gettype() == "Rectangle" {}
             }
 
             variables.objects[i].check_hover(Vec2::new(
