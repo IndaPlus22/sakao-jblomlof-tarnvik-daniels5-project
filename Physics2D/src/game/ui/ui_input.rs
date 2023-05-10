@@ -188,29 +188,13 @@ fn rescale_polygon(variables: &mut Variables, i: usize, m_pos: Vec2d) {
     //     m_pos[0] / variables.win_size[0] - variables.objects[i].get_pos().x,
     //     m_pos[1] / variables.win_size[1] - variables.objects[i].get_pos().y,
     // );
-    // let distance = (local_m_pos - variables.objects[i].get_pos()).length();
-    // let mut diffs = Vec::new();
-    // for p in variables.objects[i].getvertices() {
-    //     diffs.push(Vec2::new(local_m_pos.x - p[0], local_m_pos.y - p[1]));
-    // }
-
-    // let scaled_vertex = Vec2::new(
-    //     variables.objects[i].getvertices()[0][0],
-    //     variables.objects[i].getvertices()[0][1],
+    // let local_vertex = Vec2::new(
+    //     variables.objects[i].getvertices()[0][0] - variables.objects[i].get_pos().x,
+    //     variables.objects[i].getvertices()[0][1] - variables.objects[i].get_pos().y,
     // );
-    // let mut v = scaled_vertex - variables.objects[i].get_pos();
-    // v.x = v.x * distance / v.length();
-    // v.y = v.y * distance / v.length();
-    // variables.objects[i].rescale(v.length() / distance);
-    // variables.objects[i].rescale(1.1);
-    // get min index of vec2 in diffs
-    // let mut min_index = 0;
-    // let local_min_v = Vec2::new(
-    //     variables.objects[i].getvertices()[min_index][0] - variables.objects[i].get_pos().x,
-    //     variables.objects[i].getvertices()[min_index][1] - variables.objects[i].get_pos().y,
-    // );
-    // let projection = Vec2::dot(local_m_pos, local_min_v) / (local_min_v.length() * local_min_v.length());
-    // variables.objects[i].rescale(projection / local_min_v.length());
+    // let projection = Vec2::dot(local_m_pos, local_vertex) / local_vertex.squared_length() * local_vertex;
+    
+    // variables.objects[i].rescale((local_m_pos.length() / projection.length()));
 }
 
 fn check_hover_obj(variables: &mut Variables) -> Option<usize> {
