@@ -201,14 +201,8 @@ fn select_object(variables: &mut Variables, button: piston::Button, func: u8) {
     }
 }
 
-<<<<<<< Updated upstream
-  pub fn save(objects: &mut Vec<Box<dyn traits::Object>>) -> std::io::Result<()> {
-    let mut obj_vec: Vec<Value> = Vec::new();
-    let mut file = File::create("objects.json")?;
-=======
 pub fn save(objects: &mut Vec<Box<dyn traits::Object>>) -> std::io::Result<()> {
     let mut obj_vec = Vec::new();
->>>>>>> Stashed changes
     for ob in objects {
         let shape = ob.gettype();
         let center = ob.getcenter();
