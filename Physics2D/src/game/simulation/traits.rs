@@ -30,6 +30,7 @@ pub trait Object {
     fn get_pos (&self) -> Vec2;
     fn set_pos (&mut self, pos: Vec2);
     fn rescale (&mut self, scale: f64);
+    fn get_static (&self) -> bool;
 }
 
 pub struct collisionRecord {
