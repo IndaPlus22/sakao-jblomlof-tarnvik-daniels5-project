@@ -26,10 +26,11 @@ pub struct Rectangle {
     potnrg: f64,
     form: String,
     staticshape: bool,
-    hovered: bool,
     triangulations: Vec<Vec<usize>>,
     inertia: f64,
     density: f64,
+    hovered: bool,
+    selected: [u8; 3],
 }
 
 pub struct Circle {
@@ -41,6 +42,7 @@ pub struct Circle {
     form: String,
     staticshape: bool,
     hovered: bool,
+    selected: [u8; 3],
 }
 
 impl Rectangle {
@@ -55,7 +57,7 @@ impl Rectangle {
             vertices,
             mass,
             angular_velocity: 0.0,
-            velocity: Vec2::new(0.2, 0.2),
+            velocity: Vec2::new(0.001, 0.001),
             potnrg: 0.0,
             form: "Rectangle".to_string(),
             staticshape: false,
@@ -63,6 +65,7 @@ impl Rectangle {
             triangulations: triangles,
             density: mass / total_area,
             inertia: calculate_moment_of_inertia_of_polygon(triangle_inertia, triangle_propeties, center_of_mass, mass),
+            selected: [0, 0, 0],
         }
     }
 }
@@ -316,6 +319,35 @@ fn calculate_moment_of_inertia_of_polygon(
     return moment_total.abs();
 }
 
+    fn get_hover (&self) -> bool {
+        self.hovered
+    }
+
+    fn get_selected (&self, index: u8) -> u8 {
+        self.selected[index as usize]
+    }
+
+    fn set_selected (&mut self, index: u8, selected: u8) {
+        self.selected[index as usize] = selected;
+    }
+
+    fn get_pos (&self) -> Vec2 {
+        self.center_of_mass
+    }
+
+    fn set_pos (&mut self, pos: Vec2) {
+        self.center_of_mass = pos;
+    }
+
+    fn rescale (&mut self, scale: f64) {
+        self.mass *= scale;
+        for point in self.vertices.iter_mut() {
+            point[0] *= scale;
+            point[1] *= scale;
+        }
+    }
+
+
 fn rotate_vertices(
     center: Vec2,
     vertices: &mut Vec<[f64; 2]>,
@@ -341,13 +373,18 @@ impl Circle {
             center_of_mass: center,
             radius,
             mass,
-            velocity: Vec2::new(0.2, 0.2),
+            velocity: Vec2::new(0.001, 0.001),
             potnrg: 0.0,
             form: "Circle".to_string(),
             staticshape: false,
             hovered: false,
+            selected: [0, 0, 0],
         }
     }
+
+    // fn set_radius(&mut self, radius: f64) {
+    //     self.radius = radius;
+    // }
 }
 
 impl Object for Circle {
@@ -495,6 +532,31 @@ impl Object for Circle {
         } else {
             self.hovered = false;
         }
+    }
+
+    fn get_hover (&self) -> bool {
+        self.hovered
+    }
+
+    fn get_selected (&self, index: u8) -> u8 {
+        self.selected[index as usize]
+    }
+
+    fn set_selected (&mut self, index: u8, selected: u8) {
+        self.selected[index as usize] = selected;
+    }
+
+    fn get_pos (&self) -> Vec2 {
+        self.center_of_mass
+    }
+
+    fn set_pos (&mut self, pos: Vec2) {
+        self.center_of_mass = pos;
+    }
+
+    fn rescale (&mut self, scale: f64) {
+        self.mass *= scale;
+        self.radius *= scale;
     }
 }
 
