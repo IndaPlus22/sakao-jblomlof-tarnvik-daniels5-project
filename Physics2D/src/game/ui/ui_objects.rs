@@ -3,11 +3,11 @@ use graphics::types::Vec2d;
 use super::{ui_button::Button, toolbar::Toolbar};
 
 const SPRITES: [&str; 5] = [
-    "sprites/ui/tool_bar/bro.png", 
-    "sprites/ui/tool_bar/bro.png",
-    "sprites/ui/tool_bar/bro.png", 
-    "sprites/ui/tool_bar/bro.png", 
-    "sprites/ui/tool_bar/bro.png"];
+    "sprites/ui/tool_bar/play.png", 
+    "sprites/ui/tool_bar/pause.png",
+    "sprites/ui/tool_bar/save.png", 
+    "sprites/ui/tool_bar/reset.png", 
+    "sprites/ui/tool_bar/clear.png"];
 
 pub struct Objects {
     pub buttons: Vec<Button>,
