@@ -9,11 +9,13 @@ use crate::{
 
 use super::ui_button::Button;
 
-const SPRITES: [&str; 4] = [
+const SPRITES: [&str; 5] = [
     "sprites/ui/tool_bar/move.png", 
     "sprites/ui/tool_bar/scale.png", 
     "sprites/ui/tool_bar/rotate.png", 
-    "sprites/ui/tool_bar/draw.png"];
+    "sprites/ui/tool_bar/draw.png",
+    "sprites/ui/tool_bar/draw.png",
+    ];
 
 pub struct Toolbar {
     button_size: Vec2d,
