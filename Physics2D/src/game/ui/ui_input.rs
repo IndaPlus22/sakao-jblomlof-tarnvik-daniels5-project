@@ -205,15 +205,10 @@ fn rescale_circle(variables: &mut Variables, i: usize, m_pos: Vec2d) {
 }
 
 fn rotate_polygon(variables: &mut Variables, i: usize, m_pos: Vec2d) {
-    let angle: f64 = m_pos[1] / 100.;
+    let angle: f64 = m_pos[1] / 10000.;
     println!("angle: {}", angle);
     // TODO: fix so it changes the objects vertices and not the copy (getvertices)
-    rotate_vertices(
-        variables.objects[i].get_pos(),
-        &mut variables.objects[i].getvertices(),
-        variables.objects[i].get_angular_vel() + angle,
-        &mut variables.objects[i].get_circle_center(),
-    );
+    variables.objects[i].rotate(angle);
 }
 
 fn check_hover_obj(variables: &mut Variables) -> Option<usize> {

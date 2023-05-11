@@ -230,9 +230,7 @@ impl Object for Rectangle {
         //draw_circle(self.temp, 0.01, transform, graphics, args);
         // draw the mass_centre
         //draw_circle(self.getcenter(), 0.001, transform, graphics, args)
-        if self.selected.contains(&1) {
-            draw_circle_color(self.getcenter(), 0.01, color::hex("820155"), transform, graphics, args);
-        }
+        selecting_object_ui(self.selected, self.center_of_mass, self.radius * 1.02, transform, graphics, args);
     }
     fn getcenter(&self) -> Vec2 {
         return self.center_of_mass;
@@ -326,6 +324,10 @@ impl Object for Rectangle {
     fn set_circle_center(&mut self, c: (Vec2, f64)) {
         self.circle_center = c.0;
         self.radius = c.1;
+    }
+
+    fn rotate(&mut self, angle: f64) {
+        rotate_vertices(self.center_of_mass, &mut self.vertices, angle, &mut self.circle_center);
     }
 }
 
@@ -513,6 +515,8 @@ impl Object for Circle {
             graphics,
             args,
         );
+
+        selecting_object_ui(self.selected, self.center_of_mass, self.radius * 1.5, transform, graphics, args);
     }
     fn getcenter(&self) -> Vec2 {
         return self.center_of_mass;
@@ -590,8 +594,9 @@ impl Object for Circle {
         self.radius *= scale;
     }
 
-    fn set_circle_center(&mut self, c: (Vec2, f64)) {
-    }
+    fn set_circle_center(&mut self, c: (Vec2, f64)) {}
+
+    fn rotate(&mut self, angle: f64) {}
 }
 
 //check if two lines intersect each other
@@ -897,6 +902,12 @@ pub fn approx_circle_hitbox(vertices: &Vec<[f64; 2]>) -> (Vec2, f64) {
     }
 
     return (point, radius_sq.sqrt());
+}
+
+fn selecting_object_ui(selecteds: [u8; 3], center: Vec2, size: f64, transform: Matrix2d, graphics: &mut GlGraphics, args: &RenderArgs) {
+    if selecteds.contains(&1) {
+        draw_circle_color(center, size, [48. / 255., 110. / 255., 122. / 255., 0.5], transform, graphics, args)
+    }
 }
 
 pub fn vector_projection(a: Vec2, b: Vec2) -> Vec2 {
