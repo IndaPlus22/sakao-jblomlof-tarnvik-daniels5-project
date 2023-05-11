@@ -50,6 +50,7 @@ pub enum Tool {
     Scale,
     Rotate,
     Draw,
+    Delete,
 }
 
 // Game struct

@@ -1,8 +1,11 @@
-
-use graphics::{types::{Vec2d, Matrix2d}};
+use graphics::types::{Matrix2d, Vec2d};
 use opengl_graphics::GlGraphics;
+use piston::RenderArgs;
 
-use crate::game::draw::abs_to_rel_pos;
+use crate::{
+    game::draw::{abs_to_rel_pos, draw_circle_color},
+    vector::vector::Vec2,
+};
 
 use super::ui_button::Button;
 
@@ -29,9 +32,19 @@ impl Toolbar {
         }
     }
 
-    pub fn draw(&self, graphics: &mut GlGraphics, transform: Matrix2d) {
+    pub fn draw(&self, graphics: &mut GlGraphics, transform: Matrix2d, args: &RenderArgs) {
         for button in &self.buttons {
             button.draw(graphics, transform);
+        }
+        for pos in &self.selected_poses {
+            draw_circle_color(
+                Vec2::new(pos[0], pos[1]),
+                0.01,
+                [48. / 255., 110. / 255., 122. / 255., 0.7],
+                transform,
+                graphics,
+                args,
+            )
         }
     }
 
@@ -41,20 +54,20 @@ impl Toolbar {
 }
 
 // fn load_sprites() -> Vec<Texture> {
-    // let img = image::open("sprites/ui/tool_bar/test.png").unwrap();
-    // let image_width = img.width();
-    // let image_height = img.height();
-    // let image_rgba = img.to_rgba8();
+// let img = image::open("sprites/ui/tool_bar/test.png").unwrap();
+// let image_width = img.width();
+// let image_height = img.height();
+// let image_rgba = img.to_rgba8();
 
-    // //A texture to use with the image
-    // let texture = Texture::from_image(&image_rgba, &TextureSettings::new());
-    // vec![texture]
- // }
+// //A texture to use with the image
+// let texture = Texture::from_image(&image_rgba, &TextureSettings::new());
+// vec![texture]
+// }
 
 fn init_buttons(button_size: Vec2d, position: Vec2d) -> Vec<Button> {
     let mut buttons = Vec::new();
 
-    for i in 0..4 {
+    for i in 0..5 {
         let button = Button::new(
             [position[0], position[1] + button_size[1] * i as f64],
             button_size[0],

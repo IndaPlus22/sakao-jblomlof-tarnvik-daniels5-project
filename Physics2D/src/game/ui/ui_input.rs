@@ -94,22 +94,26 @@ pub fn input(event: &Event, objects: &mut Objects, variables: &mut Variables) {
         // Should not be able to interact with the tool bar if the game is running
         if variables.game_state == GameState::Paused {
             if objects.tool_bar.buttons[0].hover {
-                // TODO: Move tool
+                // : Move tool
                 println!("Move tool selected");
                 variables.current_tool = Tool::Move;
             } else if objects.tool_bar.buttons[1].hover {
-                // TODO: scale tool
+                // : scale tool
                 println!("Scale tool selected");
                 variables.current_tool = Tool::Scale;
             } else if objects.tool_bar.buttons[2].hover {
-                // TODO: rotate tool
+                // : rotate tool
                 println!("Rotate tool selected");
                 variables.current_tool = Tool::Rotate;
             } else if objects.tool_bar.buttons[3].hover {
-                // TODO: Draw tool
+                // : Draw tool
                 println!("Draw tool selected");
                 variables.current_tool = Tool::Draw;
                 objects.tool_bar.selected_poses.clear();
+            } else if objects.tool_bar.buttons[4].hover {
+                // Delete
+                println!("Delete tool selected");
+                variables.current_tool = Tool::Delete;
             }
         }
 
@@ -176,6 +180,14 @@ fn match_tools(
                 objects.tool_bar.selected_poses.clear();
                 variables.current_tool = Tool::None;
                 println!("made polygon");
+            }
+        }
+        Tool::Delete => {
+            let hovered_i = check_hover_obj(variables);
+            if let Some(i) = hovered_i {
+                if button == piston::Button::Mouse(piston::MouseButton::Left) {
+                    variables.objects.remove(i);
+                }
             }
         }
         _ => {}
