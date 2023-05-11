@@ -14,7 +14,7 @@ const SPRITES: [&str; 5] = [
     "sprites/ui/tool_bar/scale.png", 
     "sprites/ui/tool_bar/rotate.png", 
     "sprites/ui/tool_bar/draw.png",
-    "sprites/ui/tool_bar/draw.png",
+    "sprites/ui/tool_bar/delete.png",
     ];
 
 pub struct Toolbar {
