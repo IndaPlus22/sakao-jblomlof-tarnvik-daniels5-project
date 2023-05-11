@@ -1,3 +1,4 @@
+use graphics::color;
 use graphics::types::Matrix2d;
 use nalgebra::Matrix2;
 use nalgebra::Vector2;
@@ -10,6 +11,7 @@ use super::collision::line_math;
 use super::collision::norm_of;
 use super::collision::point_in_polygon;
 use super::traits::{collisionRecord, Object};
+use crate::game::draw::draw_circle_color;
 use crate::{
     game::draw::{draw_circle, draw_polygon},
     vector::vector::Vec2,
@@ -228,6 +230,9 @@ impl Object for Rectangle {
         //draw_circle(self.temp, 0.01, transform, graphics, args);
         // draw the mass_centre
         //draw_circle(self.getcenter(), 0.001, transform, graphics, args)
+        if self.selected.contains(&1) {
+            draw_circle_color(self.getcenter(), 0.01, color::hex("820155"), transform, graphics, args);
+        }
     }
     fn getcenter(&self) -> Vec2 {
         return self.center_of_mass;

@@ -114,6 +114,25 @@ pub fn draw_circle(
     Ellipse::new(color::hex("202d42")).draw(circle, &DrawState::default(), transform, gl);
 }
 
+pub fn draw_circle_color(
+    pos: Vec2,
+    radius: f64,
+    color: [f32; 4],
+    transform: Matrix2d,
+    gl: &mut GlGraphics,
+    args: &RenderArgs
+) {
+    // For debugging
+    // println!("Drawing circle at: ({}, {})", pos[0], pos[1]);
+    // --------------
+    let abs_pos = rel_to_abs_pos([pos.x, pos.y], args.window_size);
+    // println!("Drawing circle at: ({}, {})", abs_pos[0], abs_pos[1]);
+    // radius is relative to window x length
+    let abs_radius = radius * args.window_size[0];
+    let circle = graphics::ellipse::circle(abs_pos[0], abs_pos[1], abs_radius);
+    Ellipse::new(color).draw(circle, &DrawState::default(), transform, gl);
+}
+
 // Converts two vec2d one for position and one for size to a 4x2 array of corners. ONLY works for rectangles.
 fn conv_pos_size_to_vertices_rect(pos: Vec2, size: [f64; 2]) -> [[f64; 2]; 4]{
     let corners: [[f64; 2]; 4] = [
