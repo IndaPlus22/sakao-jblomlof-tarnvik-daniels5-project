@@ -6,7 +6,11 @@ use crate::game::draw::abs_to_rel_pos;
 
 use super::ui_button::Button;
 
-const SPRITES: [&str; 1] = ["sprites/ui/tool_bar/bro.png"];
+const SPRITES: [&str; 4] = [
+    "sprites/ui/tool_bar/move.png", 
+    "sprites/ui/tool_bar/scale.png", 
+    "sprites/ui/tool_bar/rotate.png", 
+    "sprites/ui/tool_bar/draw.png"];
 
 pub struct Toolbar {
     button_size: Vec2d,
@@ -65,7 +69,7 @@ fn init_buttons(button_size: Vec2d, position: Vec2d) -> Vec<Button> {
                 0. + i as f32 / 4.,
                 1.0,
             ],
-            &SPRITES[0],
+            &SPRITES[i],
         );
         buttons.push(button);
     }
