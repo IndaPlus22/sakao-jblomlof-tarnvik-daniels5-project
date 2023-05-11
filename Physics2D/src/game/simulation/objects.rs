@@ -1,3 +1,4 @@
+use graphics::color;
 use graphics::types::Matrix2d;
 use nalgebra::Matrix2;
 use nalgebra::Vector2;
@@ -10,6 +11,7 @@ use super::collision::line_math;
 use super::collision::norm_of;
 use super::collision::point_in_polygon;
 use super::traits::{collisionRecord, Object};
+use crate::game::draw::draw_circle_color;
 use crate::{
     game::draw::{draw_circle, draw_polygon},
     vector::vector::Vec2,
@@ -249,6 +251,7 @@ impl Object for Rectangle {
         //draw_circle(self.temp, 0.01, transform, graphics, args);
         // draw the mass_centre
         //draw_circle(self.getcenter(), 0.001, transform, graphics, args)
+        selecting_object_ui(self.selected, self.center_of_mass, self.radius * 1.02, transform, graphics, args);
     }
     fn getcenter(&self) -> Vec2 {
         return self.center_of_mass;
@@ -330,17 +333,33 @@ impl Object for Rectangle {
     }
 
     fn set_pos(&mut self, pos: Vec2) {
+        let old_center = self.center_of_mass;
         self.center_of_mass = pos;
+        let diff = pos - old_center;
+
+        for point in self.vertices.iter_mut() {
+            point[0] += diff.x;
+            point[1] += diff.y;
+        }
     }
 
     fn rescale(&mut self, scale: f64) {
         self.mass *= scale;
         for point in self.vertices.iter_mut() {
-            point[0] *= scale;
-            point[1] *= scale;
+            point[0] = (point[0] - self.center_of_mass.x) * scale + self.center_of_mass.x;
+            point[1] = (point[1] - self.center_of_mass.y) * scale + self.center_of_mass.y;
         }
         (self.circle_center, self.radius) = approx_circle_hitbox(&self.vertices);
         println!("PANIC! NEED TO RESCALE MOMENT OF INERTIA");
+    }
+
+    fn set_circle_center(&mut self, c: (Vec2, f64)) {
+        self.circle_center = c.0;
+        self.radius = c.1;
+    }
+
+    fn rotate(&mut self, angle: f64) {
+        rotate_vertices(self.center_of_mass, &mut self.vertices, angle, &mut self.circle_center);
     }
 }
 
@@ -411,7 +430,7 @@ fn calculate_moment_of_inertia_of_polygon(
     return moment_total.abs();
 }
 
-fn rotate_vertices(
+pub fn rotate_vertices(
     center: Vec2,
     vertices: &mut Vec<[f64; 2]>,
     angle: f64,
@@ -553,6 +572,8 @@ impl Object for Circle {
             graphics,
             args,
         );
+
+        selecting_object_ui(self.selected, self.center_of_mass, self.radius * 1.5, transform, graphics, args);
     }
     fn getcenter(&self) -> Vec2 {
         return self.center_of_mass;
@@ -632,6 +653,10 @@ impl Object for Circle {
         self.mass *= scale;
         self.radius *= scale;
     }
+
+    fn set_circle_center(&mut self, c: (Vec2, f64)) {}
+
+    fn rotate(&mut self, angle: f64) {}
 }
 
 //check if two lines intersect each other
@@ -900,7 +925,10 @@ fn calc_triangle_mass_center_and_area(vertices: [[f64; 2]; 3]) -> (Vec2, f64) {
 
 /// Returns a circle such that all vertices lies inside the circle,
 /// This function aims to lower the radius of that fuction.
-fn approx_circle_hitbox(vertices: &Vec<[f64; 2]>) -> (Vec2, f64) {
+pub fn approx_circle_hitbox(vertices: &Vec<[f64; 2]>) -> (Vec2, f64) {
+    if vertices.is_empty() {
+        return (Vec2::new(0., 0.), 0.);
+    }
     // make a guess where the center lies, calculate the distance to all vertices
     // move to a new point. The point towarads the vertex with the longest distance
     // the moved distance should be (max_dist - min_dist) / 2
@@ -934,6 +962,12 @@ fn approx_circle_hitbox(vertices: &Vec<[f64; 2]>) -> (Vec2, f64) {
     }
 
     return (point, radius_sq.sqrt());
+}
+
+fn selecting_object_ui(selecteds: [u8; 3], center: Vec2, size: f64, transform: Matrix2d, graphics: &mut GlGraphics, args: &RenderArgs) {
+    if selecteds.contains(&1) {
+        draw_circle_color(center, size, [48. / 255., 110. / 255., 122. / 255., 0.5], transform, graphics, args)
+    }
 }
 
 pub fn vector_projection(a: Vec2, b: Vec2) -> Vec2 {

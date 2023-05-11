@@ -9,7 +9,7 @@ pub fn draw(_event: &Event, args: &RenderArgs, gl: &mut GlGraphics, objects: &mu
             objects.buttons[i].draw(gl, context.transform);
 
             // drawing all the buttons in the toolbar
-            objects.tool_bar.draw(gl, context.transform);
+            objects.tool_bar.draw(gl, context.transform, args);
         }
     });
 }
