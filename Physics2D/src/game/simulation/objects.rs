@@ -294,6 +294,9 @@ impl Object for Rectangle {
             self. mass = 1000000000000000000000000.0;
         }
     }
+    fn get_static (&self) -> bool {
+        return self.staticshape;
+    }
     fn get_mass(&self) -> f64 {
         return self.mass;
     }
@@ -563,6 +566,9 @@ impl Object for Circle {
     }
     fn get_inertia(&self) -> f64 {
         return 0.0;
+    }
+    fn get_static (&self) -> bool {
+        self.staticshape
     }
 
     fn check_hover(&mut self, mouse_pos: Vec2) {
