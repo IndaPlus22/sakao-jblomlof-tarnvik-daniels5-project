@@ -53,7 +53,6 @@ pub enum Tool {
 }
 
 // Game struct
-//TODO game_state probably shouldn't just be public, something smart should happen instead
 pub struct Game {
     pub gl: GlGraphics,
     variables: Variables,
