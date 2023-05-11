@@ -103,7 +103,7 @@ impl Object for Rectangle {
                     added_angle,
                 ) {
                     Some((norm, move_to_resolve, point_of_collision)) => {
-                        println!("MOVE_TO_RESOLVE: {}; {}", move_to_resolve.x, move_to_resolve.y);
+                        //println!("MOVE_TO_RESOLVE: {}; {}", move_to_resolve.x, move_to_resolve.y);
                         // scalar_of_vel should be improved, it works on the relative distance, not the distance
                         let ra = point_of_collision - self.center_of_mass;
                         let rb = point_of_collision - other.getcenter();
@@ -957,7 +957,7 @@ fn calculate_impulse(
     //let j = -(1.0 + restitution) * Vec2::dot(relative_speed, normal_unit)
     //    / (1.0 / mass + 1.0 / mass_other);
     //let rel = Vec2::cross(relative_speed, normal);
-    println!("{:?}, {:?}", normal.x, normal.y);
+    //println!("{:?}, {:?}", normal.x, normal.y);
     let part1 = Vec2::dot(normal, normal) * ((1.0 / mass) + (1.0 / mass_other));
     let part2 = (Vec2::dot(r, normal) * Vec2::dot(r, normal)) / inertia;
     let part3 = (Vec2::dot(r_other, normal) * Vec2::dot(r_other, normal)) / inertia_other;
