@@ -105,7 +105,7 @@ impl Object for Rectangle {
                     added_angle,
                 ) {
                     Some((norm, move_to_resolve, point_of_collision)) => {
-                        println!("MOVE_TO_RESOLVE: {}; {}", move_to_resolve.x, move_to_resolve.y);
+                        //println!("MOVE_TO_RESOLVE: {}; {}", move_to_resolve.x, move_to_resolve.y);
                         // scalar_of_vel should be improved, it works on the relative distance, not the distance
                         let ra = point_of_collision - self.center_of_mass;
                         let rb = point_of_collision - other.getcenter();
@@ -294,7 +294,7 @@ impl Object for Rectangle {
             self.velocity = Vec2::new(0.0, 0.0);
             self.angular_velocity = 0.0;
             self.inertia = 100000000000000000000000.0;
-            self. mass = 1000000000000000000000000.0;
+            self.mass = 1000000000000000000000000.0;
         }
     }
     fn get_static (&self) -> bool {
@@ -349,6 +349,8 @@ impl Object for Rectangle {
             point[0] = (point[0] - self.center_of_mass.x) * scale + self.center_of_mass.x;
             point[1] = (point[1] - self.center_of_mass.y) * scale + self.center_of_mass.y;
         }
+        (self.circle_center, self.radius) = approx_circle_hitbox(&self.vertices);
+        println!("PANIC! NEED TO RESCALE MOMENT OF INERTIA");
     }
 
     fn set_circle_center(&mut self, c: (Vec2, f64)) {
@@ -361,6 +363,28 @@ impl Object for Rectangle {
     }
 }
 
+fn inertia_for_triangle(tri: Vec<[f64;2]>, mass: f64, mass_center: Vec2) -> f64 {
+    // https://en.wikipedia.org/wiki/List_of_moments_of_inertia
+    
+    // this is some weird approximation
+    let radius1 = (Vec2::new(tri[0][0], tri[0][1]) - mass_center).squared_length();
+    let radius2 = (Vec2::new(tri[1][0], tri[1][1]) - mass_center).squared_length();
+    let radius3 = (Vec2::new(tri[2][0], tri[2][1]) - mass_center).squared_length();
+    let middle_one = {
+        if (radius1 >= radius2 && radius1 <= radius3) || (radius1 <= radius2 && radius1 >= radius3) {
+            radius1
+        } else if (radius2 >= radius1 && radius2 <= radius3) || (radius2 <= radius1 && radius2 >= radius3) {
+            radius2
+        } else {
+            radius3
+        }
+    };
+    let moment = (2.0*mass*middle_one).abs();
+    println!("MOMent_of_inertia {};", moment);
+    return moment;
+
+}
+
 fn calculate_moment_of_inertia_of_polygon(
     triangles: Vec<Vec<[f64; 2]>>,
     triangle_propeties: Vec<(Vec2, f64)>,
@@ -368,6 +392,9 @@ fn calculate_moment_of_inertia_of_polygon(
     mass: f64,
 ) -> f64 {
     let mut moment_total = 0.0;
+    if triangles.len() == 1 {
+        return inertia_for_triangle(triangles[0].clone(), mass, polygon_center);
+    }
     for (triangle, properties) in triangles.iter().zip(triangle_propeties.iter()) {
         let mut moment = 0.0;
         let p1 = Vec2::new(triangle[0][0], triangle[0][1]);
@@ -964,7 +991,7 @@ fn calculate_impulse(
     //let j = -(1.0 + restitution) * Vec2::dot(relative_speed, normal_unit)
     //    / (1.0 / mass + 1.0 / mass_other);
     //let rel = Vec2::cross(relative_speed, normal);
-    println!("{:?}, {:?}", normal.x, normal.y);
+    //println!("{:?}, {:?}", normal.x, normal.y);
     let part1 = Vec2::dot(normal, normal) * ((1.0 / mass) + (1.0 / mass_other));
     let part2 = (Vec2::dot(r, normal) * Vec2::dot(r, normal)) / inertia;
     let part3 = (Vec2::dot(r_other, normal) * Vec2::dot(r_other, normal)) / inertia_other;
