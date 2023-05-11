@@ -2,6 +2,8 @@ use nalgebra::{Matrix2, Vector2};
 
 use crate::vector::vector::Vec2;
 
+use super::{objects::vector_projection, traits::Object};
+
 /// Returns whatever the polygons approximate circles collide.
 pub fn approx_are_colliding(centre1: Vec2, raduis1: f64, centre2: Vec2, radius2: f64) -> bool {
     let distance = (centre1 - centre2).squared_length();
@@ -378,17 +380,17 @@ fn parallel_line(line1: [[f64; 2]; 2], line2: [[f64; 2]; 2]) -> bool {
     }
 }
 
-/// Returns true iff the point lies inside or on the edge of the polyogon. 
+/// Returns true iff the point lies inside or on the edge of the polyogon.
 /// Returns false if vertices contains fewer elements than expected.
-pub fn point_in_polygon(point: Vec2, vertices: &Vec<[f64;2]>) -> bool {
-    let ray = [[10000.0 + point.x, point.y],[point.x, point.y]]; // sending the ray in positive direction.
+pub fn point_in_polygon(point: Vec2, vertices: &Vec<[f64; 2]>) -> bool {
+    let ray = [[10000.0 + point.x, point.y], [point.x, point.y]]; // sending the ray in positive direction.
 
     /* LINE MATH SEEMS BUGGED. incorrectly returns t. */
     let mut sum_of_passes = 0;
     let mut prev_vert_index = vertices.len() - 1;
     for index in 0..vertices.len() {
         let line = [vertices[index], vertices[prev_vert_index]];
-        let (t,s) = line_math(ray, line);
+        let (t, s) = line_math(ray, line);
         if t <= 1.0 && t >= 0.0 && s >= 0.0 && s <= 1.0 {
             sum_of_passes += 1;
             //println!("SUM_OF_PASSES: {}", sum_of_passes);
@@ -398,4 +400,55 @@ pub fn point_in_polygon(point: Vec2, vertices: &Vec<[f64;2]>) -> bool {
     }
 
     return sum_of_passes % 2 == 1;
+}
+
+/// Simple resolver for when a corner is inside another object. Returns the movement needed.
+pub fn resolve_interfers_simple(
+    main: &Box<dyn Object>,
+    other: &Box<dyn Object>,
+    record: Option<Vec2>,
+) -> Option<Vec2> {
+    if main.get_static() {
+        return record;
+    }
+    const MINIMUM_RESOLVE_SQUARED: f64 = 0.00001;
+
+    for p in main.getvertices() {
+        let other_vert = other.getvertices();
+        if point_in_polygon(Vec2::new(p[0], p[1]), &other_vert) {
+            let mut shortest_dist = Vec2::new(100.0, 100.0);
+            let mut prev_index = other_vert.len() - 1;
+            for index in 0..other_vert.len() {
+                let x_diff = other_vert[index][0] - other_vert[prev_index][0];
+                let y_diff = other_vert[index][1] - other_vert[prev_index][1];
+                let vec = Vec2::new(x_diff, y_diff);
+                let to_point = Vec2::new(
+                    p[0] - other_vert[prev_index][0],
+                    p[1] - other_vert[prev_index][1],
+                );
+                let proj = vector_projection(to_point, vec);
+                let scalar = proj.x / vec.x;
+                if scalar <= 0.0 || scalar >= 1.0 {
+                    prev_index = index;
+                    continue;
+                }
+                let closest = -(to_point - proj);
+                if closest.squared_length() < shortest_dist.squared_length() {
+                    shortest_dist = closest
+                }
+
+                prev_index = index;
+            }
+            if shortest_dist.squared_length() < MINIMUM_RESOLVE_SQUARED {
+                return record;
+            }
+            let scale = if other.get_static() {1.0} else {0.55};
+            return Some(match record {
+                Some(val) => val + scale*shortest_dist,
+                None => scale*shortest_dist,
+            });
+        }
+    }
+
+    record
 }
