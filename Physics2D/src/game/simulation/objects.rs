@@ -72,7 +72,7 @@ impl Rectangle {
                 triangle_propeties,
                 center_of_mass,
                 mass,
-            ),
+            ) / 10.0,
             selected: [0, 0, 0],
         }
     }
