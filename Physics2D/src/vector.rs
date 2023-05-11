@@ -1,7 +1,9 @@
 pub mod vector {
     use std::{ops, iter::Sum};
 
-    #[derive(Copy, Clone)]
+    use serde::{Serialize, Serializer, ser::SerializeTuple, Deserialize};
+
+    #[derive(Debug, Clone, Copy, PartialEq, PartialOrd, Deserialize)]
     pub struct Vec2{
         pub x: f64,
         pub y: f64,
@@ -23,8 +25,22 @@ pub mod vector {
         pub fn unit_vector(v1: Vec2) -> Vec2{
             return v1 / v1.length();
         }
+        pub fn cross(v1: Vec2, v2: Vec2) -> f64 {
+            return v1.x*v2.y - v1.y*v2.x;
+        }
 
 
+    }
+    impl Serialize for Vec2 {
+        fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+        where
+            S: Serializer,
+        {
+            let mut tuple = serializer.serialize_tuple(2)?;
+            tuple.serialize_element(&self.x)?;
+            tuple.serialize_element(&self.y)?;
+            tuple.end()
+        }
     }
     impl ops::Add<Vec2> for Vec2 {
         type Output = Vec2;

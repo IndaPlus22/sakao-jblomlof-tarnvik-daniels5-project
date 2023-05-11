@@ -1,7 +1,11 @@
+use std::fs::File;
+use std::io::Write;
+
 // boilerplate use for the game
+use glutin_window::GlutinWindow as Window;
 use graphics::types::Vec2d;
 use opengl_graphics::{GlGraphics, OpenGL, Texture};
-use piston::{UpdateArgs, RenderArgs, Event};
+use piston::{Event, RenderArgs, UpdateArgs};
 
 // IMPORTS form our code
 use self::ui::{ui_draw, ui_input};
@@ -28,9 +32,9 @@ mod ui {
 }
 
 // constants
-pub const SCREEN_WIDTH: u32 = 640;
-pub const SCREEN_HEIGHT: u32 = 480;
-pub const GRAVITY: Vec2d = [0.0, -1.0];
+pub const SCREEN_WIDTH: u32 = 600;
+pub const SCREEN_HEIGHT: u32 = 600;
+pub const GRAVITY: Vec2d = [0.0, -9.81];
 
 //Game state
 #[derive(PartialEq)]
@@ -39,8 +43,17 @@ pub enum GameState {
     Paused,
 }
 
+#[derive(PartialEq)]
+pub enum Tool {
+    None,
+    Move,
+    Scale,
+    Rotate,
+    Draw,
+    Delete,
+}
+
 // Game struct
-//TODO game_state probably shouldn't just be public, something smart should happen instead
 pub struct Game {
     pub gl: GlGraphics,
     variables: Variables,
@@ -53,20 +66,27 @@ impl Game {
     pub fn new(opengl: OpenGL) -> Game {
         let ui_objects: Objects = Objects::new();
         let mut game_state = GameState::Paused;
+        let mut current_tool = Tool::None;
+        let last_mouse_pos: Vec2d = [0.0, 0.0];
         Game {
             gl: GlGraphics::new(opengl),
             variables: Variables {
                 objects: vec![],
                 game_state,
+                current_tool,
+                last_mouse_pos,
+                win_size: [SCREEN_WIDTH as f64, SCREEN_HEIGHT as f64],
             },
-            ui_objects
+            ui_objects,
         }
     }
 
     // A function that only runs ones when the game starts
-    pub fn init(&mut self) {
+    pub fn init(&mut self) /*-> std::io::Result<()>*/
+    {
         draw::init();
-
+        //let mut file = File::create("test.txt")?;
+        //file.write_all(b"plz work")?;
         // TEMPORARY CODE TO TEST OBJECTS
         //self.variables
         //    .objects
@@ -74,32 +94,46 @@ impl Game {
         self.variables
             .objects
             .push(Box::new(objects::Rectangle::new(
-                Vec2::new(300., 100.),
-                vec![[50.0,30.0],[50.0,60.0],[70.0,60.0],[60.0,20.0]],
+                vec![[0.15, 0.1], [0.15, 0.2], [0.25, 0.2], [0.25, 0.1]],
                 10.0,
             )));
         self.variables
             .objects
             .push(Box::new(objects::Rectangle::new(
-                Vec2::new(300., 100.),
-                vec![[100.0,50.0], [105.0, 65.0],[120.0,70.0],[120.0,50.0]],
+                vec![
+                    [0.4, 0.1],
+                    [0.42, 0.15],
+                    [0.4, 0.2],
+                    [0.45, 0.18],
+                    [0.5, 0.2],
+                    [0.48, 0.15],
+                    [0.5, 0.1],
+                    [0.45, 0.12],
+                ],
                 10.0,
             )));
-        self.variables.objects.push(Box::new(objects::Circle::new(Vec2::new(100., 200.), 40.0, 10.)));
-        self.variables.objects.push(Box::new(objects::Circle::new(Vec2::new(200., 240.), 40.0, 10.)));
 
-            // self.variables
-            // .objects
-            // .push(Box::new(objects::Rectangle::new(
-            //     Vec2::new(300., 100.),
-            //     vec![[110.0,50.0],[100.0,60.0],[120.0,70.0],[120.0,50.0]],
-            //     10.0,
-            // )));
-        self.variables.objects[0].setvel(Vec2::new(1.0, 1.0));
-        self.variables.objects[1].setvel(Vec2::new(1.0, 0.5));
-        self.variables.objects[2].setvel(Vec2::new(1., 0.0));
-        self.variables.objects[3].setvel(Vec2::new(1., 0.0));
-        self.variables.objects[1].set_static(false);
+            self.variables.objects.push(Box::new(objects::Rectangle::new(vec![[0.0,0.95],[0.0,1.0],[1.0,1.0],[1.0,0.95]], 100000.0)));
+            self.variables.objects.push(Box::new(objects::Rectangle::new(vec![[0.0,0.0],[0.0,1.0],[0.05,1.0],[0.05,0.0]], 100000.0)));
+            //self.variables.objects.push(Box::new(objects::Rectangle::new(vec![[0.0,0.95],[0.0,1.0],[1.0,1.0],[1.0,0.95]], 100000.0)));
+            //self.variables.objects.push(Box::new(objects::Rectangle::new(vec![[0.0,0.95],[0.0,1.0],[1.0,1.0],[1.0,0.95]], 100000.0)));
+        // self.variables
+        // .objects
+        // .push(Box::new(objects::Rectangle::new(
+        //     Vec2::new(300., 100.),
+        //     vec![[110.0,50.0],[100.0,60.0],[120.0,70.0],[120.0,50.0]],
+        //     10.0,
+        // )));
+        self.variables.objects[0].setvel(Vec2::new(0.002, 0.00));
+        self.variables.objects[1].setvel(Vec2::new(-0.0007, 0.0));
+        self.variables.objects[1].set_angular_vel(0.0);
+        self.variables.objects[0].set_angular_vel(0.0);
+        self.variables.objects[2].set_angular_vel(0.0);
+        //self.variables.objects[2].setvel(Vec2::new(0.0, -0.0001));
+        self.variables.objects[2].set_static(true);
+        self.variables.objects[3].set_static(true);
+        self.variables.objects[1].set_static(true);
+        
 
 
         // self.variables
@@ -109,10 +143,13 @@ impl Game {
         //     vec![[110.0,50.0],[100.0,60.0],[120.0,70.0],[120.0,50.0]],
         //     10.0,
         // )));
-        self.variables.objects[0].setvel(Vec2::new(1.0, 0.0));
-        self.variables.objects[1].setvel(Vec2::new(-1.0, 0.0));
+        //self.variables.objects[0].setvel(Vec2::new(0.01, 0.0));
+        //self.variables.objects[1].setvel(Vec2::new(-0.01, 0.0));
+
         //self.variables.objects[2].setvel(Vec2::new(0.1, 0.0));
+
         //self.variables.objects[1].set_static(true);
+        //Ok(())
     }
 
     // A function that runs every update
@@ -128,7 +165,7 @@ impl Game {
     //     ui_draw::draw(event, window, &mut self.ui_objects);
     // }
     pub fn draw(&mut self, event: &Event, args: &RenderArgs) {
-        draw::draw(event, args, &mut self.gl, &self.variables);
+        draw::draw(event, args, &mut self.gl, &mut self.variables);
         ui_draw::draw(event, args, &mut self.gl, &mut self.ui_objects);
     }
 
@@ -142,4 +179,7 @@ impl Game {
 pub struct Variables {
     objects: Vec<Box<dyn traits::Object>>,
     game_state: GameState,
+    current_tool: Tool,
+    last_mouse_pos: Vec2d,
+    win_size: Vec2d,
 }
