@@ -13,7 +13,7 @@ use crate::{
     game::{
         draw::draw_circle,
         simulation::{
-            objects::{self, Circle, Rectangle, rotate_vertices},
+            objects::{self, approx_circle_hitbox, rotate_vertices, Circle, Rectangle},
             traits::{self, Object},
         },
         GameState, Tool, Variables,
@@ -34,18 +34,21 @@ pub fn input(event: &Event, objects: &mut Objects, variables: &mut Variables) {
             // println!("TOOLBAR: Button {}: hover={}", i, objects.tool_bar.buttons[i].hover);
         }
         for i in 0..variables.objects.len() {
-            if variables.objects[i].get_selected(0) == 1 { // Move tool
+            if variables.objects[i].get_selected(0) == 1 {
+                // Move tool
                 variables.objects[i].set_pos(Vec2::new(
                     pos[0] / variables.win_size[0],
                     pos[1] / variables.win_size[1],
                 ))
-            } else if variables.objects[i].get_selected(1) == 1 { // Scale tool
+            } else if variables.objects[i].get_selected(1) == 1 {
+                // Scale tool
                 if variables.objects[i].gettype() == "Circle" {
                     rescale_circle(variables, i, pos);
                 } else if variables.objects[i].gettype() == "Rectangle" {
                     rescale_polygon(variables, i, pos);
                 }
-            } else if variables.objects[i].get_selected(2) == 1 { // Rotate tool
+            } else if variables.objects[i].get_selected(2) == 1 {
+                // Rotate tool
                 // Rotate
                 // Only rotate rects(polygons)
                 if variables.objects[i].gettype() == "Rectangle" {
@@ -122,6 +125,12 @@ pub fn input(event: &Event, objects: &mut Objects, variables: &mut Variables) {
             for i in 0..variables.objects.len() {
                 for j in 0..3 {
                     if variables.objects[i].get_selected(j) == 1 {
+                        if j == 1 {
+                            // if it was scale fix circle center thingy
+                            let v = variables.objects[i].getvertices();
+                            variables.objects[i].set_circle_center(approx_circle_hitbox(&v));
+                            // println!("fixed");
+                        }
                         variables.objects[i].set_selected(j, 0);
                     }
                 }
@@ -185,7 +194,6 @@ fn rescale_polygon(variables: &mut Variables, i: usize, m_pos: Vec2d) {
     );
 
     variables.objects[i].rescale(local_m_pos.length() / local_vertex.length());
-    // TODO: set the right circle center for the polygon
 }
 
 fn rescale_circle(variables: &mut Variables, i: usize, m_pos: Vec2d) {
@@ -197,13 +205,13 @@ fn rescale_circle(variables: &mut Variables, i: usize, m_pos: Vec2d) {
 }
 
 fn rotate_polygon(variables: &mut Variables, i: usize, m_pos: Vec2d) {
-    let angle: f64 = 0.0;
-    let bruh = 0;
+    let angle: f64 = m_pos[1] / 100.;
+    println!("angle: {}", angle);
     rotate_vertices(
         variables.objects[i].get_pos(),
         &mut variables.objects[i].getvertices(),
-        angle,
-        &mut variables.objects[i].get_circle_center()
+        variables.objects[i].get_angular_vel() + angle,
+        &mut variables.objects[i].get_circle_center(),
     );
 }
 

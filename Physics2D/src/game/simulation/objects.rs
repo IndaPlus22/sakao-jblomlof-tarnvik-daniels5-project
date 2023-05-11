@@ -317,6 +317,11 @@ impl Object for Rectangle {
             point[1] = (point[1] - self.center_of_mass.y) * scale + self.center_of_mass.y;
         }
     }
+
+    fn set_circle_center(&mut self, c: (Vec2, f64)) {
+        self.circle_center = c.0;
+        self.radius = c.1;
+    }
 }
 
 fn calculate_moment_of_inertia_of_polygon(
@@ -578,6 +583,9 @@ impl Object for Circle {
     fn rescale(&mut self, scale: f64) {
         self.mass *= scale;
         self.radius *= scale;
+    }
+
+    fn set_circle_center(&mut self, c: (Vec2, f64)) {
     }
 }
 
@@ -847,7 +855,10 @@ fn calc_triangle_mass_center_and_area(vertices: [[f64; 2]; 3]) -> (Vec2, f64) {
 
 /// Returns a circle such that all vertices lies inside the circle,
 /// This function aims to lower the radius of that fuction.
-fn approx_circle_hitbox(vertices: &Vec<[f64; 2]>) -> (Vec2, f64) {
+pub fn approx_circle_hitbox(vertices: &Vec<[f64; 2]>) -> (Vec2, f64) {
+    if vertices.is_empty() {
+        return (Vec2::new(0., 0.), 0.);
+    }
     // make a guess where the center lies, calculate the distance to all vertices
     // move to a new point. The point towarads the vertex with the longest distance
     // the moved distance should be (max_dist - min_dist) / 2
