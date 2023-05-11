@@ -54,7 +54,6 @@ pub enum Tool {
 }
 
 // Game struct
-//TODO game_state probably shouldn't just be public, something smart should happen instead
 pub struct Game {
     pub gl: GlGraphics,
     variables: Variables,
@@ -95,7 +94,7 @@ impl Game {
         self.variables
             .objects
             .push(Box::new(objects::Rectangle::new(
-                vec![[0.15, 0.1], [0.15, 0.3], [0.25, 0.2], [0.25, 0.1]],
+                vec![[0.15, 0.1], [0.15, 0.2], [0.25, 0.2], [0.25, 0.1]],
                 10.0,
             )));
         self.variables
@@ -113,12 +112,11 @@ impl Game {
                 ],
                 10.0,
             )));
-        self.variables.objects.push(Box::new(objects::Circle::new(
-            Vec2::new(0.7, 0.2),
-            0.1,
-            10.0,
-        )));
-        //self.variables.objects.push(Box::new(objects::Rectangle::new(vec![[0.0,0.7],[0.0,1.0],[1.0,1.0],[1.0,0.9]], 10.0)));
+
+            self.variables.objects.push(Box::new(objects::Rectangle::new(vec![[0.0,0.95],[0.0,1.0],[1.0,1.0],[1.0,0.95]], 100000.0)));
+            self.variables.objects.push(Box::new(objects::Rectangle::new(vec![[0.0,0.0],[0.0,1.0],[0.05,1.0],[0.05,0.0]], 100000.0)));
+            //self.variables.objects.push(Box::new(objects::Rectangle::new(vec![[0.0,0.95],[0.0,1.0],[1.0,1.0],[1.0,0.95]], 100000.0)));
+            //self.variables.objects.push(Box::new(objects::Rectangle::new(vec![[0.0,0.95],[0.0,1.0],[1.0,1.0],[1.0,0.95]], 100000.0)));
         // self.variables
         // .objects
         // .push(Box::new(objects::Rectangle::new(
@@ -126,11 +124,17 @@ impl Game {
         //     vec![[110.0,50.0],[100.0,60.0],[120.0,70.0],[120.0,50.0]],
         //     10.0,
         // )));
-        self.variables.objects[0].setvel(Vec2::new(0.0, 0.0));
-        self.variables.objects[1].setvel(Vec2::new(-0.0000, 0.0));
+        self.variables.objects[0].setvel(Vec2::new(0.002, 0.00));
+        self.variables.objects[1].setvel(Vec2::new(-0.0007, 0.0));
         self.variables.objects[1].set_angular_vel(0.0);
-        self.variables.objects[0].set_angular_vel(0.00);
-        //self.variables.objects[2].set_static(true);
+        self.variables.objects[0].set_angular_vel(0.0);
+        self.variables.objects[2].set_angular_vel(0.0);
+        //self.variables.objects[2].setvel(Vec2::new(0.0, -0.0001));
+        self.variables.objects[2].set_static(true);
+        self.variables.objects[3].set_static(true);
+        self.variables.objects[1].set_static(true);
+        
+
 
         // self.variables
         // .objects
@@ -139,8 +143,9 @@ impl Game {
         //     vec![[110.0,50.0],[100.0,60.0],[120.0,70.0],[120.0,50.0]],
         //     10.0,
         // )));
-        self.variables.objects[0].setvel(Vec2::new(0.01, 0.0));
-        self.variables.objects[1].setvel(Vec2::new(-0.01, 0.0));
+        //self.variables.objects[0].setvel(Vec2::new(0.01, 0.0));
+        //self.variables.objects[1].setvel(Vec2::new(-0.01, 0.0));
+
         //self.variables.objects[2].setvel(Vec2::new(0.1, 0.0));
 
         //self.variables.objects[1].set_static(true);

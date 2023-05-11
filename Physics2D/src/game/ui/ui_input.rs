@@ -248,6 +248,8 @@ pub fn save(objects: &mut Vec<Box<dyn traits::Object>>) -> std::io::Result<()> {
         let center = ob.getcenter();
         let velocity = ob.getvel();
         let mass = ob.get_mass();
+        let static_shape = ob.get_static();
+        let angular_velocity = ob.get_angular_vel();
 
         let mut obj_map = serde_json::Map::new();
         obj_map.insert("shape".to_string(), serde_json::json!(shape));
@@ -263,7 +265,8 @@ pub fn save(objects: &mut Vec<Box<dyn traits::Object>>) -> std::io::Result<()> {
         obj_map.insert("center".to_string(), serde_json::json!(center));
         obj_map.insert("velocity".to_string(), serde_json::json!(velocity));
         obj_map.insert("mass".to_string(), serde_json::json!(mass));
-
+        obj_map.insert("static shape".to_string(), serde_json::json!(static_shape));
+        obj_map.insert("angular velocity".to_string(), serde_json::json!(angular_velocity));
         obj_vec.push(serde_json::json!(obj_map));
     }
 
@@ -286,6 +289,8 @@ pub fn load(objects: &mut Vec<Box<dyn traits::Object>>) -> std::io::Result<()> {
         let center: Vec2 = serde_json::from_value(obj["center"].clone())?;
         let velocity: Vec2 = serde_json::from_value(obj["velocity"].clone())?;
         let mass: f64 = serde_json::from_value(obj["mass"].clone())?;
+        let static_shape = serde_json::from_value(obj["static shape"].clone())?;
+        let angular_velocity = serde_json::from_value(obj["angular velocity"].clone())?;
         let mut new_obj: Box<dyn traits::Object>;
         if shape == "Rectangle" {
             let vertices: Vec<[f64; 2]> = serde_json::from_value(obj["vertices"].clone())?;
@@ -295,6 +300,8 @@ pub fn load(objects: &mut Vec<Box<dyn traits::Object>>) -> std::io::Result<()> {
             new_obj = Box::new(Circle::new(center, radius, mass));
         }
         new_obj.setvel(velocity);
+        new_obj.set_static(static_shape);
+        new_obj.set_angular_vel(angular_velocity);
         objects.push(new_obj);
     }
     Ok(())
