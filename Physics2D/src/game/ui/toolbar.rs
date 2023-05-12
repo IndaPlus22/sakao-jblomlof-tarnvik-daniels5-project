@@ -1,4 +1,4 @@
-use graphics::types::{Matrix2d, Vec2d};
+/*use graphics::types::{Matrix2d, Vec2d};
 use opengl_graphics::GlGraphics;
 use piston::RenderArgs;
 
@@ -90,3 +90,4 @@ fn init_buttons(button_size: Vec2d, position: Vec2d) -> Vec<Button> {
     }
     buttons
 }
+*/
