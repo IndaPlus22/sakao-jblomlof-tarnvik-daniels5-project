@@ -1,20 +1,16 @@
 use graphics::types::Vec2d;
-use serde_json::Value;
 use std::{
-    fs::{File, OpenOptions},
+    fs::{File},
     io::{BufRead, BufReader, Write},
-    isize::MIN,
 };
 
-use graphics::types::Radius;
 use piston::{Event, MouseCursorEvent, PressEvent, ReleaseEvent};
 
 use crate::{
     game::{
-        draw::draw_circle,
         simulation::{
-            objects::{self, approx_circle_hitbox, rotate_vertices, Circle, Rectangle},
-            traits::{self, Object},
+            objects::{self, approx_circle_hitbox, Circle, Rectangle},
+            traits::{self},
         },
         GameState, Tool, Variables,
     },
@@ -26,12 +22,10 @@ use super::ui_objects::Objects;
 pub fn input(event: &Event, objects: &mut Objects, variables: &mut Variables) {
     if let Some(pos) = event.mouse_cursor_args() {
         for i in 0..5 {
-            objects.buttons[i].check_hover(pos);
-            // println!("Button {}: hover={}", i, objects.buttons[i].hover);
+            objects.play_buttons[i].check_hover(pos);
         }
-        for i in 0..objects.tool_bar.buttons.len() {
-            objects.tool_bar.buttons[i].check_hover(pos);
-            // println!("TOOLBAR: Button {}: hover={}", i, objects.tool_bar.buttons[i].hover);
+        for i in 0..objects.tool_buttons.len() {
+            objects.tool_buttons[i].check_hover(pos);
         }
         for i in 0..variables.objects.len() {
             if variables.objects[i].get_selected(0) == 1 {
@@ -48,9 +42,7 @@ pub fn input(event: &Event, objects: &mut Objects, variables: &mut Variables) {
                     rescale_polygon(variables, i, pos);
                 }
             } else if variables.objects[i].get_selected(2) == 1 {
-                // Rotate tool
-                // Rotate
-                // Only rotate rects(polygons)
+                // Rotate tool (only works for rects(polygons))
                 if variables.objects[i].gettype() == "Rectangle" {
                     rotate_polygon(variables, i, pos);
                 }
@@ -69,49 +61,49 @@ pub fn input(event: &Event, objects: &mut Objects, variables: &mut Variables) {
         // for matching tools
         match_tools(variables, button, objects, variables.win_size);
 
-        if objects.buttons[0].hover {
+        if objects.play_buttons[0].get_hover() {
             variables.game_state = GameState::Running;
-        } else if objects.buttons[1].hover {
+        } else if objects.play_buttons[1].get_hover() {
             //PAUSE BUTTON (pauses simulation)
             variables.game_state = GameState::Paused;
-        } else if objects.buttons[2].hover {
+        } else if objects.play_buttons[2].get_hover() {
             //SAVE BUTTON (saves current objects to file)
             match save(&mut variables.objects) {
                 Ok(()) => (),
                 Err(e) => eprintln!("Error saving objects: {}", e),
             }
-        } else if objects.buttons[3].hover {
+        } else if objects.play_buttons[3].get_hover(){
             //RESET BUTTON (resets simulation to saved state)
             match load(&mut variables.objects) {
                 Ok(()) => (),
                 Err(e) => eprintln!("Error loading objects: {}", e),
             }
-        } else if objects.buttons[4].hover {
+        } else if objects.play_buttons[4].get_hover(){
             //CLEAR BUTTON (clear all objects from the simulation)
             variables.objects.clear();
         }
 
         // Should not be able to interact with the tool bar if the game is running
         if variables.game_state == GameState::Paused {
-            if objects.tool_bar.buttons[0].hover {
+            if objects.tool_buttons[0].get_hover() {
                 // : Move tool
                 println!("Move tool selected");
                 variables.current_tool = Tool::Move;
-            } else if objects.tool_bar.buttons[1].hover {
+            } else if objects.tool_buttons[1].get_hover() {
                 // : scale tool
                 println!("Scale tool selected");
                 variables.current_tool = Tool::Scale;
-            } else if objects.tool_bar.buttons[2].hover {
+            } else if objects.tool_buttons[2].get_hover() {
                 // : rotate tool
                 println!("Rotate tool selected");
                 variables.current_tool = Tool::Rotate;
-            } else if objects.tool_bar.buttons[3].hover {
-                // : Draw tool
+            } else if objects.tool_buttons[3].get_hover() {
+                // : draw tool
                 println!("Draw tool selected");
                 variables.current_tool = Tool::Draw;
-                objects.tool_bar.selected_poses.clear();
-            } else if objects.tool_bar.buttons[4].hover {
-                // Delete
+                objects.selected_poses.clear();
+            } else if objects.tool_buttons[4].get_hover() {
+                // : delete tool
                 println!("Delete tool selected");
                 variables.current_tool = Tool::Delete;
             }
@@ -166,18 +158,16 @@ fn match_tools(
         Tool::Draw => {
             if button == piston::Button::Mouse(piston::MouseButton::Left) {
                 println!("Left mouse button pressed");
-                objects
-                    .tool_bar
-                    .add_selected_button(variables.last_mouse_pos, win_size);
+                objects.add_selected_button(variables.last_mouse_pos, win_size);
 
-                println!("Selected poses: {:?}", objects.tool_bar.selected_poses);
+                println!("Selected poses: {:?}", objects.selected_poses);
             }
             if button == piston::Button::Keyboard(piston::Key::Return) {
                 variables.objects.push(Box::new(objects::Rectangle::new(
-                    objects.tool_bar.selected_poses.clone(),
+                    objects.selected_poses.clone(),
                     10.0,
                 )));
-                objects.tool_bar.selected_poses.clear();
+                objects.selected_poses.clear();
                 variables.current_tool = Tool::None;
                 println!("made polygon");
             }
