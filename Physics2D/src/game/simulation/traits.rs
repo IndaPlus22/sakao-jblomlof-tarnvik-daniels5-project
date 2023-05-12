@@ -33,6 +33,7 @@ pub trait Object {
     fn set_circle_center(&mut self, c: (Vec2, f64));
     fn rotate(&mut self, angle: f64);
     fn get_static (&self) -> bool;
+    fn calclulate_inertia (&mut self);
 }
 
 pub struct collisionRecord {

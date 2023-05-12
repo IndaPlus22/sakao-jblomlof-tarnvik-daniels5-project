@@ -1,7 +1,6 @@
-use graphics::{color, types::{Vec2d, Matrix2d}, clear, rectangle, Polygon, draw_state::DrawState, Ellipse};
+use graphics::{color, types::{Vec2d, Matrix2d}, clear, Polygon, draw_state::DrawState, Ellipse};
 use opengl_graphics::GlGraphics;
 use piston::{Event, RenderArgs};
-use glutin_window::GlutinWindow as Window;
 
 use crate::vector::vector::Vec2;
 
@@ -9,7 +8,7 @@ use crate::vector::vector::Vec2;
 use super::Variables;
 
 const CERISE_COLOR: [f32; 4] = [232.0 / 255.0, 61.0 / 255.0, 132.0 / 255.0, 1.0];
-const LIGHT_CERISE: &str = "ec5f99";
+// const LIGHT_CERISE: &str = "ec5f99";
 
 // pub fn draw(event: &Event, window: &mut PistonWindow, variables: &Variables) {
 //     // Update application window.
@@ -24,7 +23,7 @@ const LIGHT_CERISE: &str = "ec5f99";
 //     });
 // }
 
-pub fn draw(event: &Event, args: &RenderArgs, gl: &mut GlGraphics, variables: &mut Variables) {
+pub fn draw(_event: &Event, args: &RenderArgs, gl: &mut GlGraphics, variables: &mut Variables) {
     // Update application window.
     gl.draw(args.viewport(), |context, gl| {
         variables.win_size = args.window_size;
@@ -38,30 +37,7 @@ pub fn draw(event: &Event, args: &RenderArgs, gl: &mut GlGraphics, variables: &m
     });
 }
 
-// TODO: should be something that is in initialization of game and probably in something alike "fn init_menu"
-pub fn init() {
-    let buttons = play_bar(Vec2d::from([0.0, 0.0]));
-}
-
-// TODO:
-fn play_bar(pos: Vec2d) /*-> [Button; 2]*/ {
-    // pos is upper-left corner
-    let size: Vec2d = Vec2d::from([40.0, 40.0]);
-    let width = 40.0;
-    let height = 40.0;
-    let play_pos: Vec2d = Vec2d::from([pos[0] + 40.0, pos[1]]);
-    let restart_pos: Vec2d = Vec2d::from([pos[0] + size[0] + 60.0, pos[1]]);
-
-    //let mut play_button = Button::new(play_pos, width, height, [0.0,0.0,0.0,1.0]);
-    //let mut restart_button = Button::new(restart_pos, width, height, [0.0,0.0,0.0,1.0]);
-
-    //[play_button, restart_button]
-}
-
-// TODO:
-fn tool_box() {}
-
-// Draws a rectangle by polygon. size[0] is width and size[1] is height.
+// Draws a Polygon by polygon. size[0] is width and size[1] is height.
 pub fn draw_rect(
     pos: Vec2,
     size: [f64; 2],
@@ -133,7 +109,7 @@ pub fn draw_circle_color(
     Ellipse::new(color).draw(circle, &DrawState::default(), transform, gl);
 }
 
-// Converts two vec2d one for position and one for size to a 4x2 array of corners. ONLY works for rectangles.
+// Converts two vec2d one for position and one for size to a 4x2 array of corners. ONLY works for Polygons.
 fn conv_pos_size_to_vertices_rect(pos: Vec2, size: [f64; 2]) -> [[f64; 2]; 4]{
     let corners: [[f64; 2]; 4] = [
         [pos.x - size[0]/2.0, pos.y - size[1]/2.0],
