@@ -1,10 +1,6 @@
-use std::fs::File;
-use std::io::Write;
-
 // boilerplate use for the game
-use glutin_window::GlutinWindow as Window;
 use graphics::types::Vec2d;
-use opengl_graphics::{GlGraphics, OpenGL, Texture};
+use opengl_graphics::{GlGraphics, OpenGL};
 use piston::{Event, RenderArgs, UpdateArgs};
 
 // IMPORTS form our code
@@ -24,7 +20,6 @@ mod simulation {
     pub mod traits;
 }
 mod ui {
-    pub mod toolbar;
     pub mod ui_button;
     pub mod ui_draw;
     pub mod ui_input;
@@ -34,7 +29,7 @@ mod ui {
 // constants
 pub const SCREEN_WIDTH: u32 = 600;
 pub const SCREEN_HEIGHT: u32 = 600;
-pub const GRAVITY: Vec2d = [0.0, -9.81];
+// pub const GRAVITY: Vec2d = [0.0, -9.81];
 
 //Game state
 #[derive(PartialEq)]
@@ -65,8 +60,8 @@ impl Game {
     // Constructor for the game
     pub fn new(opengl: OpenGL) -> Game {
         let ui_objects: Objects = Objects::new();
-        let mut game_state = GameState::Paused;
-        let mut current_tool = Tool::None;
+        let game_state = GameState::Paused;
+        let current_tool = Tool::None;
         let last_mouse_pos: Vec2d = [0.0, 0.0];
         Game {
             gl: GlGraphics::new(opengl),
@@ -84,7 +79,6 @@ impl Game {
     // A function that only runs ones when the game starts
     pub fn init(&mut self) /*-> std::io::Result<()>*/
     {
-        draw::init();
         //let mut file = File::create("test.txt")?;
         //file.write_all(b"plz work")?;
         // TEMPORARY CODE TO TEST OBJECTS
@@ -93,13 +87,13 @@ impl Game {
         //    .push(Box::new(objects::Circle::new(Vec2::new(100.0, 50.), 20.0, 10.0)));
         self.variables
             .objects
-            .push(Box::new(objects::Rectangle::new(
+            .push(Box::new(objects::Polygon::new(
                 vec![[0.15, 0.1], [0.15, 0.2], [0.25, 0.2], [0.25, 0.1]],
                 10.0,
             )));
         self.variables
             .objects
-            .push(Box::new(objects::Rectangle::new(
+            .push(Box::new(objects::Polygon::new(
                 vec![
                     [0.4, 0.1],
                     [0.42, 0.15],
@@ -113,13 +107,13 @@ impl Game {
                 10.0,
             )));
 
-            self.variables.objects.push(Box::new(objects::Rectangle::new(vec![[0.0,0.95],[0.0,1.0],[1.0,1.0],[1.0,0.95]], 100000.0)));
-            self.variables.objects.push(Box::new(objects::Rectangle::new(vec![[0.0,0.0],[0.0,1.0],[0.05,1.0],[0.05,0.0]], 100000.0)));
-            //self.variables.objects.push(Box::new(objects::Rectangle::new(vec![[0.0,0.95],[0.0,1.0],[1.0,1.0],[1.0,0.95]], 100000.0)));
-            //self.variables.objects.push(Box::new(objects::Rectangle::new(vec![[0.0,0.95],[0.0,1.0],[1.0,1.0],[1.0,0.95]], 100000.0)));
+            self.variables.objects.push(Box::new(objects::Polygon::new(vec![[0.0,0.95],[0.0,1.0],[1.0,1.0],[1.0,0.95]], 100000.0)));
+            self.variables.objects.push(Box::new(objects::Polygon::new(vec![[0.0,0.0],[0.0,1.0],[0.05,1.0],[0.05,0.0]], 100000.0)));
+            //self.variables.objects.push(Box::new(objects::Polygon::new(vec![[0.0,0.95],[0.0,1.0],[1.0,1.0],[1.0,0.95]], 100000.0)));
+            //self.variables.objects.push(Box::new(objects::Polygon::new(vec![[0.0,0.95],[0.0,1.0],[1.0,1.0],[1.0,0.95]], 100000.0)));
         // self.variables
         // .objects
-        // .push(Box::new(objects::Rectangle::new(
+        // .push(Box::new(objects::Polygon::new(
         //     Vec2::new(300., 100.),
         //     vec![[110.0,50.0],[100.0,60.0],[120.0,70.0],[120.0,50.0]],
         //     10.0,
@@ -138,7 +132,7 @@ impl Game {
 
         // self.variables
         // .objects
-        // .push(Box::new(objects::Rectangle::new(
+        // .push(Box::new(objects::Polygon::new(
         //     Vec2::new(300., 100.),
         //     vec![[110.0,50.0],[100.0,60.0],[120.0,70.0],[120.0,50.0]],
         //     10.0,

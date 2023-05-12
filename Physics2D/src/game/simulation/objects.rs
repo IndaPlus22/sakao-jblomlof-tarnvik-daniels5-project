@@ -1,4 +1,3 @@
-use graphics::color;
 use graphics::types::Matrix2d;
 use nalgebra::Matrix2;
 use nalgebra::Vector2;
@@ -17,7 +16,7 @@ use crate::{
     vector::vector::Vec2,
 };
 
-pub struct Rectangle {
+pub struct Polygon {
     center_of_mass: Vec2,
     circle_center: Vec2,
     radius: f64,
@@ -25,12 +24,10 @@ pub struct Rectangle {
     mass: f64,
     angular_velocity: f64, // Positive direction clockwise.
     velocity: Vec2,
-    potnrg: f64,
     form: String,
     staticshape: bool,
     triangulations: Vec<Vec<usize>>,
     inertia: f64,
-    density: f64,
     hovered: bool,
     selected: [u8; 3],
 }
@@ -40,20 +37,19 @@ pub struct Circle {
     radius: f64,
     mass: f64,
     velocity: Vec2,
-    potnrg: f64,
     form: String,
     staticshape: bool,
     hovered: bool,
     selected: [u8; 3],
 }
 
-impl Rectangle {
-    pub fn new(mut vertices: Vec<[f64; 2]>, mass: f64) -> Rectangle {
+impl Polygon {
+    pub fn new(mut vertices: Vec<[f64; 2]>, mass: f64) -> Polygon {
         let c = approx_circle_hitbox(&vertices);
         make_vertices_anti_clockwise(&mut vertices);
         let (center_of_mass, triangles, total_area, triangle_inertia, triangle_propeties) =
             calc_mass_center(&vertices);
-        Rectangle {
+        Polygon {
             center_of_mass: center_of_mass,
             circle_center: c.0,
             radius: c.1,
@@ -61,30 +57,28 @@ impl Rectangle {
             mass,
             angular_velocity: 0.0,
             velocity: Vec2::new(0.0, 0.0),
-            potnrg: 0.0,
-            form: "Rectangle".to_string(),
+            form: "Polygon".to_string(),
             staticshape: false,
             hovered: false,
             triangulations: triangles,
-            density: mass / total_area,
             inertia: calculate_moment_of_inertia_of_polygon(
                 triangle_inertia,
                 triangle_propeties,
                 center_of_mass,
                 mass,
-            ),
+            )/10.0,
             selected: [0, 0, 0],
         }
     }
 }
 
-impl Object for Rectangle {
+impl Object for Polygon {
     fn collisions(
         &self,
         other: &Box<dyn Object>,
         record: Option<collisionRecord>,
     ) -> Option<super::traits::collisionRecord> {
-        if other.gettype() == "Rectangle" {
+        if other.gettype() == "Polygon" {
             if approx_are_colliding(
                 self.circle_center,
                 self.radius,
@@ -361,6 +355,12 @@ impl Object for Rectangle {
     fn rotate(&mut self, angle: f64) {
         rotate_vertices(self.center_of_mass, &mut self.vertices, angle, &mut self.circle_center);
     }
+    fn calclulate_inertia (&mut self) {
+        let (center_of_mass, triangles, total_area, triangle_inertia, triangle_propeties) =
+        calc_mass_center(&self.vertices);
+        self.inertia = calculate_moment_of_inertia_of_polygon(triangle_inertia, triangle_propeties, center_of_mass, self.mass)/10.0;
+
+    }
 }
 
 fn inertia_for_triangle(tri: Vec<[f64;2]>, mass: f64, mass_center: Vec2) -> f64 {
@@ -456,7 +456,6 @@ impl Circle {
             radius,
             mass,
             velocity: Vec2::new(0.001, 0.001),
-            potnrg: 0.0,
             form: "Circle".to_string(),
             staticshape: false,
             hovered: false,
@@ -505,7 +504,7 @@ impl Object for Circle {
                     impulse_angular: 0.0,
                 });
             }
-        } else if other.gettype() == "Rectangle" {
+        } else if other.gettype() == "Polygon" {
             let mut lines = Vec::new();
             for i in 0..other.getvertices().len() {
                 if i == other.getvertices().len() - 1 {
@@ -545,7 +544,7 @@ impl Object for Circle {
                         None => Vec2::new(0.0, 0.0),
                     } + max_distance * Vec2::unit_vector(relative_speed),
                     impulse: impulse * normal / self.mass, //return Some(collisionRecord {desired_movement: local_collision_offset*-1.0});
-                    //The -1.0 is to make sure the circle moves away from the rectangle and not into it since the offset is based on the rectangle
+                    //The -1.0 is to make sure the circle moves away from the Polygon and not into it since the offset is based on the Polygon
                     impulse_angular: 0.0,
                 });
             }
@@ -657,6 +656,9 @@ impl Object for Circle {
     fn set_circle_center(&mut self, c: (Vec2, f64)) {}
 
     fn rotate(&mut self, angle: f64) {}
+    fn calclulate_inertia (&mut self) {
+        
+    }
 }
 
 //check if two lines intersect each other

@@ -6,7 +6,7 @@
       0.975
     ],
     "mass": 1e24,
-    "shape": "Rectangle",
+    "shape": "Polygon",
     "static shape": true,
     "velocity": [
       0.0,
@@ -38,7 +38,7 @@
       0.5
     ],
     "mass": 1e24,
-    "shape": "Rectangle",
+    "shape": "Polygon",
     "static shape": true,
     "velocity": [
       0.0,
@@ -70,7 +70,7 @@
       0.5
     ],
     "mass": 1e24,
-    "shape": "Rectangle",
+    "shape": "Polygon",
     "static shape": true,
     "velocity": [
       0.0,
@@ -102,7 +102,7 @@
       0.8185104218568345
     ],
     "mass": 10.0,
-    "shape": "Rectangle",
+    "shape": "Polygon",
     "static shape": false,
     "velocity": [
       0.0,
@@ -134,7 +134,7 @@
       0.8207080762517067
     ],
     "mass": 10.0,
-    "shape": "Rectangle",
+    "shape": "Polygon",
     "static shape": false,
     "velocity": [
       0.0,
@@ -166,7 +166,7 @@
       0.6661551058928028
     ],
     "mass": 10.0,
-    "shape": "Rectangle",
+    "shape": "Polygon",
     "static shape": false,
     "velocity": [
       0.0,
@@ -198,7 +198,7 @@
       0.5086462585034014
     ],
     "mass": 10.0,
-    "shape": "Rectangle",
+    "shape": "Polygon",
     "static shape": false,
     "velocity": [
       0.0,
@@ -230,7 +230,7 @@
       0.5119433032171886
     ],
     "mass": 10.0,
-    "shape": "Rectangle",
+    "shape": "Polygon",
     "static shape": false,
     "velocity": [
       0.0,
@@ -262,7 +262,7 @@
       0.3330374787941259
     ],
     "mass": 10.0,
-    "shape": "Rectangle",
+    "shape": "Polygon",
     "static shape": false,
     "velocity": [
       0.0,
@@ -294,7 +294,7 @@
       0.22700336700336704
     ],
     "mass": 10.0,
-    "shape": "Rectangle",
+    "shape": "Polygon",
     "static shape": false,
     "velocity": [
       0.0,
@@ -326,7 +326,7 @@
       0.8194919492603499
     ],
     "mass": 10.0,
-    "shape": "Rectangle",
+    "shape": "Polygon",
     "static shape": false,
     "velocity": [
       0.0,

@@ -1,17 +1,11 @@
-// extern crate piston_window;
-// extern crate image;
-
-use game::Game;
 use glutin_window::GlutinWindow as Window;
-use opengl_graphics::{GlGraphics, OpenGL};
+use opengl_graphics::OpenGL;
 use piston::{input::UpdateEvent, window::WindowSettings, Event, EventSettings, Events, Loop};
 
-use crate::game::GameState;
 mod game;
 mod vector;
 
 fn main() {
-    use std::{thread, time};
     let opengl = OpenGL::V3_2;
 
     let mut window: Window =

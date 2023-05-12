@@ -9,7 +9,7 @@ use piston::{Event, MouseCursorEvent, PressEvent, ReleaseEvent};
 use crate::{
     game::{
         simulation::{
-            objects::{self, approx_circle_hitbox, Circle, Rectangle},
+            objects::{self, approx_circle_hitbox, Circle, Polygon},
             traits::{self},
         },
         GameState, Tool, Variables,
@@ -38,12 +38,12 @@ pub fn input(event: &Event, objects: &mut Objects, variables: &mut Variables) {
                 // Scale tool
                 if variables.objects[i].gettype() == "Circle" {
                     rescale_circle(variables, i, pos);
-                } else if variables.objects[i].gettype() == "Rectangle" {
+                } else if variables.objects[i].gettype() == "Polygon" {
                     rescale_polygon(variables, i, pos);
                 }
             } else if variables.objects[i].get_selected(2) == 1 {
                 // Rotate tool (only works for rects(polygons))
-                if variables.objects[i].gettype() == "Rectangle" {
+                if variables.objects[i].gettype() == "Polygon" {
                     rotate_polygon(variables, i, pos);
                 }
             }
@@ -125,6 +125,7 @@ pub fn input(event: &Event, objects: &mut Objects, variables: &mut Variables) {
                             // if it was scale fix circle center thingy
                             let v = variables.objects[i].getvertices();
                             variables.objects[i].set_circle_center(approx_circle_hitbox(&v));
+                            variables.objects[i].calclulate_inertia();
                             // println!("fixed");
                         }
                         variables.objects[i].set_selected(j, 0);
@@ -163,7 +164,7 @@ fn match_tools(
                 println!("Selected poses: {:?}", objects.selected_poses);
             }
             if button == piston::Button::Keyboard(piston::Key::Return) {
-                variables.objects.push(Box::new(objects::Rectangle::new(
+                variables.objects.push(Box::new(objects::Polygon::new(
                     objects.selected_poses.clone(),
                     10.0,
                 )));
@@ -244,7 +245,7 @@ pub fn save(objects: &mut Vec<Box<dyn traits::Object>>) -> std::io::Result<()> {
         let mut obj_map = serde_json::Map::new();
         obj_map.insert("shape".to_string(), serde_json::json!(shape));
 
-        if shape == "Rectangle" {
+        if shape == "Polygon" {
             let vertices = ob.getvertices();
             obj_map.insert("vertices".to_string(), serde_json::json!(vertices));
         } else if shape == "Circle" {
@@ -282,9 +283,9 @@ pub fn load(objects: &mut Vec<Box<dyn traits::Object>>) -> std::io::Result<()> {
         let static_shape = serde_json::from_value(obj["static shape"].clone())?;
         let angular_velocity = serde_json::from_value(obj["angular velocity"].clone())?;
         let mut new_obj: Box<dyn traits::Object>;
-        if shape == "Rectangle" {
+        if shape == "Polygon" {
             let vertices: Vec<[f64; 2]> = serde_json::from_value(obj["vertices"].clone())?;
-            new_obj = Box::new(Rectangle::new(vertices, mass));
+            new_obj = Box::new(Polygon::new(vertices, mass));
         } else {
             let radius: f64 = serde_json::from_value(obj["radius"].clone())?;
             new_obj = Box::new(Circle::new(center, radius, mass));
