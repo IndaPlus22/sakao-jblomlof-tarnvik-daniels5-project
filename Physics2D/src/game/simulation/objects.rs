@@ -66,7 +66,7 @@ impl Polygon {
                 triangle_propeties,
                 center_of_mass,
                 mass,
-            )/10.0,
+            )/5.0,
             selected: [0, 0, 0],
         }
     }
@@ -358,7 +358,7 @@ impl Object for Polygon {
     fn calclulate_inertia (&mut self) {
         let (center_of_mass, triangles, total_area, triangle_inertia, triangle_propeties) =
         calc_mass_center(&self.vertices);
-        self.inertia = calculate_moment_of_inertia_of_polygon(triangle_inertia, triangle_propeties, center_of_mass, self.mass)/10.0;
+        self.inertia = calculate_moment_of_inertia_of_polygon(triangle_inertia, triangle_propeties, center_of_mass, self.mass)/5.0;
 
     }
 }

@@ -107,9 +107,9 @@ impl Game {
                 10.0,
             )));
 
-            self.variables.objects.push(Box::new(objects::Polygon::new(vec![[0.0,0.95],[0.0,1.0],[1.0,1.0],[1.0,0.95]], 100000.0)));
-            self.variables.objects.push(Box::new(objects::Polygon::new(vec![[0.0,0.0],[0.0,1.0],[0.05,1.0],[0.05,0.0]], 100000.0)));
-            //self.variables.objects.push(Box::new(objects::Polygon::new(vec![[0.0,0.95],[0.0,1.0],[1.0,1.0],[1.0,0.95]], 100000.0)));
+            self.variables.objects.push(Box::new(objects::Polygon::new(vec![[0.0,0.95],[0.0,2.0],[1.0,2.0],[1.0,0.95]], 100000.0)));
+            self.variables.objects.push(Box::new(objects::Polygon::new(vec![[-2.0,0.0],[-2.0,1.0],[0.05,1.0],[0.05,0.0]], 100000.0)));
+            self.variables.objects.push(Box::new(objects::Polygon::new(vec![[0.95,0.0],[0.95,1.0],[2.0,1.0],[2.0,0.0]], 100000.0)));
             //self.variables.objects.push(Box::new(objects::Polygon::new(vec![[0.0,0.95],[0.0,1.0],[1.0,1.0],[1.0,0.95]], 100000.0)));
         // self.variables
         // .objects
@@ -127,6 +127,7 @@ impl Game {
         self.variables.objects[2].set_static(true);
         self.variables.objects[3].set_static(true);
         self.variables.objects[1].set_static(true);
+        self.variables.objects[4].set_static(true);
         
 
 
